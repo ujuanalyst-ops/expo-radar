@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>전시회·박람회 레이더</title>
+<link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body>
+<header>
+  <div class="hd-top">
+    <div class="brand">
+      <h1>🌍 전시회·박람회 레이더</h1>
+      <p id="subline">불러오는 중…</p>
+    </div>
+    <div class="kpis" id="kpis"></div>
+  </div>
+  <div class="gsearch">
+    <div class="gsbox">
+      <span class="gsicon">🔍</span>
+      <input id="gq" type="search" autocomplete="off" spellcheck="false"
+             placeholder="전시회·도시·나라·품목으로 찾기 (예: 커넥터, electronica, 베트남, 자동차부품)">
+      <button id="gclear" title="지우기" hidden>✕</button>
+    </div>
+    <div class="gchips" id="gchips"></div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button data-tab="soon" class="on">🗓 곧 열리는 전시회</button>
+    <button data-tab="pick">🎯 우리 관련·지원</button>
+    <button data-tab="riv">🏁 경쟁사</button>
+    <button data-tab="map">🌍 세계 지도</button>
+    <button data-tab="ind">🏭 산업분야</button>
+    <button data-tab="kr">🇰🇷 국내</button>
+    <button data-tab="cal">📅 달력</button>
+    <button data-tab="new">🆕 새로 등록</button>
+    <button data-tab="src">🧭 출처</button>
+  </nav>
+</header>
+
+<main id="main"></main>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer"></aside>
+<div class="maptip" id="maptip" hidden></div>
+
+<script src="app-data.js?v=1"></script>
+<script src="app-geo.js?v=1"></script>
+<script src="app.js?v=1"></script>
+</body>
+</html>

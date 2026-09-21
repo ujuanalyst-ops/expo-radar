@@ -1,0 +1,8 @@
+.DS_Store
+__pycache__/
+*.log
+logs/
+# 수집 원본·날짜별 공유본은 collect/build로 재생성
+data/
+share/
+*.tmp

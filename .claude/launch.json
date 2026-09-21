@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "expo-radar",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["serve.py", "4199"],
+      "port": 4199
+    }
+  ]
+}
