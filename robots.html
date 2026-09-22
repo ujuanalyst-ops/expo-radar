@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>로봇 전시회 출품사 레이더</title>
+<link rel="stylesheet" href="styles.css?v=1">
+<link rel="stylesheet" href="robots.css?v=1">
+</head>
+<body>
+<header>
+  <div class="hd-top">
+    <div class="brand">
+      <h1>🤖 로봇 전시회 출품사 레이더</h1>
+      <p id="subline">불러오는 중…</p>
+    </div>
+    <div class="kpis" id="kpis"></div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <a class="tablink" href="index.html">← 전시회 레이더</a>
+    <button data-tab="co" class="on">🏢 출품 업체</button>
+    <button data-tab="fair">📋 명단 확보 전시회</button>
+    <button data-tab="expo">🌍 전세계 로봇 전시회</button>
+    <button data-tab="how">ℹ️ 만든 방법·한계</button>
+  </nav>
+</header>
+
+<main id="main"></main>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer"></aside>
+
+<script src="app-robots.js?v=1"></script>
+<script src="robots.js?v=1"></script>
+</body>
+</html>

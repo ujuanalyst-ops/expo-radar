@@ -1,0 +1,72 @@
+/* 로봇 전시회 출품사 레이더 — styles.css 위에 얹는 페이지 전용 스타일 */
+.tabs a.tablink{color:#bcd6ea;padding:11px 14px;font-weight:700;font-size:13.5px;display:inline-flex;align-items:center}
+.tabs a.tablink:hover{color:#fff}
+
+.rtool{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 14px;margin-bottom:12px}
+.rtool input[type=search]{flex:1;min-width:220px;border:1px solid var(--line);border-radius:9px;padding:8px 11px;font:inherit;outline:0}
+.rtool input[type=search]:focus{border-color:var(--brand)}
+.rtool select{border:1px solid var(--line);border-radius:9px;padding:7px 9px;font:inherit;background:#fff;color:var(--ink);max-width:220px}
+.rtool label.ck{display:inline-flex;gap:5px;align-items:center;color:var(--muted);font-size:12.5px;white-space:nowrap}
+.rtool .cnt{margin-left:auto;color:var(--muted);font-size:12.5px;white-space:nowrap}
+.rtool .cnt b{color:var(--ink)}
+.rbtn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 12px;font-size:12.5px;font-weight:700;color:var(--brand)}
+.rbtn:hover{border-color:var(--brand)}
+.rchips{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 12px}
+.rchips .lbl{color:var(--dim);font-size:11.5px;font-weight:800;align-self:center;margin-right:2px}
+
+.rtbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.rtbl th{position:sticky;top:0;background:#f7f9fc;color:var(--muted);font-size:11.5px;text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap;z-index:1}
+.rtbl td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.rtbl tr.co{cursor:pointer}
+.rtbl tr.co:hover td{background:#f4f8fd}
+.rtbl .nm{font-weight:700;color:var(--ink);white-space:nowrap}
+.rtbl .nm small{display:block;color:var(--dim);font-weight:400;font-size:11px;white-space:normal}
+.rtbl .what{color:#3b4656;max-width:420px}
+.rtbl .str{color:#7a5320;max-width:340px;font-size:12px}
+.rtbl .fairs{white-space:nowrap}
+.tag{display:inline-block;background:#eef2f7;border-radius:6px;padding:1px 7px;font-size:11px;margin:1px 3px 1px 0;color:#3b4656;white-space:nowrap}
+.tag.body{background:#e6f1ff;color:#0d4a9a}
+.tag.parts{background:#fff2df;color:#8a4b00}
+.tag.sw{background:#efe8ff;color:#5a2ea6}
+.tag.apply{background:#e4f6ee;color:#0f6b4a}
+.tag.etc{background:#eef0f3;color:#5f6b7d}
+.tag.ind{background:#f5f5f5;color:#555;border:1px solid #e4e4e4}
+.tag.cc{background:#fff;border:1px solid var(--line);color:var(--muted)}
+.flink{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:11px;margin:1px 3px 1px 0;color:var(--brand);font-weight:700}
+.flink:hover{border-color:var(--brand)}
+.flink.hist{color:#5f6b7d;font-weight:600}
+.flink em{font-style:normal;color:var(--dim);font-weight:400;margin-left:3px}
+.tblwrap{overflow-x:auto}
+.morebar{text-align:center;padding:14px}
+.note{color:var(--muted);font-size:12.5px;margin:0 0 12px}
+.note b{color:var(--ink)}
+
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.fcard{padding:14px 16px}
+.fcard h3{margin:0 0 4px;font-size:15px}
+.fcard .meta{color:var(--muted);font-size:12px;margin-bottom:8px}
+.fcard .nums{display:flex;gap:14px;margin:8px 0}
+.fcard .nums b{display:block;font-size:18px;line-height:1.1}
+.fcard .nums span{font-size:11px;color:var(--muted)}
+.fcard .err{color:var(--danger);font-size:12px}
+.kind{display:inline-block;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:700}
+.kind.confirmed{background:#e4f6ee;color:#0f6b4a}
+.kind.history{background:#eef0f3;color:#5f6b7d}
+.kind.no{background:#fdecec;color:#b32d2d}
+
+.etbl td.core{font-weight:700}
+.etbl td.dim{color:var(--dim)}
+
+.how{padding:18px 22px;line-height:1.7;max-width:900px}
+.how h3{margin:18px 0 6px;font-size:15px}
+.how ul{margin:0;padding-left:20px}
+
+/* 드로어(업체 상세) — 헤더·닫기 버튼은 styles.css 것을 그대로 쓴다 */
+.dbody h4{margin:6px 0 2px;font-size:11.5px;color:var(--muted);letter-spacing:.4px}
+.dbody p{margin:0;white-space:pre-wrap;font-size:13px}
+.dbody .desc{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.dbody .strl{margin:0;padding-left:18px;color:#7a5320;font-size:13px}
+@media (max-width:720px){
+  .rtbl .what,.rtbl .str{max-width:none}
+  .rtool .cnt{margin-left:0}
+}

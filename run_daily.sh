@@ -22,6 +22,7 @@ mkdir -p logs
 {
   echo "──────── $(date '+%F %T') 수집 시작"
   /usr/bin/python3 -u rivals.py       # 경쟁사 출품 정보(전시회 출품사 명단·경쟁사 행사 페이지)
+  /usr/bin/python3 -u robots.py       # 로봇 전시회 출품사 전체 명단 → app-robots.js (robots.html)
   /usr/bin/python3 -u build.py        # -u: 진행 상황이 로그에 바로바로 찍히게
   /usr/bin/python3 build_share.py     # 공유용 단일 HTML(share/)도 매일 갱신
   publish_github                      # 새 app-data.js를 GitHub(공개 페이지)에 올린다

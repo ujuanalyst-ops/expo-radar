@@ -44,6 +44,8 @@ header{background:linear-gradient(135deg,#0b2545,#123b6b 45%,#0d7c86);color:#fff
   font-size:13.5px;font-weight:600;position:relative;top:1px;white-space:nowrap}
 .tabs button:hover{color:#fff}
 .tabs button.on{background:var(--bg);color:var(--ink)}
+.tabs a.tablink{color:#ffd66b;padding:11px 14px;font-weight:700;font-size:13.5px;display:inline-flex;align-items:center;white-space:nowrap;margin-left:auto}
+.tabs a.tablink:hover{color:#fff}
 
 /* ---------- 레이아웃 ---------- */
 main{max-width:1480px;margin:0 auto;padding:22px 28px 70px}
