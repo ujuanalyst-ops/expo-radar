@@ -368,7 +368,8 @@
           (e.sum ? '<br><small style="color:var(--muted)">' + esc(e.sum.slice(0, 140)) + (e.sum.length > 140 ? "…" : "") + "</small>" : "") + "</td>" +
           "<td>" + tierTag(e) + "</td>" +
           "<td>" + esc(ccName(e.c)) + (e.city ? " · " + esc(e.city) : "") + (e.venue ? " · " + esc(e.venue) : "") + "</td>" +
-          "<td>" + (e.lists.length ? e.lists.map(function (k) { return '<button class="flink" data-goto="' + k + '">' + esc(fairShort(k)) + " ↗</button>"; }).join("") : '<span class="kind no">미확보</span>') + "</td>" +
+          "<td>" + (e.lists.length ? e.lists.map(function (k) { return '<button class="flink" data-goto="' + k + '">' + esc(fairShort(k)) + " ↗</button>"; }).join("") :
+            (e.why ? '<span class="kind no">미확보</span><br><small style="color:var(--muted)">' + esc(e.why) + "</small>" : '<span class="kind no">미확보</span>')) + "</td>" +
           '<td>' + (e.url ? '<a class="flink" href="' + esc(e.url) + '" target="_blank" rel="noopener">열기 ↗</a>' : "") + "</td></tr>";
       }).join("") + "</tbody></table></div>";
   }
@@ -383,7 +384,8 @@
           return "<tr><td>" + esc(e.s) + (e.e && e.e !== e.s ? " ~ " + esc(e.e.slice(5)) : "") + "</td>" +
             '<td class="' + (e.core ? "core" : "") + '">' + esc(e.t) + (e.te && e.te !== e.t ? '<br><small style="color:var(--dim)">' + esc(e.te) + "</small>" : "") + "</td>" +
             "<td>" + esc(ccName(e.c)) + (e.city ? " · " + esc(e.city) : "") + "</td>" +
-            "<td>" + (e.lists.length ? e.lists.map(function (k) { return '<button class="flink" data-goto="' + k + '">' + esc(fairShort(k)) + " ↗</button>"; }).join("") : '<span class="kind no">미확보</span>') + "</td>" +
+            "<td>" + (e.lists.length ? e.lists.map(function (k) { return '<button class="flink" data-goto="' + k + '">' + esc(fairShort(k)) + " ↗</button>"; }).join("") :
+            (e.why ? '<span class="kind no">미확보</span><br><small style="color:var(--muted)">' + esc(e.why) + "</small>" : '<span class="kind no">미확보</span>')) + "</td>" +
             '<td>' + (e.url ? '<a class="flink" href="' + esc(e.url) + '" target="_blank" rel="noopener">열기 ↗</a>' : "") + "</td></tr>";
         }).join("") + "</tbody></table></div>";
     }
@@ -454,14 +456,17 @@
     main.innerHTML = '<div class="card how">' +
       "<h3>어떻게 모았나</h3><ul>" +
       "<li>전시회 DB에서 로봇 전시회를 고른 뒤, 주최 측이 <b>웹에 공개한 출품사 명단</b>을 읽었습니다. 각 업체 줄의 전시회 링크가 곧 출처입니다.</li>" +
-      "<li>Automate·ProMat(미국)은 MapYourShow 출품사 검색, iREX(도쿄)는 출품사 그리드 API, automatica(뮌헨)는 출품사 포털의 엑셀 내려받기를 씁니다.</li>" +
+      "<li>읽는 방법은 전시회마다 다릅니다 — Automate·ProMat(미국) MapYourShow 검색 API(+제품 카테고리), iREX(도쿄) 출품사 그리드 API, automatica(뮌헨) 출품사 포털 상세 페이지(홈페이지·제품군), 로보월드 참가업체 목록+팝업, THE NEXT AI 업체 카드, Robot Tech Show 부스 배치도 API, ROBEX FIX 디렉토리, WRC(베이징) 관별 목록+상세, FAIR plus(선전) 워드프레스 REST, HRTE(항저우) 정적 표, RAV 베트남(VIMF) 워드프레스 REST, Robotics Slovenia·Serbia Momentus 부스 API, ROBOTICS Warsaw·Warsaw Automatica 정적 카탈로그, STOM-ROBOTICS Kielce 검색 API.</li>" +
       "<li>같은 회사가 전시회마다 다른 법인명(FANUC America / FANUC Deutschland)으로 나오면 법인격·지역 표기를 떼고 <b>한 회사로 합쳤습니다</b>. 국가 칸은 그래서 여러 개가 붙을 수 있고, 출품 법인 기준이라 본사와 다를 수 있습니다.</li>" +
+      "<li><b>홈페이지</b>는 명단이 주는 곳(automatica·로보월드·iREX·넥스트AI·슬로베니아·세르비아 등)만 실었고, MapYourShow(Automate·ProMat)는 상세 페이지가 AWS 봇 차단이라 못 읽어 검색 링크로 대체했습니다.</li>" +
       "</ul><h3>분류는 어떻게 했나</h3><ul>" +
       "<li><b>카테고리·산업·분야</b>는 회사 소개글·전시 하이라이트·전시회 태그에서 키워드(영·일·한·중)를 찾아 붙인 규칙 분류입니다. 소개글이 없으면 분류가 비어 있고, 소개글이 두루뭉술하면 '로봇(세부 미분류)'로 남습니다.</li>" +
       "<li><b>강점</b>은 소개글 문장 중 '세계 최대·선도·최초·특허·수상·N년' 같은 표지가 있는 문장을 그대로 발췌한 것입니다. 회사의 자기소개이므로 검증된 사실이 아닙니다.</li>" +
-      "</ul><h3>한계 · 못 읽은 전시회</h3><ul>" +
-      "<li>Automate 2027·automatica 2025는 회사명과 부스만 공개해 소개글이 없습니다(Automate는 회차가 다가오면 채워집니다).</li>" +
-      "<li>로보월드(서울)는 2026 사이트가 아직 열리지 않았고, ROBEX(대구)는 출품사 관리 시스템 안에만, WRC(베이징)·CIROS(상하이)·TAIROS(타이베이)는 봇 차단 또는 JS 전용이라 자동 수집이 안 됩니다. Hannover Messe·SPS는 로봇 전용 필터가 없어 뺐습니다.</li>" +
+      "<li><b>한국어</b>는 구글 번역(키 없는 엔드포인트)으로 만든 기계번역이며 문장 단위로 캐시합니다.</li>" +
+      "</ul><h3>한계 · 못 읽은 전시회 (사이트를 직접 확인한 결과)</h3><ul>" +
+      "<li><b>명단을 안 여는 곳</b>: Mobile Robotics Summit(뒤셀도르프)·Russia Robotics Week·ROBOTECH EXPO(카타르)·AICONFEXPO(항저우) — 출품 안내 페이지만 있고 명단이 없습니다. CIROS(상하이)는 사이트 자체가 폐쇄 상태입니다.</li>" +
+      "<li><b>봇 차단·JS 전용</b>: TAIROS(타이베이, Cloudflare), ROBOT X@METALEX(방콕, RX Tradex 암호화 토큰), INDUSTRIAL JAPAN(도쿄, RX Japan 컴포넌트). ROBOT4MANUFACTURING(프랑스)은 PDF만 있습니다.</li>" +
+      "<li><b>아직 미공개</b>: Robotics Summit 2027(보스턴, 명단 호스트 확인됨 — 열리면 자동 수집)·RoboBusiness 2026·하노이 RX Tradex 2027. Automate 2027·Robot Tech Show·ROBOTICS Warsaw 등은 회사명·부스만 공개된 상태입니다.</li>" +
       "<li>매일 08:45 수집이 돌면서 명단이 갱신됩니다. 회차가 바뀌면 robots.py의 FAIRS 목록에 새 회차를 추가해야 합니다.</li>" +
       "</ul></div>";
   }

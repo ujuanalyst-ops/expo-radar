@@ -43,6 +43,7 @@ OUT = os.path.join(HERE, "data", "robots.json")
 APP = os.path.join(HERE, "app-robots.js")
 EXPOS = os.path.join(HERE, "data", "expos.json")
 KO_CACHE = os.path.join(HERE, "data", "ko_cache.json")
+AUT_CACHE = os.path.join(HERE, "data", "aut_cache.json")
 
 # ================================================================ 전시회 목록
 # scope: robot = 로봇 전시회라 출품사 전부 싣는다 / filter = 종합 전시회라 로봇 관련 업체만 남긴다
@@ -79,6 +80,21 @@ FAIRS = [
     {"key": "robex25", "platform": "fixkorea", "url": "https://fixkorea.or.kr/participation/bis_info_list.asp?site=robex&yy=2025&lang=kor",
      "title": "ROBEX 대구국제로봇산업전 2025", "when": "2025-10", "kind": "history", "scope": "robot",
      "city": "대구(엑스코)", "country": "KR", "note": "직전 회차 — FIX 디렉토리 등록 업체만(실제 출품사의 일부), 전시품목·홈페이지 포함"},
+    # ── 중국·동남아
+    {"key": "wrc26", "platform": "wrc", "url": "https://www.worldrobotconference.com/expo/",
+     "title": "WRC 세계로봇대회 2026 (베이징)", "when": "2026-08", "kind": "history", "scope": "robot",
+     "city": "Beijing", "country": "CN", "note": "직전 회차 — 관별 명단·부스·회사소개(중국어) 포함 (다음 2027-08)"},
+    {"key": "fairplus26", "platform": "fairplus", "url": "https://fairplus.cn/exhibitor-list/",
+     "api": "https://fairplus.cn/wp-json/wp/v2/exhibitor?per_page=100&exhibitor_year=67",
+     "title": "FAIR plus 선전 로봇산업체인전 2026", "when": "2026-04", "kind": "history", "scope": "robot",
+     "city": "Shenzhen", "country": "CN", "note": "직전 회차 — 회사소개(중국어) 포함, 부스 미공개 (다음 2027-04)"},
+    {"key": "hrte26", "platform": "hrte", "url": "https://www.arte.net.cn/about_36/",
+     "title": "HRTE 항저우 휴머노이드로봇기술전 2026", "when": "2026-05", "kind": "history", "scope": "robot",
+     "city": "Hangzhou", "country": "CN", "note": "직전 회차 — 회사명(중·영)·부스만 (다음 2027-05)"},
+    {"key": "vimf_bn26", "platform": "vimf", "url": "https://vimf.vn/danh-sach-don-vi-tham-gia/",
+     "api": "https://vimf.vn/wp-json/wp/v2/posts?categories=222&per_page=100&_fields=id,title,link,content",
+     "title": "RAV Robotic & Automation Vietnam 2026 (VIMF 박닌)", "when": "2026-11", "kind": "confirmed", "scope": "filter",
+     "city": "Bac Ninh", "country": "VN", "note": "VIMF 산업전과 통합 명단 — 로봇·자동화 관련 업체만 추림, 소개·제품 포함"},
     # ── 유럽
     {"key": "robotics_si27", "platform": "ungerboeck",
      "aat": "4a45536f7153673739724d2f726556383664504743536d4a376d4f766f7a307165663779673555526273513d",
@@ -109,6 +125,15 @@ NO_LIST = [
     ("russia robotics week", "포럼 성격 행사 — PDF 안내서만 있고 출품사 명단 없음"),
     ("robot4manufacturing", "2024·2022 회차 명단이 PDF로만 공개(2026 미발표) — 텍스트 추출 도구가 있어야 읽을 수 있음"),
     ("robotech expo", "주최측 사이트(robotechexpo.com)에 출품사 명단 페이지가 없음 — 후원사 로고만"),
+    ("ciros", "주최측 사이트(ciros.com.cn)가 폐쇄 상태(모든 페이지 404) — 온라인 명단 없음"),
+    ("aiconfexpo", "주최측 사이트(sysbh.cn)의 참展명록 페이지가 빈 틀 — 명단 미발표"),
+    ("체화지능", "주최측 사이트(sysbh.cn)의 참展명록 페이지가 빈 틀 — 명단 미발표"),
+    ("tairos", "주최측 사이트(chanchao.com.tw)가 Cloudflare 봇 검사로 차단 — 브라우저로만 열람 가능"),
+    ("industrial japan", "RX Japan 신설 사이트 — 출품사 검색이 아직 없음(열려도 JS 전용 컴포넌트)"),
+    ("산업장비 및 로봇 개발", "RX Japan 신설 사이트 — 출품사 검색이 아직 없음(열려도 JS 전용 컴포넌트)"),
+    ("robot x @metalex", "RX Tradex 출품사 검색이 암호화 토큰 뒤에 있어 자동 수집 불가"),
+    ("하노이 스마트 제조", "RX Tradex 베트남 사이트가 아직 없음(2027 신설)"),
+    ("inti robotics", "INTI 통합 명단(346사)은 있으나 로봇 전시 소속 업체가 0 — 명단 미분류"),
     ("robotics summit", "2027 회차 명단 사이트(rsedtb2026.mapyourshow.com)가 아직 안 열림 — 열리면 자동 수집 가능"),
     ("robobusiness", "2026 부스 배치도가 아직 미공개(Arrowfly) — 2025 후원사 로고만 있음"),
 ]
@@ -401,9 +426,16 @@ def fetch_aut(f):
         except Exception:  # noqa: BLE001
             break
 
+    try:
+        cache = json.load(open(AUT_CACHE, encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        cache = {}
+
     def detail(item):
         i, ch = item
         u = f"{AUT_HOST}/en/exhibitors-details/exhibitors-brands/exhibitors-brands-details/exhibitorDetail/ID/{i}/?cHash={ch}"
+        if i in cache:
+            return dict(cache[i])
         try:
             d = get(op, u, timeout=60).decode("utf-8", "replace")
         except Exception:  # noqa: BLE001
@@ -424,16 +456,15 @@ def fetch_aut(f):
                 groups.append(g)
         x = extra.get(norm_co(name), {})
         time.sleep(0.05)
-        return {"name": name, "booth": (booth.group(1) if booth else x.get("booth", ""))[:24],
-                "desc": _txt(desc.group(1))[:1500] if desc else "", "show": "", "tags": groups[:12],
-                "web": web.group(1) if web else "", "city": x.get("city", ""), "country": x.get("country", ""),
-                "src": u}
+        row = {"name": name, "booth": (booth.group(1) if booth else x.get("booth", ""))[:24],
+               "desc": _txt(desc.group(1))[:1500] if desc else "", "show": "", "tags": groups[:12],
+               "web": web.group(1) if web else "", "city": x.get("city", ""), "country": x.get("country", ""),
+               "src": u}
+        cache[i] = row
+        return dict(row)
     with ThreadPool(6) as pool:
         rows = [r for r in pool.map(detail, list(ids.items())) if r]
-    seen = {norm_co(r["name"]) for r in rows}
-    for key, x in extra.items():                 # 상세가 없는 업체는 엑셀 줄만이라도
-        if key not in seen:
-            pass
+    json.dump(cache, open(AUT_CACHE, "w", encoding="utf-8"), ensure_ascii=False)
     return rows, len(rows), f["url"]
 
 
@@ -664,7 +695,111 @@ def fetch_kielce(f):
     return rows, len(rows), f["url"]
 
 
+def fetch_wrc(f):
+    """세계로봇대회(베이징) — 관(A~D)별 목록 한 페이지 + 업체 상세(부스·회사소개·전시품)."""
+    op = opener()
+    base = "https://www.worldrobotconference.com"
+    t = get(op, f["url"], timeout=60).decode("utf-8", "replace")
+    rows = []
+    for hall, block in re.findall(r'expo-stadium-title">([^<]+)</h2>(.*?)</ul>', t, re.S):
+        for cid, name in re.findall(r'href="/expo/company/(\d+)\.html"><img[^>]*alt="([^"]*)"', block):
+            rows.append({"name": _html.unescape(name).strip(), "booth": "", "desc": "", "show": "", "tags": [clean(hall)],
+                         "country": "CN" if re.search(r"[一-龥]", name) else "", "src": f"{base}/expo/company/{cid}.html"})
+
+    def detail(r):
+        try:
+            d = get(op, r["src"], timeout=40).decode("utf-8", "replace")
+        except Exception:  # noqa: BLE001
+            return
+        b = re.search(r'class="zwh">展位号\s*([^<]*)<', d)
+        i = re.search(r'class="qyxc-intor[^"]*">(.*?)</div>', d, re.S)
+        r["booth"] = clean(b.group(1))[:24] if b else ""
+        r["desc"] = _txt(i.group(1))[:1500] if i else ""
+        prods = re.findall(r'展品介绍.*?<h3[^>]*>(.*?)</h3>', d, re.S)
+        r["show"] = " / ".join(_txt(x) for x in prods[:8] if _txt(x))[:600]
+        time.sleep(0.1)
+    with ThreadPool(6) as pool:
+        pool.map(detail, rows)
+    return rows, len(rows), f["url"]
+
+
+def fetch_fairplus(f):
+    """FAIR plus(선전) — 워드프레스 REST로 명단, 상세 페이지에서 公司简介."""
+    op = opener()
+    rows, page = [], 1
+    while page < 20:
+        try:
+            raw = get(op, f["api"] + f"&page={page}", timeout=60)
+        except Exception:  # noqa: BLE001
+            break
+        items = json.loads(raw.decode("utf-8", "replace"))
+        if not isinstance(items, list) or not items:
+            break
+        for it in items:
+            name = _html.unescape(TAG.sub("", it.get("title", {}).get("rendered", ""))).strip()
+            if name:
+                rows.append({"name": name, "booth": "", "desc": "", "show": "", "tags": [],
+                             "country": "CN" if re.search(r"[一-龥]", name) else "", "src": it.get("link", f["url"])})
+        if len(items) < 100:
+            break
+        page += 1
+
+    def detail(r):
+        try:
+            d = get(op, r["src"], timeout=40).decode("utf-8", "replace")
+        except Exception:  # noqa: BLE001
+            return
+        m = re.search(r"公司简介\s*</[^>]+>\s*(?:<[^>]+>\s*)*(.*?)</(?:p|div)>", d, re.S)
+        r["desc"] = _txt(m.group(1))[:1500] if m else ""
+        time.sleep(0.1)
+    with ThreadPool(6) as pool:
+        pool.map(detail, rows)
+    return rows, len(rows), f["url"]
+
+
+def fetch_hrte(f):
+    """HRTE(항저우) — 정적 표: '中文 | 이름 | 부스' 줄과 '英文 | 영문명' 줄이 짝."""
+    h = get(opener(), f["url"], timeout=60).decode("utf-8", "replace")
+    rows, cur = [], None
+    for tr in re.findall(r"<tr[^>]*>(.*?)</tr>", h, re.S):
+        c = [_txt(x) for x in re.findall(r"<td[^>]*>(.*?)</td>", tr, re.S)]
+        if len(c) < 2:
+            continue
+        if c[0] == "中文":
+            cur = {"name": c[1], "name_ja": "", "booth": (c[2] if len(c) > 2 else "")[:24], "desc": "", "show": "",
+                   "tags": [], "country": "CN", "src": f["url"]}
+            rows.append(cur)
+        elif c[0] == "英文" and cur and c[1]:
+            cur["name_ja"], cur["name"] = cur["name"], c[1]
+    return rows, len(rows), f["url"]
+
+
+def fetch_vimf(f):
+    """VIMF(베트남 산업전) — 워드프레스 글 하나가 출품사 하나. 제목 'COMPANY – Số gian hàng: 983'."""
+    op = opener()
+    rows, page = [], 1
+    while page < 20:
+        try:
+            raw = get(op, f["api"] + f"&page={page}", timeout=60)
+        except Exception:  # noqa: BLE001
+            break
+        items = json.loads(raw.decode("utf-8", "replace"))
+        if not isinstance(items, list) or not items:
+            break
+        for it in items:
+            t = _html.unescape(TAG.sub("", it.get("title", {}).get("rendered", ""))).strip()
+            m = re.match(r"(.*?)\s*[–-]\s*Số gian hàng:\s*(.*)", t)
+            body = _txt(it.get("content", {}).get("rendered", ""))
+            rows.append({"name": (m.group(1) if m else t).strip(), "booth": (m.group(2) if m else "")[:24],
+                         "desc": body[:1500], "show": "", "tags": [], "country": "", "src": it.get("link", f["url"])})
+        if len(items) < 100:
+            break
+        page += 1
+    return rows, len(rows), f["url"]
+
+
 FETCH = {"mys": fetch_mys, "irex": fetch_irex, "aut": fetch_aut, "robotworld": fetch_robotworld,
+         "wrc": fetch_wrc, "fairplus": fetch_fairplus, "hrte": fetch_hrte, "vimf": fetch_vimf,
          "ungerboeck": fetch_ungerboeck, "ptak": fetch_ptak, "kielce": fetch_kielce,
          "nextai": fetch_nextai, "exporum": fetch_exporum, "fixkorea": fetch_fixkorea}
 
@@ -893,6 +1028,8 @@ LIST_MATCH = {"automate": ["automate27", "automate26"], "irex": ["irex25"],
               "robex": ["robex25"], "robotics slovenia": ["robotics_si27"], "robotics serbia": ["robotics_rs26"],
               "robotics warsaw": ["roboticswarsaw26"], "warsaw automatica": ["warsawautomatica26"],
               "warsaw industry automatica": ["warsawautomatica26"], "stom-robotics": ["stom_robotics26"],
+              "wrc": ["wrc26"], "베이징 로봇": ["wrc26"], "fair plus": ["fairplus26"], "선전 로봇": ["fairplus26"],
+              "hrte": ["hrte26"], "휴머노이드로봇기술": ["hrte26"], "rav - robotic": ["vimf_bn26"],
               "国際ロボット展": ["irex25"], "international robot exhibition": ["irex25"],
               "automatica": ["automatica25"], "promat": ["promat27", "promat25"]}
 

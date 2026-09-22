@@ -112,6 +112,20 @@
 | iREX 2025 국際ロボット展 (도쿄) | `/api/parts/get_exhibitor_grid` (60건씩) | 소개글·전시 하이라이트·전시회 분야 태그 |
 | automatica 2025 (뮌헨) | 출품사 포털의 엑셀 내려받기(`mode=xls`) | 회사·홀·도시·국가만 |
 | ProMat 2025·2027 (미국, 물류) | MapYourShow | 종합 전시회라 로봇·AMR·피킹 관련 업체만(`ROBOT_RE`) |
+| 로보월드 2026 (킨텍스) | `visitors/list_of_exhibitors.php?offset=` + 팝업 | 부스·전시분야·홈페이지·회사소개·제품소개 |
+| THE NEXT AI 2026 (창원) | `visitors/companies?page=` + 상세 | 홈페이지·소개·출품내역 |
+| Robot Tech Show 2026 (코엑스) | 엑스포럼 `floorplan.exporum.com/api/exhibitors` | 존 이름으로 로봇테크쇼만 |
+| ROBEX 2025 (대구) | FIX `bis_info_list.asp?site=robex&yy=` | 디렉토리 등록 업체만 |
+| WRC 2026 (베이징) | `/expo/` 관별 목록 + `/expo/company/N.html` | 부스·회사소개(중) |
+| FAIR plus 2026 (선전) | 워드프레스 REST `wp/v2/exhibitor` + 상세 | 회사소개(중) |
+| HRTE 2026 (항저우) | 정적 표 `arte.net.cn/about_36/` | 회사명(중·영)·부스 |
+| RAV 2026 (베트남 박닌, VIMF) | 워드프레스 REST `wp/v2/posts?categories=222` | 통합 명단이라 로봇 관련만 |
+| Robotics Slovenia 2027 · Serbia 2026 | Momentus(Ungerboeck) `VFPServer/GetInitialData` + 상세 | 홈페이지·제품군·국가 |
+| ROBOTICS Warsaw · Warsaw Automatica 2026 | Ptak 워드프레스 정적 카탈로그 | 회사명·부스 |
+| STOM-ROBOTICS 2026 (Kielce) | `api/modules/exhibitors-list/search/…` | 회사명·국가·부스 |
+| automatica 2025 (뮌헨) | 상세 페이지 `exhibitorDetail/ID/…` (캐시 `data/aut_cache.json`) | 홈페이지·제품군·소개(독) |
+
+명단을 못 읽는 로봇 전시회와 그 이유는 `NO_LIST`에 적혀 화면 '미확보' 옆에 표시된다.
 
 - **분류**는 소개글·태그의 키워드 규칙(영·일·한·중, `CATS`·`INDS`)이다. 카테고리가 6개를 넘으면 두 번 이상 나온 것만 남긴다. 소개글이 없으면 분류가 빈다.
 - **강점**은 '세계 최대·선도·최초·특허·수상·N년' 같은 표지(`STRONG_RE`)가 있는 문장을 그대로 발췌한다 — 회사 자기소개이지 검증된 사실이 아니다.
