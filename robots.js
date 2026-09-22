@@ -27,7 +27,7 @@
     var core = D.expos.filter(function (e) { return e.core; }).length;
     document.getElementById("subline").textContent =
       D.generated + " 기준 · 로봇 전시회 " + D.fairs.length + "회차의 출품사 명단을 회사 단위로 합쳤습니다. " +
-      "분류는 소개글 키워드 규칙이라 참고용입니다.";
+      "한국어 소개글은 기계번역, 분류는 소개글 키워드 규칙이라 참고용입니다.";
     document.getElementById("kpis").innerHTML =
       '<div class="kpi"><b>' + num(D.companies.length) + '</b><span>출품 업체</span></div>' +
       '<div class="kpi hot"><b>' + num(multi) + '</b><span>2개 이상 전시회 출품</span></div>' +
@@ -48,7 +48,7 @@
       if (S.descOnly && !c.desc) return false;
       if (S.multi && fairKeys(c).length < 2) return false;
       if (q) {
-        var hay = (c.n + " " + c.ja + " " + c.desc + " " + c.show + " " + c.tags.join(" ") + " " +
+        var hay = (c.n + " " + c.ja + " " + c.desc + " " + c.show + " " + (c.ko || "") + " " + (c.show_ko || "") + " " + (c.str_ko || []).join(" ") + " " + c.tags.join(" ") + " " +
           c.cat.map(function (k) { return CAT[k]; }).join(" ") + " " + c.ind.map(function (k) { return IND[k]; }).join(" ")).toLowerCase();
         if (hay.indexOf(q) < 0) return false;
       }
@@ -167,10 +167,10 @@
       '<td class="nm">' + esc(c.n) + (c.ja ? "<small>" + esc(c.ja) + "</small>" : "") + "</td>" +
       "<td>" + (c.c.length ? c.c.map(function (x) { return '<span class="tag cc">' + esc(ccName(x)) + "</span>"; }).join("") : '<span class="tag cc">—</span>') + "</td>" +
       "<td>" + (c.fld ? '<span class="tag ' + c.fld + '">' + esc(FLD[c.fld]) + "</span>" : '<span class="tag">미분류</span>') + "</td>" +
-      "<td>" + c.cat.map(function (k) { return '<span class="tag">' + esc(CAT[k]) + "</span>"; }).join("") +
+      '<td class="cats">' + c.cat.map(function (k) { return '<span class="tag">' + esc(CAT[k]) + "</span>"; }).join("") +
       c.ind.map(function (k) { return '<span class="tag ind">' + esc(IND[k]) + "</span>"; }).join("") + "</td>" +
-      '<td class="what">' + (c.what ? esc(c.what) : '<span style="color:var(--dim)">소개글 없음 — 전시회가 회사명만 공개</span>') + "</td>" +
-      '<td class="str">' + esc(c.str[0] || "") + "</td>" +
+      '<td class="what">' + (c.what ? (c.ko ? esc(c.ko) + "<small>" + esc(c.what) + "</small>" : esc(c.what)) : '<span style="color:var(--dim)">소개글 없음 — 전시회가 회사명만 공개</span>') + "</td>" +
+      '<td class="str">' + (c.str.length ? ((c.str_ko || [])[0] ? esc(c.str_ko[0]) + "<small>" + esc(c.str[0]) + "</small>" : esc(c.str[0])) : "") + "</td>" +
       '<td class="fairs">' + fairs + "</td>" +
       "</tr>";
   }
@@ -192,9 +192,10 @@
       c.cat.map(function (k) { return '<span class="tag">' + esc(CAT[k]) + "</span>"; }).join("") +
       c.ind.map(function (k) { return '<span class="tag ind">' + esc(IND[k]) + "</span>"; }).join("") + "</div>" +
       (c.web ? '<div><a class="dlink" href="' + esc(c.web) + '" target="_blank" rel="noopener">회사 홈페이지 ↗</a></div>' : "") +
-      "<div><h4>무엇을 만드는 회사인가 (전시회 소개글)</h4>" + (c.desc ? '<p class="desc">' + esc(c.desc) + "</p>" : "<p>소개글 없음 — 이 전시회는 회사명·부스만 공개합니다.</p>") + "</div>" +
-      (c.show ? "<div><h4>무엇을 전시했는가 (전시 하이라이트)</h4><p class=\"desc\">" + esc(c.show) + "</p></div>" : "") +
-      (c.str.length ? "<div><h4>강점 (소개글에서 발췌)</h4><ul class=\"strl\">" + c.str.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ul></div>" : "") +
+      (c.ko ? "<div><h4>무엇을 만드는 회사인가 (한국어 요약 · 기계번역)</h4><p class=\"desc\">" + esc(c.ko) + "</p></div>" : "") +
+      "<div><h4>전시회 소개글 원문</h4>" + (c.desc ? '<p class="desc">' + esc(c.desc) + "</p>" : "<p>소개글 없음 — 이 전시회는 회사명·부스만 공개합니다.</p>") + "</div>" +
+      (c.show ? "<div><h4>무엇을 전시했는가 (전시 하이라이트)</h4><p class=\"desc\">" + (c.show_ko ? esc(c.show_ko) + "\n\n" : "") + esc(c.show) + "</p></div>" : "") +
+      (c.str.length ? "<div><h4>강점 (소개글에서 발췌)</h4><ul class=\"strl\">" + c.str.map(function (s, i) { var k = (c.str_ko || [])[i]; return "<li>" + (k ? esc(k) + " <small style=\"color:var(--dim)\">" + esc(s) + "</small>" : esc(s)) + "</li>"; }).join("") + "</ul></div>" : "") +
       (c.tags.length ? "<div><h4>전시회가 붙인 분야 태그</h4><div>" + c.tags.map(function (t) { return '<span class="tag">' + esc(t) + "</span>"; }).join("") + "</div></div>" : "") +
       "<div><h4>출처 전시회</h4><ul style=\"margin:0;padding-left:18px;font-size:13px\">" + fairs + "</ul></div>" +
       "</div>";
@@ -207,10 +208,11 @@
 
   // ---------------------------------------------------------------- CSV
   function downloadCsv(rows) {
-    var head = ["회사", "회사(현지어)", "국가", "분야", "카테고리", "산업", "무엇을 만드는가", "전시 하이라이트", "강점", "전시회 태그", "출처 전시회", "부스", "출처 링크", "홈페이지"];
+    var head = ["회사", "회사(현지어)", "국가", "분야", "카테고리", "산업", "무엇을 만드는가(한국어)", "강점(한국어)", "전시 하이라이트(한국어)", "소개글 원문", "전시 하이라이트 원문", "강점 원문", "전시회 태그", "출처 전시회", "부스", "출처 링크", "홈페이지"];
     var lines = [head].concat(rows.map(function (c) {
       return [c.n, c.ja, c.c.map(ccName).join("·"), FLD[c.fld] || "", c.cat.map(function (k) { return CAT[k]; }).join("·"),
-        c.ind.map(function (k) { return IND[k]; }).join("·"), c.desc, c.show, c.str.join(" / "), c.tags.join("·"),
+        c.ind.map(function (k) { return IND[k]; }).join("·"), c.ko || "", (c.str_ko || []).filter(Boolean).join(" / "), c.show_ko || "",
+        c.desc, c.show, c.str.join(" / "), c.tags.join("·"),
         c.f.map(function (x) { return fairShort(x.k); }).join("·"), c.f.map(function (x) { return x.b; }).join("·"),
         c.f.map(function (x) { return x.u; }).join(" "), c.web];
     }));
@@ -246,9 +248,26 @@
   }
 
   // ---------------------------------------------------------------- 탭: 전세계 로봇 전시회(DB)
+  var TIER = { core: ["로봇 전문", "kind confirmed"], adj: ["자동화·제조 (로봇 주요 품목)", "kind history"], mention: ["설명에 로봇 언급", "kind"] };
+  function tierTag(e) { var t = TIER[e.tier || (e.core ? "core" : "mention")]; return '<span class="' + t[1] + '">' + t[0] + "</span>"; }
+
+  function expoTable(list) {
+    return '<div class="tblwrap"><table class="rtbl etbl"><thead><tr><th>일정</th><th>전시회</th><th>구분</th><th>국가 · 도시 · 장소</th><th>출품사 명단</th><th>원문</th></tr></thead><tbody>' +
+      list.map(function (e) {
+        return "<tr><td>" + esc(e.s) + (e.e && e.e !== e.s ? " ~ " + esc(e.e.slice(5)) : "") + "</td>" +
+          '<td class="' + (e.core ? "core" : "") + '">' + esc(e.t) + (e.te && e.te !== e.t ? '<br><small style="color:var(--dim)">' + esc(e.te) + "</small>" : "") +
+          (e.sum ? '<br><small style="color:var(--muted)">' + esc(e.sum.slice(0, 140)) + (e.sum.length > 140 ? "…" : "") + "</small>" : "") + "</td>" +
+          "<td>" + tierTag(e) + "</td>" +
+          "<td>" + esc(ccName(e.c)) + (e.city ? " · " + esc(e.city) : "") + (e.venue ? " · " + esc(e.venue) : "") + "</td>" +
+          "<td>" + (e.lists.length ? e.lists.map(function (k) { return '<button class="flink" data-goto="' + k + '">' + esc(fairShort(k)) + " ↗</button>"; }).join("") : '<span class="kind no">미확보</span>') + "</td>" +
+          '<td>' + (e.url ? '<a class="flink" href="' + esc(e.url) + '" target="_blank" rel="noopener">열기 ↗</a>' : "") + "</td></tr>";
+      }).join("") + "</tbody></table></div>";
+  }
+
   function tabExpos() {
-    var core = D.expos.filter(function (e) { return e.core; });
-    var rest = D.expos.filter(function (e) { return !e.core; });
+    var core = D.expos.filter(function (e) { return (e.tier || "core") === "core"; });
+    var adj = D.expos.filter(function (e) { return e.tier === "adj"; });
+    var rest = D.expos.filter(function (e) { return e.tier === "mention" || (!e.tier && !e.core); });
     function tbl(list) {
       return '<div class="tblwrap"><table class="rtbl etbl"><thead><tr><th>일정</th><th>전시회</th><th>국가 · 도시</th><th>출품사 명단</th><th>원문</th></tr></thead><tbody>' +
         list.map(function (e) {
@@ -260,14 +279,64 @@
         }).join("") + "</tbody></table></div>";
     }
     main.innerHTML =
-      '<p class="note">전시회 DB(국내 AKEI·KOTRA GEP·EventsEye 등)에서 <b>제목에 로봇이 들어간 전시회 ' + core.length + '개</b>와, 설명에 로봇이 언급된 전시회 ' + rest.length + '개를 골랐습니다. ' +
-      '<b>출품사 명단</b> 칸이 "미확보"인 곳은 주최 측이 명단을 웹에 공개하지 않거나(로보월드·ROBEX·WRC·CIROS 등) 아직 회차가 열리지 않은 곳입니다.</p>' +
+      '<p class="note">전시회 DB(국내 AKEI·코엑스·킨텍스·벡스코, KOTRA GEP, EventsEye 세계 달력 — 총 ' + "19,000여" + '건, 앞으로 15개월)에서 세 단계로 골랐습니다. ' +
+      '<b>로봇 전문</b>은 제목에 로봇이 든 전시회, <b>자동화·제조</b>는 자동화·스마트팩토리·머신비전·드론·물류자동화·공작기계처럼 로봇이 주요 전시 품목인 전시회, <b>설명에 로봇 언급</b>은 소개글에서만 로봇이 나오는 곳입니다. ' +
+      '같은 전시회의 여러 회차·출처는 하나로 합쳤습니다. <b>출품사 명단</b>이 "미확보"인 곳은 주최 측이 명단을 웹에 공개하지 않거나 아직 회차가 열리지 않은 곳입니다.</p>' +
       '<div class="sec-title"><h2>🤖 로봇 전문 전시회</h2><small>' + core.length + "개 · 날짜순</small></div>" +
-      '<div class="card">' + tbl(core) + "</div>" +
-      '<div class="sec-title" style="margin-top:22px"><h2>📎 설명에 로봇이 언급된 전시회</h2><small>' + rest.length + "개 · 공작기계·자동화·물류 등</small></div>" +
-      '<div class="card">' + tbl(rest) + "</div>";
+      '<div class="card">' + expoTable(core) + "</div>" +
+      '<div class="sec-title" style="margin-top:22px"><h2>🏭 자동화·제조 전시회 (로봇이 주요 품목)</h2><small>' + adj.length + "개</small></div>" +
+      '<div class="card">' + expoTable(adj) + "</div>" +
+      '<div class="sec-title" style="margin-top:22px"><h2>📎 설명에 로봇이 언급된 전시회</h2><small>' + rest.length + "개</small></div>" +
+      '<div class="card">' + expoTable(rest) + "</div>";
     Array.prototype.forEach.call(main.querySelectorAll("[data-goto]"), function (b) {
       b.addEventListener("click", function () { S.fair = b.getAttribute("data-goto"); S.tab = "co"; S.limit = 150; setTab(); render(); });
+    });
+  }
+
+  // ---------------------------------------------------------------- 탭: 한국 전시회 · 홍보 전략
+  function tabKorea() {
+    var kr = D.expos.filter(function (e) { return e.c === "KR"; });
+    var core = kr.filter(function (e) { return e.tier === "core"; });
+    var adj = kr.filter(function (e) { return e.tier === "adj"; });
+    var rest = kr.filter(function (e) { return e.tier === "mention"; });
+    // 데이터에서 뽑는 근거: 여러 전시회에 겹쳐 나오는 로봇 본체 업체(=부품 고객 후보), 국내 업체
+    var body = D.companies.filter(function (c) { return c.fld === "body" && fairKeys(c).length >= 3; }).slice(0, 40);
+    var krco = D.companies.filter(function (c) { return c.c.indexOf("KR") >= 0 || /korea|한국|코리아/i.test(c.n + c.ja); });
+    var parts = D.companies.filter(function (c) { return c.fld === "parts" && fairKeys(c).length >= 3; }).slice(0, 25);
+    function coList(list) {
+      return list.map(function (c) {
+        return '<button class="flink" data-co="' + esc(c.k) + '">' + esc(c.n) + "<em>" + fairKeys(c).length + "회</em></button>";
+      }).join("");
+    }
+    main.innerHTML =
+      '<div class="sec-title"><h2>🇰🇷 한국에서 열리는 로봇 관련 전시회</h2><small>로봇 전문 ' + core.length + " · 자동화·제조 " + adj.length + " · 로봇 언급 " + rest.length + "</small></div>" +
+      '<div class="card">' + expoTable(core.concat(adj, rest)) + "</div>" +
+      '<div class="sec-title" style="margin-top:26px"><h2>📣 로봇 부품 고객에게 한국에서 홍보하는 방법</h2><small>위 명단 데이터 + 국내 전시회 일정으로 정리한 제안</small></div>' +
+      '<div class="card how">' +
+      "<h3>1. 고객이 누구인가 — 명단 데이터가 말해 주는 것</h3><ul>" +
+      "<li><b>로봇 본체 제조사</b>가 커넥터·케이블·하네스의 1차 고객입니다. 우리가 읽은 6회차 명단에서 <b>3개 이상 전시회에 겹쳐 나온 로봇 본체 업체</b>가 " + body.length + "곳입니다 — 전시회를 꾸준히 도는 곳은 신제품 주기가 빠르고 부품 소싱을 열어 두는 곳입니다.<br>" + coList(body) + "</li>" +
+      "<li><b>국내 업체</b>로 해외 로봇 전시회(automatica·Automate·iREX)에 나간 곳이 " + krco.length + "곳입니다. 두산로보틱스·HD현대로보틱스·한화로보틱스·뉴로메카 계열(automatica 2025 한국관)·로보티즈·에이딘로보틱스·하이젠RNM(모터·감속기)·SPG(감속기) 등 — 해외 전시회에서 만나기보다 <b>국내에서 먼저 접촉</b>하는 편이 훨씬 싸고 빠릅니다.<br>" + coList(krco) + "</li>" +
+      "<li><b>부품 경쟁·협업 상대</b>(3개 이상 전시회, 부품·요소기술): " + coList(parts) + " — 이들이 어느 부스에 어떤 형태로 나오는지가 우리 부스 기획의 기준점입니다.</li>" +
+      "</ul><h3>2. 어느 국내 전시회에 나갈 것인가</h3><ul>" +
+      "<li><b>로보월드 (11월, 킨텍스)</b> — 국내 최대 로봇 전문전. 로봇 본체·부품·SI가 한자리에 모이고 두산·HD현대·레인보우·뉴로메카·로보티즈 등 국내 본체사가 매년 나옵니다. <b>부품·요소기술관</b>에 부스를 내는 것이 1순위. 한국로봇산업협회(KAR)가 주최라 회원사 할인·공동관이 있습니다.</li>" +
+      "<li><b>ROBEX 대구 (10월, 엑스코)</b> — 로봇 SI·제조 현장 위주(대구·경북 자동차 부품 벨트). 본체보다 <b>SI·적용 업체</b>와 만나기 좋고, 한국로봇산업진흥원(KIRIA)이 대구에 있어 지원사업 담당자를 직접 만날 수 있습니다.</li>" +
+      "<li><b>AIMEX / Automation World (3월, 코엑스)</b> — 스마트공장·자동화 종합전. 로봇 본체사보다 <b>제어·센서·케이블·커넥터 부품사</b>의 비중이 큰 곳이라 우리와 같은 업종이 가장 많이 모입니다(경쟁사 동향 파악 + 협동로봇 주변기기 수요).</li>" +
+      "<li><b>THE NEXT AI 피지컬AI & 스마트팩토리산업전 (10월, 창원)</b>, <b>제조자동화기술전 (4월, 창원)</b> — 경남 기계·방산 벨트. 휴머노이드·피지컬 AI를 앞세운 신설전이라 초기 출품 비용이 낮습니다.</li>" +
+      "<li><b>Robot Tech Show (6월, 코엑스)</b>, <b>스마트공장구축 및 생산자동화전 (11월, 수원)</b> — 중소 SI·수요기업 위주. 부스보다 <b>참관 영업</b>(명함·샘플)이 효율적입니다.</li>" +
+      "<li>인접 전시회 — 한국전자전 KES(10월)·반도체대전(10월)·국제물류산업대전 KOREA MAT(4월)은 로봇 전시회는 아니지만 <b>AMR·물류로봇·반도체 장비 로봇</b>의 수요처가 모입니다. 이미 출품 중이면 로봇용 하네스 데모를 한 코너 두는 것으로 충분합니다.</li>" +
+      "</ul><h3>3. 어떻게 홍보할 것인가 — 커넥터·하네스 회사의 로봇 전시 방식</h3><ul>" +
+      "<li><b>완제품이 아니라 '적용 사례'를 보여줍니다.</b> 로봇 관절(J1~J6) 내부 배선·엔코더 케이블·툴 체인저 커넥터·AMR 배터리 커넥터처럼 <b>로봇 한 대를 해부한 배선 데모</b>가 커넥터 카탈로그보다 훨씬 잘 통합니다. 굴곡 수명(1천만 회)·EMC·IP 등급을 숫자로 붙이세요.</li>" +
+      "<li><b>본체사 부스를 먼저 돕니다.</b> 국내 전시회는 규모가 작아 하루면 본체사 부스를 다 돌 수 있습니다. 위 '3개 이상 전시회' 명단 중 국내 법인이 있는 곳(FANUC 코리아·야스카와·KUKA·UR·Techman·Dobot 등)은 부스 담당자가 곧 구매 창구입니다.</li>" +
+      "<li><b>협동로봇·휴머노이드 신규 진입 업체</b>(에이딘·코라스·주강로보텍·리보틱스 같은 automatica 한국관 참가사)는 아직 부품 공급망이 굳지 않았습니다. 소량·맞춤 하네스 제안이 먹히는 곳입니다.</li>" +
+      "<li><b>정부 지원을 씁니다.</b> KOTRA GEP 공고 기준으로 automatica(뮌헨)·Hannover Messe·WRC(베이징)는 매년 <b>한국관 단체참가</b> 모집이 있었습니다(메인 레이더의 '우리 관련·지원' 탭). 국내 전시회는 KAR·KIRIA·지자체(대구·창원) 공동관과 중소기업 참가비 지원(중진공·지방 테크노파크)을 노립니다.</li>" +
+      "<li><b>전시 전후가 더 중요합니다.</b> 이 화면의 CSV로 대상 업체 목록을 뽑아 전시 4주 전 미팅 요청 → 부스에서 샘플 전달 → 전시 후 2주 내 견적. 국내 전시회는 관람객 수가 적어 <b>사전 약속 없는 부스는 성과가 낮습니다</b>.</li>" +
+      "</ul><p class=\"note\" style=\"margin-top:12px\">이 제안은 위 출품사 명단(6회차)과 전시회 DB 일정을 근거로 한 판단이며, 국내 전시회 출품사 명단은 아직 자동 수집하지 못했습니다(로보월드 2026 사이트 미개설·ROBEX 비공개). 확정 부스·비용은 각 주최 측 공고로 확인하세요.</p>" +
+      "</div>";
+    Array.prototype.forEach.call(main.querySelectorAll("[data-goto]"), function (b) {
+      b.addEventListener("click", function () { S.fair = b.getAttribute("data-goto"); S.tab = "co"; S.limit = 150; setTab(); render(); });
+    });
+    Array.prototype.forEach.call(main.querySelectorAll("[data-co]"), function (b) {
+      b.addEventListener("click", function () { openCompany(b.getAttribute("data-co")); });
     });
   }
 
@@ -301,6 +370,7 @@
   function render() {
     if (S.tab === "fair") tabFairs();
     else if (S.tab === "expo") tabExpos();
+    else if (S.tab === "kr") tabKorea();
     else if (S.tab === "how") tabHow();
     else tabCompanies();
   }

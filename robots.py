@@ -41,6 +41,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "data", "robots.json")
 APP = os.path.join(HERE, "app-robots.js")
 EXPOS = os.path.join(HERE, "data", "expos.json")
+KO_CACHE = os.path.join(HERE, "data", "ko_cache.json")
 
 # ================================================================ 전시회 목록
 # scope: robot = 로봇 전시회라 출품사 전부 싣는다 / filter = 종합 전시회라 로봇 관련 업체만 남긴다
@@ -351,7 +352,7 @@ def strengths(desc):
         s = s.strip(" ・-•")
         if 15 <= len(s) <= 220 and STRONG_RE.search(s):
             out.append(s)
-        if len(out) >= 3:
+        if len(out) >= 2:
             break
     return out
 
@@ -402,8 +403,87 @@ def build_companies(per_fair):
     return out
 
 
+# ================================================================ 한국어 번역 (소개글·강점·전시 하이라이트)
+# 크롬 사전 확장이 쓰는 구글 번역 엔드포인트(키 없음)를 쓴다. 문장마다 data/ko_cache.json에 저장해
+# 다음 날부터는 새로 생긴 문장만 번역한다. 막히면(429 등) 그 문장은 원문 그대로 둔다.
+import hashlib
+import ssl
+import threading
+
+TR_URL = "https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=auto&tl=ko"
+TR_CTX = ssl.create_default_context()
+_tr_lock = threading.Lock()
+
+
+def _tr_one(text):
+    data = urllib.parse.urlencode({"q": text}).encode()
+    req = urllib.request.Request(TR_URL, data=data, headers={"User-Agent": UA})
+    for attempt in range(3):
+        try:
+            d = json.loads(urllib.request.urlopen(req, timeout=40, context=TR_CTX).read().decode("utf-8", "replace"))
+            out = d[0][0] if isinstance(d[0], list) else d[0]
+            return clean(out)
+        except Exception as e:  # noqa: BLE001
+            if "429" in str(e):
+                time.sleep(20 * (attempt + 1))
+            else:
+                time.sleep(2)
+    return ""
+
+
+def translate_ko(companies, budget=4000):
+    """what·str·show를 한국어로. 한국어가 이미인 문장은 건너뛴다. budget = 한 번에 새로 번역할 최대 문장 수."""
+    try:
+        cache = json.load(open(KO_CACHE, encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        cache = {}
+    ko_re = re.compile(r"[가-힣]")
+    todo = {}
+    for c in companies:
+        for t in [c["what"], c["show"]] + c["str"]:
+            if t and not ko_re.search(t):
+                h = hashlib.sha1(t.encode("utf-8")).hexdigest()
+                if h not in cache:
+                    todo[h] = t
+    items = list(todo.items())[:budget]
+    if items:
+        print(f"[{datetime.now():%H:%M:%S}] 한국어 번역 {len(items)}문장 (캐시 {len(cache)})", flush=True)
+
+        def work(pair):
+            h, t = pair
+            r = _tr_one(t)
+            if r:
+                with _tr_lock:
+                    cache[h] = r
+            time.sleep(0.3)
+        with ThreadPool(4) as pool:
+            pool.map(work, items)
+        os.makedirs(os.path.dirname(KO_CACHE), exist_ok=True)
+        json.dump(cache, open(KO_CACHE, "w", encoding="utf-8"), ensure_ascii=False)
+
+    def ko(t):
+        if not t or ko_re.search(t):
+            return ""
+        return cache.get(hashlib.sha1(t.encode("utf-8")).hexdigest(), "")
+    for c in companies:
+        c["ko"] = ko(c["what"])
+        c["show_ko"] = ko(c["show"])
+        c["str_ko"] = [ko(t) for t in c["str"]]
+    return sum(1 for c in companies if c["ko"])
+
+
 # ================================================================ 전시회 DB에서 로봇 전시회 뽑기
-EXPO_RE = re.compile(r"robot|로봇|humanoid|ロボット|机器人|automatica|\bautomate\b", re.I)
+# 세 단계로 나눈다 — 제목에 로봇이 박힌 '로봇 전문'(core), 제목이 자동화·스마트팩토리·머신비전·드론·
+# 물류자동화·제조기술인 '로봇이 주요 품목인 전시회'(adj), 설명에만 로봇이 언급된 곳(mention).
+EXPO_CORE = re.compile(r"robot|로봇|humanoid|ロボット|机器人|automatica|\bautomate\b|피지컬\s?AI|physical ai|embodied", re.I)
+EXPO_ADJ = re.compile(
+    r"automation|自動化|자동화|オートメーション|smart\s?factory|스마트\s?팩토리|스마트\s?공장|smart manufactur|"
+    r"factory automation|\bFA\b|machine vision|머신비전|motion control|drones?|드론|\bUAV\b|intralogistic|"
+    r"logistics automation|물류자동화|manufacturing technolog|industrial technolog|manufacturing (expo|show|fair)|"
+    r"제조자동화|생산자동화|자동화산업|hannover messe|\bSPS\b|\bCIIF\b|machine tools?|공작기계|metalworking|"
+    r"metal week|기계\s?(산업전|대전|전시회|전)\b|기계\s?&\s?제조|manufacturing|제조산업전|제조기술|\bmach-?tech\b|"
+    r"mechatronic|메카트로닉스|機械要素|techno-?frontier|\bAI\b.*(제조|manufactur)|스마트제조|smart production", re.I)
+EXPO_RE = EXPO_CORE
 
 
 def robot_expos():
@@ -414,8 +494,14 @@ def robot_expos():
     items = store.values() if isinstance(store, dict) else store
     seen, out = set(), []
     for e in items:
-        blob = " ".join(str(e.get(k, "")) for k in ("title", "title_en", "summary"))
-        if not EXPO_RE.search(blob):
+        title = e.get("title", "") + " " + e.get("title_en", "")
+        if EXPO_CORE.search(title):
+            tier = "core"
+        elif EXPO_ADJ.search(title):
+            tier = "adj"
+        elif EXPO_CORE.search(e.get("summary", "") or ""):
+            tier = "mention"
+        else:
             continue
         t = (e.get("title_en") or e.get("title") or "").lower()
         t = re.sub(r"[^a-z0-9가-힣一-龥ぁ-んァ-ン]", "", t)
@@ -423,11 +509,12 @@ def robot_expos():
         if dedupe in seen:
             continue
         seen.add(dedupe)
-        core = bool(EXPO_RE.search(e.get("title", "") + " " + e.get("title_en", "")))
-        out.append({"t": e.get("title", ""), "te": e.get("title_en", ""), "s": e.get("start", ""), "core": core,
-                    "e": e.get("end", ""), "c": e.get("country", ""), "city": e.get("city", ""),
+        out.append({"t": e.get("title", ""), "te": e.get("title_en", ""), "s": e.get("start", ""), "core": tier == "core",
+                    "tier": tier, "e": e.get("end", ""), "c": e.get("country", ""), "city": e.get("city", ""),
+                    "venue": e.get("venue", ""), "org": e.get("org", ""), "sum": (e.get("summary") or "")[:300],
                     "url": e.get("homepage") or e.get("url", ""), "src": e.get("source", "")})
-    out.sort(key=lambda x: (not x["core"], x["s"]))
+    rank = {"core": 0, "adj": 1, "mention": 2}
+    out.sort(key=lambda x: (rank[x["tier"]], x["s"]))
     return out
 
 
@@ -452,6 +539,8 @@ def collect_all():
             per_fair.append((f, rows))
             report.append(rep)
     companies = build_companies(per_fair)
+    n_ko = translate_ko(companies)
+    print(f"[{datetime.now():%H:%M:%S}] 한국어 소개글 {n_ko}개 업체", flush=True)
     order = {f["key"]: i for i, f in enumerate(FAIRS)}
     report.sort(key=lambda r: order.get(r["key"], 99))
     expos = link_lists(robot_expos())
