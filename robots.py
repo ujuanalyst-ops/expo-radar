@@ -58,7 +58,7 @@ FAIRS = [
      "city": "Tokyo", "country": "JP", "note": "세계 최대 로봇 전문 전시회 (격년, 다음 2027-11). 소개글·전시 분야 태그 포함"},
     {"key": "automatica25", "platform": "aut", "url": "https://exhibitors.automatica-munich.com/en/exhibitors-details/exhibitors-brands",
      "title": "automatica 2025", "when": "2025-06", "kind": "history", "scope": "robot",
-     "city": "Munich", "country": "DE", "note": "유럽 최대 로봇·자동화 (격년, 다음 2027-06). 회사·홀·국가만 공개"},
+     "city": "Munich", "country": "DE", "note": "유럽 최대 로봇·자동화 (격년, 다음 2027-06). 홈페이지·제품군·회사소개(독일어 多) 포함"},
     {"key": "promat27", "platform": "mys", "host": "pm2027.mapyourshow.com",
      "title": "ProMat 2027", "when": "2027-03", "kind": "confirmed", "scope": "filter",
      "city": "Chicago", "country": "US", "note": "북미 최대 물류 자동화 — 로봇·AMR·피킹 관련 업체만 추림"},
@@ -79,6 +79,38 @@ FAIRS = [
     {"key": "robex25", "platform": "fixkorea", "url": "https://fixkorea.or.kr/participation/bis_info_list.asp?site=robex&yy=2025&lang=kor",
      "title": "ROBEX 대구국제로봇산업전 2025", "when": "2025-10", "kind": "history", "scope": "robot",
      "city": "대구(엑스코)", "country": "KR", "note": "직전 회차 — FIX 디렉토리 등록 업체만(실제 출품사의 일부), 전시품목·홈페이지 포함"},
+    # ── 유럽
+    {"key": "robotics_si27", "platform": "ungerboeck",
+     "aat": "4a45536f7153673739724d2f726556383664504743536d4a376d4f766f7a307165663779673555526273513d",
+     "url": "https://icm.si/events/mte-slovenia-exhibitors/",
+     "title": "Robotics Slovenia 2027 (IFAM·INTRONIKA·ROBOTICS·MTE)", "when": "2027-01", "kind": "confirmed", "scope": "robot",
+     "city": "Ljubljana", "country": "SI", "note": "자동화·전자·로봇 합동전 — 홈페이지·제품군·국가 포함"},
+    {"key": "robotics_rs26", "platform": "ungerboeck",
+     "aat": "364b554e3741596b2b362b426c724a386d57486350594d51777a2f4d79333071356e58724d316b716377413d",
+     "url": "https://icm.si/events/robotics-serbia-novi-sad/",
+     "title": "Robotics Serbia 2026 (IFAM·INTRONIKA·ROBOTICS·MTE)", "when": "2026-10", "kind": "confirmed", "scope": "robot",
+     "city": "Novi Sad", "country": "RS", "note": "자동화·전자·로봇 합동전 — 홈페이지·제품군·국가 포함"},
+    {"key": "roboticswarsaw26", "platform": "ptak", "url": "https://roboticswarsaw.com/katalog-wystawcow-2026/",
+     "title": "ROBOTICS Warsaw 2026", "when": "2026-02", "kind": "history", "scope": "robot",
+     "city": "Warsaw(Nadarzyn)", "country": "PL", "note": "직전 회차 — 회사명·부스만 (다음 2027-02)"},
+    {"key": "warsawautomatica26", "platform": "ptak", "url": "https://automaticaexpo.com/katalog-wystawcow-2026/",
+     "title": "Warsaw Industry Automatica 2026", "when": "2026-05", "kind": "history", "scope": "robot",
+     "city": "Warsaw(Nadarzyn)", "country": "PL", "note": "직전 회차 — 회사명·부스만 (다음 2027-05)"},
+    {"key": "stom_robotics26", "platform": "kielce",
+     "api": "https://www.targikielce.pl/api/modules/exhibitors-list/search/53050/78336/en", "alias": "714",
+     "url": "https://www.targikielce.pl/en/industrial-spring-2026/list-of-exhibitors?aliases=714",
+     "title": "STOM-ROBOTICS 2026 (Kielce Industrial Spring)", "when": "2026-03", "kind": "history", "scope": "robot",
+     "city": "Kielce", "country": "PL", "note": "직전 회차 — 회사명·국가·부스 (다음 2027-04)"},
+]
+
+# 명단을 웹에 공개하지 않는 로봇 전시회 — 화면에 '미확보' 대신 이유를 보여준다 (사이트를 직접 확인한 결과)
+NO_LIST = [
+    ("mobile robotics summit", "주최측(Logistics Summit GmbH)이 출품사 명단을 공개하지 않음 — 출품 안내 페이지만 있음"),
+    ("russia robotics week", "포럼 성격 행사 — PDF 안내서만 있고 출품사 명단 없음"),
+    ("robot4manufacturing", "2024·2022 회차 명단이 PDF로만 공개(2026 미발표) — 텍스트 추출 도구가 있어야 읽을 수 있음"),
+    ("robotech expo", "주최측 사이트(robotechexpo.com)에 출품사 명단 페이지가 없음 — 후원사 로고만"),
+    ("robotics summit", "2027 회차 명단 사이트(rsedtb2026.mapyourshow.com)가 아직 안 열림 — 열리면 자동 수집 가능"),
+    ("robobusiness", "2026 부스 배치도가 아직 미공개(Arrowfly) — 2025 후원사 로고만 있음"),
 ]
 
 # ================================================================ 분류 규칙 (영·일·한·중)
@@ -208,7 +240,9 @@ TAG = re.compile(r"<[^>]+>")
 
 # ================================================================ 수집기
 def fetch_mys(f):
-    """MapYourShow — 갤러리로 쿠키를 받은 뒤 검색 API. rivals.fetch_mys보다 소개글을 길게 남긴다."""
+    """MapYourShow — 갤러리로 쿠키를 받은 뒤 검색 API. rivals.fetch_mys보다 소개글을 길게 남긴다.
+    상세 페이지(홈페이지)는 AWS WAF 봇 차단이라 못 읽지만, **제품 카테고리**는 카테고리별 검색을
+    거꾸로 돌려(카테고리 → 출품사 목록) 업체마다 붙일 수 있다."""
     op = opener()
     base = f"https://{f['host']}/8_0"
     gallery = base + "/explore/exhibitor-gallery.cfm"
@@ -216,17 +250,38 @@ def fetch_mys(f):
         get(op, gallery, timeout=40)
     except Exception:  # noqa: BLE001
         pass
-    raw = get(op, base + "/ajax/remote-proxy.cfm?action=search&searchtype=exhibitorgallery&searchsize=6000",
-              referer=gallery, timeout=120)
+    api = base + "/ajax/remote-proxy.cfm?action=search&searchtype=exhibitorgallery&searchsize=6000"
+    raw = get(op, api, referer=gallery, timeout=120)
     d = json.loads(raw.decode("utf-8", "replace"))["DATA"]["results"]["exhibitor"]
-    rows = []
+    rows, by_id = [], {}
     for h in d.get("hit", []):
         fl = h.get("fields", {})
         booth = [b for b in (fl.get("boothsdisplay_la") or []) if "random" not in str(b)]
-        eid = fl.get("exhid_l") or ""
-        rows.append({"name": clean(fl.get("exhname_t")), "booth": booth[0] if booth else "",
-                     "desc": clean(TAG.sub(" ", fl.get("exhdesc_t") or ""))[:1500], "show": "", "tags": [], "country": "",
-                     "src": f"{base}/exhibitor/exhibitor-details.cfm?exhid={eid}" if eid else gallery})
+        eid = str(fl.get("exhid_l") or "")
+        r = {"name": clean(fl.get("exhname_t")), "booth": booth[0] if booth else "",
+             "desc": clean(TAG.sub(" ", fl.get("exhdesc_t") or ""))[:1500], "show": "", "tags": [], "country": "",
+             "src": f"{base}/exhibitor/exhibitor-details.cfm?exhid={eid}" if eid else gallery}
+        rows.append(r)
+        by_id[eid] = r
+    # 카테고리 사전 → 카테고리별 검색 → 업체에 태그로
+    try:
+        cats = json.loads(get(op, base + "/ajax/remote-proxy.cfm?action=getsearchoptions&function=getsearchcategories&exhibitorgallery=true",
+                              referer=gallery, timeout=60).decode("utf-8", "replace")).get("DATA") or []
+    except Exception:  # noqa: BLE001
+        cats = []
+
+    def one_cat(c):
+        try:
+            cd = json.loads(get(op, api + "&categories=" + urllib.parse.quote(str(c["fieldvalue"])),
+                                referer=gallery, timeout=90).decode("utf-8", "replace"))["DATA"]["results"]["exhibitor"]
+        except Exception:  # noqa: BLE001
+            return
+        for h in cd.get("hit", []):
+            r = by_id.get(str(h.get("fields", {}).get("exhid_l") or ""))
+            if r is not None and len(r["tags"]) < 12:
+                r["tags"].append(clean(c.get("fielddisplay")))
+    with ThreadPool(4) as pool:
+        pool.map(one_cat, [c for c in cats if c.get("fieldvalue")])
     return rows, int(d.get("found") or len(rows)), gallery
 
 
@@ -275,23 +330,30 @@ def fetch_irex(f):
 CELL = re.compile(r'<c r="([A-Z]+)\d+"([^>]*?)(?:/>|>(.*?)</c>)', re.S)
 
 
-def fetch_aut(f):
-    """automatica 출품사 포털 — 목록 페이지에 있는 엑셀 내려받기 링크(mode=xls)를 받아 읽는다.
-    열: A 회사 · B 홀/부스 · C 우편번호 · D 도시 · E 국가. 1행 제목, 2행 머리글."""
-    op = opener()
-    page = get(op, f["url"], timeout=60).decode("utf-8", "replace")
+TR = re.compile(r"<tr>(.*?)</tr>", re.S)
+TD = re.compile(r"<td[^>]*>(.*?)</td>", re.S)
+
+
+def _txt(x):
+    return clean(_html.unescape(TAG.sub(" ", x or "")))
+
+
+AUT_HOST = "https://exhibitors.automatica-munich.com"
+
+
+def _aut_xlsx(op, page):
+    """목록 페이지의 엑셀 내려받기 링크(mode=xls) — 회사·홀/부스·도시·국가."""
     m = re.search(r'href="(/index\.php\?[^"]*mode%5D=xls[^"]*)"', page)
     if not m:
-        raise RuntimeError("엑셀 링크를 못 찾음")
-    raw = get(op, "https://exhibitors.automatica-munich.com" + m.group(1).replace("&amp;", "&"), timeout=120)
+        return {}
+    raw = get(op, AUT_HOST + m.group(1).replace("&amp;", "&"), timeout=120)
     if raw[:2] != b"PK":
-        raise RuntimeError("엑셀이 아님")
+        return {}
     zf = zipfile.ZipFile(io.BytesIO(raw))
     shared = [re.sub(r"<[^>]+>", "", x) for x in re.findall(
         r"<si>(.*?)</si>", zf.read("xl/sharedStrings.xml").decode("utf-8", "replace"), re.S)]
     sheet = zf.read("xl/worksheets/sheet1.xml").decode("utf-8", "replace")
-    title = ""
-    rows = []
+    out, first = {}, True
     for row in re.findall(r"<row[^>]*>(.*?)</row>", sheet, re.S):
         cells = {}
         for col, attrs, body in CELL.findall(row):
@@ -302,23 +364,77 @@ def fetch_aut(f):
         name = _html.unescape(clean(cells.get("A")))
         if not name:
             continue
-        if not title:
-            title = name                     # 'Exhibitor list automatica 2025'
+        if first:                              # 'Exhibitor list automatica 2025'
+            first = False
             continue
         if name.lower() == "exhibitor":
             continue
-        rows.append({"name": name, "booth": clean(cells.get("B")), "desc": "", "show": "", "tags": [],
-                     "city": clean(cells.get("D")), "country": countries.iso2(clean(cells.get("E"))) or "",
-                     "src": f["url"]})
+        out[norm_co(name)] = {"booth": clean(cells.get("B")), "city": clean(cells.get("D")),
+                              "country": countries.iso2(clean(cells.get("E"))) or ""}
+    return out
+
+
+def fetch_aut(f):
+    """automatica 출품사 포털(TYPO3 nfmedb) — 목록을 20건씩 넘기며 업체 ID를 모으고,
+    업체 상세 페이지에서 홈페이지·제품군·회사소개(독일어가 많음)·부스를 읽는다. 엑셀로 도시·국가를 보탠다."""
+    op = opener()
+    page = get(op, f["url"], timeout=60).decode("utf-8", "replace")
+    extra = _aut_xlsx(op, page)
+    fair_id = re.search(r"fair_id=(\d+)", page)
+    fair_id = fair_id.group(1) if fair_id else "1966"
+    ids, offset = {}, 0
+    frag = page
+    while frag:
+        for i, ch in re.findall(r"exhibitorDetail/ID/(\d+)/\?cHash=([0-9a-f]+)", frag):
+            ids.setdefault(i, ch)
+        m = re.search(r"data-ilnoff='(\d+)'", frag)
+        if not m or int(m.group(1)) <= offset or offset > 5000:
+            break
+        offset = int(m.group(1))
+        q = ("/index.php?L=1&fair_id=" + fair_id + "&CMW=PassThrue&request[pluginName]=Exhibitors&request[controller]=Exhibitors"
+             "&request[action]=defaultList&request[arguments][params][initializeWithEmptyQuery]=1"
+             "&request[arguments][params][statsrch][aussteller_buchstfilter]=all&request[arguments][params][statsrch][aussteller_offset]=0"
+             "&request[arguments][params][statsrch][aussteller_orderby]=ASC&request[arguments][params][statsrch][aussteller_sortby]=_title"
+             f"&request[arguments][params][xoffset]={offset}&request[arguments][params][append]=1")
+        try:
+            frag = get(op, AUT_HOST + q.replace("[", "%5B").replace("]", "%5D"), referer=f["url"], timeout=60).decode("utf-8", "replace")
+        except Exception:  # noqa: BLE001
+            break
+
+    def detail(item):
+        i, ch = item
+        u = f"{AUT_HOST}/en/exhibitors-details/exhibitors-brands/exhibitors-brands-details/exhibitorDetail/ID/{i}/?cHash={ch}"
+        try:
+            d = get(op, u, timeout=60).decode("utf-8", "replace")
+        except Exception:  # noqa: BLE001
+            return None
+        name = re.search(r"<h1[^>]*>(.*?)</h1>", d, re.S)
+        name = _txt(name.group(1)) if name else ""
+        if not name:
+            return None
+        web = re.search(r'Website:</div>\s*<div>\s*<a[^>]+href="([^"]+)"', d, re.S)
+        desc = re.search(r'class="col-sm-12 firmenpraesentation-text">(.*?)</div>', d, re.S)
+        booth = re.search(r'class="exhibitordetails-standdetails".*?<h3 class="mt-0">.*?</i>\s*([A-Z]\d\.\d+)</h3>', d, re.S)
+        groups = []
+        for li in re.findall(r'<li class="productitems">(.*?)</li>', d, re.S):
+            path = [_txt(x) for x in re.findall(r'<span class="zusatzinfo small">\s*<a[^>]*>(.*?)</a>', li, re.S)]
+            leaf = re.search(r'<div class="nomen_item">\s*<a[^>]*>(.*?)</a>', li, re.S)
+            g = " > ".join(path + ([_txt(leaf.group(1))] if leaf else []))
+            if g and g not in groups:
+                groups.append(g)
+        x = extra.get(norm_co(name), {})
+        time.sleep(0.05)
+        return {"name": name, "booth": (booth.group(1) if booth else x.get("booth", ""))[:24],
+                "desc": _txt(desc.group(1))[:1500] if desc else "", "show": "", "tags": groups[:12],
+                "web": web.group(1) if web else "", "city": x.get("city", ""), "country": x.get("country", ""),
+                "src": u}
+    with ThreadPool(6) as pool:
+        rows = [r for r in pool.map(detail, list(ids.items())) if r]
+    seen = {norm_co(r["name"]) for r in rows}
+    for key, x in extra.items():                 # 상세가 없는 업체는 엑셀 줄만이라도
+        if key not in seen:
+            pass
     return rows, len(rows), f["url"]
-
-
-TR = re.compile(r"<tr>(.*?)</tr>", re.S)
-TD = re.compile(r"<td[^>]*>(.*?)</td>", re.S)
-
-
-def _txt(x):
-    return clean(_html.unescape(TAG.sub(" ", x or "")))
 
 
 def fetch_robotworld(f):
@@ -459,7 +575,97 @@ def fetch_fixkorea(f):
     return rows, len(rows), f["url"]
 
 
+def fetch_ungerboeck(f):
+    """Momentus(Ungerboeck) 부스 배치도 앱 — 페이지에서 토큰을 얻어 VFPServer API를 부른다.
+    GetInitialData로 전체 명단, GetExhibitorDetails로 홈페이지·제품군."""
+    import uuid
+    op = opener()
+    h = get(op, "https://icm.ungerboeck.com/prod/app85.cshtml?aat=" + f["aat"], timeout=60).decode("utf-8", "replace")
+
+    def g(k):
+        m = re.search(k + r':\s*"([^"]*)"', h)
+        return m.group(1) if m else ""
+    tok, sid, ver = g("USIFPToken"), g("USISessionId"), g("USIVersion")
+    cfg = int(re.search(r'"VFPConfigID","Value":(\d+)', h).group(1))
+
+    def call(method, args):
+        hd = {"User-Agent": UA, "Version": ver, "ShowActionID": "false", "ClientAppType": "2",
+              "Authorization": "Bearer " + tok, "X-Nonce": str(uuid.uuid4()), "ClientAppCategory": "30",
+              "WorkStationName": str(uuid.uuid4()), "WSID": sid, "AppCode": "VFP",
+              "Accept": "application/json", "Content-Type": "application/json"}
+        r = op.open(urllib.request.Request("https://icm.ungerboeck.com/PROD/api/VFPServer/" + method,
+                                           data=json.dumps(args).encode(), headers=hd, method="POST"), timeout=60)
+        return json.loads(json.loads(r.read().decode("utf-8", "replace"))[0])["ReturnObj"]
+    init = call("GetInitialData", [None, None, None, cfg, "en", 0])
+    pmap = init.get("ProductDescMap") or {}
+    rows = []
+    for e in init.get("ExhibitorList", []):
+        prods = [pmap.get(str(c), pmap.get(c, "")) for c in (e.get("ProductCodes") or [])]
+        rows.append({"name": clean(e.get("Name")), "booth": ", ".join(e.get("BoothNames") or [])[:24],
+                     "desc": clean(e.get("Note"))[:1500], "show": "", "tags": [p for p in prods if p][:12],
+                     "country": countries.iso2(e.get("CatCountryDesc") or "") or "", "web": "",
+                     "src": f["url"], "_id": e.get("Id")})
+
+    def detail(r):
+        try:
+            d = call("GetExhibitorDetails", [init["OrgCode"], init["EventID"], init["ConfigCode"], r["_id"], "*"])
+        except Exception:  # noqa: BLE001
+            return
+        r["web"] = clean(d.get("WebsiteURL"))
+        if r["web"] and not r["web"].startswith("http"):
+            r["web"] = "http://" + r["web"]
+        r["tags"] = r["tags"] or [p.get("Desc", "") for p in d.get("Products") or [] if p.get("Desc")][:12]
+        r["country"] = r["country"] or countries.iso2(d.get("CatCountry") or "") or ""
+        time.sleep(0.1)
+    with ThreadPool(4) as pool:
+        pool.map(detail, rows)
+    for r in rows:
+        r.pop("_id", None)
+    return rows, len(rows), f["url"]
+
+
+def fetch_ptak(f):
+    """Ptak Warsaw Expo 워드프레스 출품사 카탈로그 — 이름·부스만 있는 정적 HTML."""
+    t = get(opener(), f["url"], timeout=60).decode("utf-8", "replace")
+    rows = []
+    for blk in re.findall(r'(?s)class="exhibitors__container-list">(.*?)(?=class="exhibitors__container-list">|$)', t):
+        n = re.search(r'list-text-name">(.*?)</h2>\s*<p>(.*?)</p>', blk, re.S)
+        if not n:
+            continue
+        name = _txt(n.group(1))
+        if name:
+            rows.append({"name": name, "booth": _txt(n.group(2))[:24], "desc": "", "show": "", "tags": [],
+                         "country": "", "src": f["url"]})
+    return rows, len(rows), f["url"]
+
+
+def fetch_kielce(f):
+    """Targi Kielce 출품사 검색 API — HTML 조각(view)과 페이저를 JSON으로 준다."""
+    op = opener()
+    rows, page = [], 1
+    while page < 60:
+        u = f["api"] + "?" + urllib.parse.urlencode({"page": page, "filters[aliases][]": f["alias"]})
+        req = urllib.request.Request(u, headers={"User-Agent": UA, "Accept": "application/json",
+                                                  "X-Requested-With": "XMLHttpRequest"})
+        d = json.loads(op.open(req, timeout=60).read().decode("utf-8", "replace"))
+        for tr in re.findall(r"(?s)<tr>(.*?)</tr>", d.get("view", "")):
+            m = re.search(r'(?s)<div class="main-title[^"]*">(.*?)</div>', tr)
+            if not m:
+                continue
+            href = re.search(r'href="([^"]+list-of-exhibitors/[^"]+)"', m.group(1))
+            c = [_txt(x) for x in re.findall(r"(?s)<td>(.*?)</td>", tr)]
+            rows.append({"name": _txt(m.group(1)), "booth": (c[3] if len(c) > 3 else "")[:24], "desc": "", "show": "",
+                         "tags": [], "country": countries.iso2(c[2]) if len(c) > 2 else "",
+                         "src": (href.group(1) if href else f["url"])})
+        pager = (d.get("settings") or {}).get("pager") or {}
+        if page >= int(pager.get("total") or 1):
+            break
+        page += 1
+    return rows, len(rows), f["url"]
+
+
 FETCH = {"mys": fetch_mys, "irex": fetch_irex, "aut": fetch_aut, "robotworld": fetch_robotworld,
+         "ungerboeck": fetch_ungerboeck, "ptak": fetch_ptak, "kielce": fetch_kielce,
          "nextai": fetch_nextai, "exporum": fetch_exporum, "fixkorea": fetch_fixkorea}
 
 
@@ -684,7 +890,9 @@ def robot_expos():
 LIST_MATCH = {"automate": ["automate27", "automate26"], "irex": ["irex25"],
               "로보월드": ["robotworld26"], "robot world": ["robotworld26"], "robotworld": ["robotworld26"],
               "next ai": ["nextai26"], "피지컬ai": ["nextai26"], "robot tech show": ["robottech26"],
-              "robex": ["robex25"],
+              "robex": ["robex25"], "robotics slovenia": ["robotics_si27"], "robotics serbia": ["robotics_rs26"],
+              "robotics warsaw": ["roboticswarsaw26"], "warsaw automatica": ["warsawautomatica26"],
+              "warsaw industry automatica": ["warsawautomatica26"], "stom-robotics": ["stom_robotics26"],
               "国際ロボット展": ["irex25"], "international robot exhibition": ["irex25"],
               "automatica": ["automatica25"], "promat": ["promat27", "promat25"]}
 
@@ -693,6 +901,7 @@ def link_lists(expos):
     for e in expos:
         blob = (e["t"] + " " + e["te"]).lower()
         e["lists"] = sorted({k for word, keys in LIST_MATCH.items() if word in blob for k in keys})
+        e["why"] = next((why for word, why in NO_LIST if word in blob), "") if not e["lists"] else ""
     return expos
 
 
