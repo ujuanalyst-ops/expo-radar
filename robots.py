@@ -284,7 +284,7 @@ def fetch_aut(f):
             if v:
                 v = v.group(1)
                 cells[col] = shared[int(v)] if 't="s"' in attrs and v.isdigit() else v
-        name = clean(cells.get("A"))
+        name = _html.unescape(clean(cells.get("A")))
         if not name:
             continue
         if not title:
@@ -407,6 +407,7 @@ def build_companies(per_fair):
 # 크롬 사전 확장이 쓰는 구글 번역 엔드포인트(키 없음)를 쓴다. 문장마다 data/ko_cache.json에 저장해
 # 다음 날부터는 새로 생긴 문장만 번역한다. 막히면(429 등) 그 문장은 원문 그대로 둔다.
 import hashlib
+import html as _html
 import ssl
 import threading
 
