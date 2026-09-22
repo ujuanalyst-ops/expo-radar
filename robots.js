@@ -465,8 +465,9 @@
       "<li><b>한국어</b>는 구글 번역(키 없는 엔드포인트)으로 만든 기계번역이며 문장 단위로 캐시합니다.</li>" +
       "</ul><h3>한계 · 못 읽은 전시회 (사이트를 직접 확인한 결과)</h3><ul>" +
       "<li><b>명단을 안 여는 곳</b>: Mobile Robotics Summit(뒤셀도르프)·Russia Robotics Week·ROBOTECH EXPO(카타르)·AICONFEXPO(항저우) — 출품 안내 페이지만 있고 명단이 없습니다. CIROS(상하이)는 사이트 자체가 폐쇄 상태입니다.</li>" +
-      "<li><b>봇 차단·JS 전용</b>: TAIROS(타이베이, Cloudflare), ROBOT X@METALEX(방콕, RX Tradex 암호화 토큰), INDUSTRIAL JAPAN(도쿄, RX Japan 컴포넌트). ROBOT4MANUFACTURING(프랑스)은 PDF만 있습니다.</li>" +
-      "<li><b>아직 미공개</b>: Robotics Summit 2027(보스턴, 명단 호스트 확인됨 — 열리면 자동 수집)·RoboBusiness 2026·하노이 RX Tradex 2027. Automate 2027·Robot Tech Show·ROBOTICS Warsaw 등은 회사명·부스만 공개된 상태입니다.</li>" +
+      "<li><b>봇 차단·JS 전용</b>: ROBOT X@METALEX(방콕, RX Tradex 암호화 토큰), INDUSTRIAL JAPAN(도쿄, RX Japan 컴포넌트).</li>" +
+      "<li><b>지난 회차로 채운 곳</b>: 현 회차 명단을 안 여는 전시회는 <b>지난 회차 자료</b>로 대신했습니다 — Robotics Summit 2023·RoboBusiness 2023(ExpoFP 배치도 데이터가 행사 후에도 남아 있음), ROBOT4MANUFACTURING 2024(주최측 PDF 명단을 파이썬으로 추출), TAIROS 2026(봇 차단이라 인터넷 아카이브에 남은 목록 1쪽, 827곳 중 20곳만).</li>" +
+      "<li><b>아직 미공개</b>: 하노이 RX Tradex 2027. Automate 2027·Robot Tech Show·ROBOTICS Warsaw 등은 회사명·부스만 공개된 상태입니다.</li>" +
       "<li>매일 08:45 수집이 돌면서 명단이 갱신됩니다. 회차가 바뀌면 robots.py의 FAIRS 목록에 새 회차를 추가해야 합니다.</li>" +
       "</ul></div>";
   }

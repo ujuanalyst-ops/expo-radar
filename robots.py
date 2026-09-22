@@ -31,6 +31,7 @@ import time
 import urllib.parse
 import urllib.request
 import zipfile
+import zlib
 from collections import Counter
 from datetime import datetime
 from multiprocessing.dummy import Pool as ThreadPool
@@ -95,6 +96,27 @@ FAIRS = [
      "api": "https://vimf.vn/wp-json/wp/v2/posts?categories=222&per_page=100&_fields=id,title,link,content",
      "title": "RAV Robotic & Automation Vietnam 2026 (VIMF 박닌)", "when": "2026-11", "kind": "confirmed", "scope": "filter",
      "city": "Bac Ninh", "country": "VN", "note": "VIMF 산업전과 통합 명단 — 로봇·자동화 관련 업체만 추림, 소개·제품 포함"},
+    # ── 지난 회차·아카이브로 채운 곳 (현 회차 명단을 주최측이 안 여는 전시회)
+    {"key": "roboticssummit23", "platform": "expofp",
+     "api": "https://roboticsdtboston2023.expofp.com/data/data.js",
+     "url": "https://www.roboticssummit.com/exhibit-floor/",
+     "title": "Robotics Summit & Expo 2023 (보스턴)", "when": "2023-05", "kind": "history", "scope": "robot",
+     "city": "Boston", "country": "US", "note": "2027 회차 명단이 아직 안 열려 지난 회차(ExpoFP 배치도)로 대체 — 홈페이지·국가·소개 포함"},
+    {"key": "robobusiness23", "platform": "expofp",
+     "api": "https://robobusinessdt2023.expofp.com/data/data.js",
+     "url": "https://www.robobusiness.com/exhibit-floor/",
+     "title": "RoboBusiness 2023 (산타클라라)", "when": "2023-10", "kind": "history", "scope": "robot",
+     "city": "Santa Clara", "country": "US", "note": "2026 회차 배치도 미공개 — 지난 회차 명단(회사명·부스)"},
+    {"key": "r4m24", "platform": "pdflist",
+     "api": "https://robot4manufacturing.com/images/2024/Liste_provisoire_des_exposants_R4M_2024.pdf",
+     "url": "https://robot4manufacturing.com/en/exhibitors",
+     "title": "ROBOT4MANUFACTURING 2024 (라로슈쉬르용)", "when": "2024-11", "kind": "history", "scope": "robot",
+     "city": "La Roche-sur-Yon", "country": "FR", "note": "2026 명단 미발표 — 주최측이 올린 2024 회차 PDF 명단에서 추출(국가·홈페이지·소개)"},
+    {"key": "tairos26", "platform": "wayback_tairos",
+     "api": "https://web.archive.org/web/20260609062150/https://tairos.chanchao.com.tw/VisitorExhibitor",
+     "url": "https://tairos.chanchao.com.tw/VisitorExhibitor",
+     "title": "TAIROS 2026 (타이베이) — 일부", "when": "2026-08", "kind": "history", "scope": "robot",
+     "city": "Taipei", "country": "TW", "note": "주최측 사이트가 Cloudflare 봇 차단 — 인터넷 아카이브에 남은 목록 1쪽(전체 827곳 중 20곳)만"},
     # ── 유럽
     {"key": "robotics_si27", "platform": "ungerboeck",
      "aat": "4a45536f7153673739724d2f726556383664504743536d4a376d4f766f7a307165663779673555526273513d",
@@ -123,19 +145,15 @@ FAIRS = [
 NO_LIST = [
     ("mobile robotics summit", "주최측(Logistics Summit GmbH)이 출품사 명단을 공개하지 않음 — 출품 안내 페이지만 있음"),
     ("russia robotics week", "포럼 성격 행사 — PDF 안내서만 있고 출품사 명단 없음"),
-    ("robot4manufacturing", "2024·2022 회차 명단이 PDF로만 공개(2026 미발표) — 텍스트 추출 도구가 있어야 읽을 수 있음"),
     ("robotech expo", "주최측 사이트(robotechexpo.com)에 출품사 명단 페이지가 없음 — 후원사 로고만"),
     ("ciros", "주최측 사이트(ciros.com.cn)가 폐쇄 상태(모든 페이지 404) — 온라인 명단 없음"),
     ("aiconfexpo", "주최측 사이트(sysbh.cn)의 참展명록 페이지가 빈 틀 — 명단 미발표"),
     ("체화지능", "주최측 사이트(sysbh.cn)의 참展명록 페이지가 빈 틀 — 명단 미발표"),
-    ("tairos", "주최측 사이트(chanchao.com.tw)가 Cloudflare 봇 검사로 차단 — 브라우저로만 열람 가능"),
     ("industrial japan", "RX Japan 신설 사이트 — 출품사 검색이 아직 없음(열려도 JS 전용 컴포넌트)"),
     ("산업장비 및 로봇 개발", "RX Japan 신설 사이트 — 출품사 검색이 아직 없음(열려도 JS 전용 컴포넌트)"),
     ("robot x @metalex", "RX Tradex 출품사 검색이 암호화 토큰 뒤에 있어 자동 수집 불가"),
     ("하노이 스마트 제조", "RX Tradex 베트남 사이트가 아직 없음(2027 신설)"),
     ("inti robotics", "INTI 통합 명단(346사)은 있으나 로봇 전시 소속 업체가 0 — 명단 미분류"),
-    ("robotics summit", "2027 회차 명단 사이트(rsedtb2026.mapyourshow.com)가 아직 안 열림 — 열리면 자동 수집 가능"),
-    ("robobusiness", "2026 부스 배치도가 아직 미공개(Arrowfly) — 2025 후원사 로고만 있음"),
 ]
 
 # ================================================================ 분류 규칙 (영·일·한·중)
@@ -798,7 +816,159 @@ def fetch_vimf(f):
     return rows, len(rows), f["url"]
 
 
+def fetch_expofp(f):
+    """ExpoFP 부스 배치도 — `data/data.js`에 `var __data = {...}` 통째로 들어 있다.
+    지난 회차 배치도는 행사가 끝나도 그대로 남아 있어, 현 회차 명단이 없을 때 대신 쓴다."""
+    raw = get(opener(), f["api"], timeout=90).decode("utf-8-sig", "replace")
+    d = json.loads(raw[raw.index("=") + 1:].strip().rstrip(";"))
+    booth = {}
+    for b in d.get("booths") or []:
+        for eid in b.get("exhibitors") or []:
+            booth.setdefault(eid, b.get("name", ""))
+    cats = {c["id"]: c.get("name", "") for c in (d.get("categories") or []) if c.get("id")}
+    rows = []
+    for e in d.get("exhibitors") or []:
+        name = clean(e.get("name"))
+        if not name:
+            continue
+        rows.append({"name": name, "booth": str(booth.get(e.get("id"), ""))[:24],
+                     "desc": _txt(e.get("description"))[:1500], "show": "",
+                     "tags": [cats.get(c, "") for c in (e.get("categories") or []) if cats.get(c)][:12],
+                     "web": clean(e.get("website")), "city": clean(e.get("city")),
+                     "country": countries.iso2(e.get("country") or "") or "", "src": f["url"]})
+    return rows, len(rows), f["url"]
+
+
+def _pdf_lines(raw):
+    """순수 파이썬 PDF 텍스트 추출 — FlateDecode 스트림을 풀고, 폰트마다 딸린
+    ToUnicode CMap으로 글리프 번호를 글자로 되돌린다(폰트를 섞으면 글자가 깨진다)."""
+    objs = {int(m.group(1)): m.group(3) for m in re.finditer(rb"(\d+)\s+(\d+)\s+obj(.*?)endobj", raw, re.S)}
+
+    def stream_of(body):
+        m = re.search(rb"stream\r?\n", body)
+        if not m:
+            return None
+        data = body[m.end():body.rfind(b"endstream")]
+        if b"/FlateDecode" in body[:m.start()]:
+            try:
+                return zlib.decompress(data)
+            except Exception:  # noqa: BLE001
+                return None
+        return data
+
+    def parse_cmap(data):
+        cm = {}
+        for blk in re.findall(rb"beginbfchar(.*?)endbfchar", data, re.S):
+            for src, dst in re.findall(rb"<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>", blk):
+                cm[int(src, 16)] = bytes.fromhex(dst.decode()).decode("utf-16-be", "replace")
+        for blk in re.findall(rb"beginbfrange(.*?)endbfrange", data, re.S):
+            for lo, hi, dst in re.findall(rb"<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>", blk):
+                lo, hi, base = int(lo, 16), int(hi, 16), int(dst, 16)
+                for i in range(lo, hi + 1):
+                    cm[i] = chr(base + i - lo)
+        return cm
+    fonts = {}
+    for body in objs.values():
+        fd = re.search(rb"/Font\s*<<(.*?)>>", body, re.S)
+        if not fd:
+            continue
+        for name, ref in re.findall(rb"/(\w+)\s+(\d+)\s+0\s+R", fd.group(1)):
+            tu = re.search(rb"/ToUnicode\s+(\d+)\s+0\s+R", objs.get(int(ref), b""))
+            if tu:
+                st = stream_of(objs.get(int(tu.group(1)), b"") or b"")
+                if st:
+                    fonts[name.decode()] = parse_cmap(st)
+    lines = []
+    for body in objs.values():
+        st = stream_of(body)
+        if not st or (b"Tj" not in st and b"TJ" not in st):
+            continue
+        cur, cm = "", {}
+        for m in re.finditer(rb"/(\w+)\s+[\d.]+\s+Tf|\[(.*?)\]\s*TJ|<([0-9A-Fa-f]+)>\s*Tj|"
+                             rb"(?:-?[\d.]+\s+-?[\d.]+\s+(?:Td|TD))|T\*|ET", st, re.S):
+            if m.group(1):
+                cm = fonts.get(m.group(1).decode(), cm)
+                continue
+            hexes = None
+            if m.group(2) is not None:
+                hexes = [x.decode() for x in re.findall(rb"<([0-9A-Fa-f]+)>", m.group(2))]
+            elif m.group(3) is not None:
+                hexes = [m.group(3).decode()]
+            if hexes is not None:
+                for h in hexes:
+                    cur += "".join(cm.get(int(h[i:i + 4], 16), "") for i in range(0, len(h), 4))
+            elif cur.strip():
+                lines.append(cur.strip())
+                cur = ""
+        if cur.strip():
+            lines.append(cur.strip())
+    return lines
+
+
+# PDF 명단(R4M)의 줄 구조: 회사명(대문자) → 소개 여러 줄 → 국가 → 구분 → 홈페이지 → 담당 직함
+PDF_COUNTRY = {"France": "FR", "Belgique": "BE", "Allemagne": "DE", "Espagne": "ES", "Italie": "IT",
+               "Suisse": "CH", "Portugal": "PT", "Pays-Bas": "NL", "Luxembourg": "LU", "Autriche": "AT",
+               "Royaume-Uni": "GB", "Danemark": "DK", "Suède": "SE", "Tunisie": "TN", "Canada": "CA",
+               "Chine": "CN", "Japon": "JP", "Etats-Unis": "US", "États-Unis": "US", "USA": "US",
+               "Pologne": "PL", "Turquie": "TR", "Maroc": "MA", "Irlande": "IE", "Slovaquie": "SK",
+               "Slovénie": "SI", "Roumanie": "RO", "Tchéquie": "CZ", "Finlande": "FI", "Norvège": "NO"}
+PDF_ROLE = ("Fournisseur", "Donneur d'ordres", "Donneur d’ordres", "Exposant")
+
+
+def fetch_pdflist(f):
+    raw = get(opener(), f["api"], timeout=120)
+    if raw[:4] != b"%PDF":
+        raise RuntimeError("PDF가 아님")
+    rows, cur = [], None
+    for line in _pdf_lines(raw):
+        if line.isupper() and 2 < len(line) < 70 and not line.lower().startswith("http") \
+                and line not in PDF_COUNTRY and not re.match(r"^[\d\W]+$", line):
+            if cur:
+                rows.append(cur)
+            cur = {"name": line, "booth": "", "desc": "", "show": "", "tags": [], "web": "",
+                   "country": "", "src": f["url"], "_d": []}
+        elif cur is not None:
+            if line in PDF_COUNTRY:
+                cur["country"] = PDF_COUNTRY[line]
+            elif line.lower().startswith(("www.", "http")):
+                cur["web"] = line if line.startswith("http") else "https://" + line
+            elif line in PDF_ROLE:
+                cur["tags"] = [line]
+            elif len(line) > 12:
+                cur["_d"].append(line)
+    if cur:
+        rows.append(cur)
+    for r in rows:
+        r["desc"] = clean(" ".join(r.pop("_d")))[:1500]
+    return rows, len(rows), f["url"]
+
+
+def fetch_wayback_tairos(f):
+    """TAIROS — 주최측이 봇을 막아 인터넷 아카이브에 남은 목록 스냅샷에서 읽는다(1쪽 분량)."""
+    t = get(opener(), f["api"], timeout=90).decode("utf-8", "replace")
+    t = re.sub(r"<script.*?</script>|<style.*?</style>", " ", t, flags=re.S)
+    blocks = re.split(r'<div[^>]*class="[^"]*ExhListHover[^"]*"[^>]*>', t)[1:]
+    rows = []
+    for b in blocks:
+        reg = re.search(r"regNo=(\d+)", b)
+        cells = [_txt(x) for x in re.findall(r">([^<>]{2,400})<", b)]
+        cells = [c for c in cells if c and c not in ("0",)]
+        name = next((c for c in cells if len(c) > 3 and not c.startswith(("展館", "國家", "攤位"))), "")
+        booth = ""
+        for i, c in enumerate(cells):
+            if c.startswith("攤位號碼") and i + 1 < len(cells):
+                booth = cells[i + 1]
+        desc = max(cells, key=len) if cells else ""
+        if not name:
+            continue
+        rows.append({"name": name, "booth": booth[:24], "desc": desc[:1500] if len(desc) > 40 else "",
+                     "show": "", "tags": [], "country": "TW",
+                     "src": f"https://tairos.chanchao.com.tw/VisitorExhibitor/Detail?regNo={reg.group(1)}" if reg else f["url"]})
+    return rows, len(rows), f["url"]
+
+
 FETCH = {"mys": fetch_mys, "irex": fetch_irex, "aut": fetch_aut, "robotworld": fetch_robotworld,
+         "expofp": fetch_expofp, "pdflist": fetch_pdflist, "wayback_tairos": fetch_wayback_tairos,
          "wrc": fetch_wrc, "fairplus": fetch_fairplus, "hrte": fetch_hrte, "vimf": fetch_vimf,
          "ungerboeck": fetch_ungerboeck, "ptak": fetch_ptak, "kielce": fetch_kielce,
          "nextai": fetch_nextai, "exporum": fetch_exporum, "fixkorea": fetch_fixkorea}
@@ -1030,6 +1200,8 @@ LIST_MATCH = {"automate": ["automate27", "automate26"], "irex": ["irex25"],
               "warsaw industry automatica": ["warsawautomatica26"], "stom-robotics": ["stom_robotics26"],
               "wrc": ["wrc26"], "베이징 로봇": ["wrc26"], "fair plus": ["fairplus26"], "선전 로봇": ["fairplus26"],
               "hrte": ["hrte26"], "휴머노이드로봇기술": ["hrte26"], "rav - robotic": ["vimf_bn26"],
+              "robotics summit": ["roboticssummit23"], "robobusiness": ["robobusiness23"],
+              "robot4manufacturing": ["r4m24"], "tairos": ["tairos26"],
               "国際ロボット展": ["irex25"], "international robot exhibition": ["irex25"],
               "automatica": ["automatica25"], "promat": ["promat27", "promat25"]}
 

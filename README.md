@@ -125,6 +125,14 @@
 | STOM-ROBOTICS 2026 (Kielce) | `api/modules/exhibitors-list/search/…` | 회사명·국가·부스 |
 | automatica 2025 (뮌헨) | 상세 페이지 `exhibitorDetail/ID/…` (캐시 `data/aut_cache.json`) | 홈페이지·제품군·소개(독) |
 
+**현 회차 명단을 안 여는 전시회는 지난 회차로 채운다**
+
+| 전시회 | 대체 자료 |
+|---|---|
+| Robotics Summit 2027 · RoboBusiness 2026 | 2023 회차 ExpoFP 배치도(`<show>.expofp.com/data/data.js`) — 행사 후에도 남아 있다 |
+| ROBOT4MANUFACTURING 2026 | 주최측이 올린 2024 회차 PDF 명단 — `_pdf_lines()`가 FlateDecode 스트림을 풀고 폰트별 ToUnicode CMap으로 글자를 되돌린다(폰트를 섞으면 R이 w로 깨진다) |
+| TAIROS 2026 | Cloudflare 봇 차단 — 인터넷 아카이브 스냅샷의 목록 1쪽(827곳 중 20곳)만 |
+
 명단을 못 읽는 로봇 전시회와 그 이유는 `NO_LIST`에 적혀 화면 '미확보' 옆에 표시된다.
 
 - **분류**는 소개글·태그의 키워드 규칙(영·일·한·중, `CATS`·`INDS`)이다. 카테고리가 6개를 넘으면 두 번 이상 나온 것만 남긴다. 소개글이 없으면 분류가 빈다.
