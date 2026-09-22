@@ -20,6 +20,14 @@
   function ccName(c) { return D.countries[c] || c; }
   function fairShort(k) { var f = FAIR[k]; return f ? f.title.replace(" 国際ロボット展", "") : k; }
   function fairKeys(c) { var s = {}; c.f.forEach(function (x) { s[x.k] = 1; }); return Object.keys(s); }
+  function webHtml(c, cls) {
+    if (c.web) {
+      var host = c.web.replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/.*$/, "");
+      return '<a class="' + (cls || "flink") + '" href="' + esc(c.web) + '" target="_blank" rel="noopener" title="' + esc(c.web) + '">' + esc(host) + " ↗</a>";
+    }
+    var q = encodeURIComponent(c.n + " official website");
+    return '<a class="' + (cls || "flink") + ' hist" href="https://www.google.com/search?q=' + q + '" target="_blank" rel="noopener" title="명단에 홈페이지가 없어 검색으로 연결">🔍 찾기</a>';
+  }
 
   // ---------------------------------------------------------------- 헤더
   function header() {
@@ -165,7 +173,7 @@
         esc(fairShort(x.k)) + (x.b ? "<em>" + esc(x.b) + "</em>" : "") + "</a>";
     }).join("");
     return '<tr class="co" data-k="' + esc(c.k) + '">' +
-      '<td class="nm">' + esc(c.n) + (c.ja ? "<small>" + esc(c.ja) + "</small>" : "") + "</td>" +
+      '<td class="nm">' + esc(c.n) + (c.ja ? "<small>" + esc(c.ja) + "</small>" : "") + '<div class="web">' + webHtml(c) + "</div></td>" +
       "<td>" + (c.c.length ? c.c.map(function (x) { return '<span class="tag cc">' + esc(ccName(x)) + "</span>"; }).join("") : '<span class="tag cc">—</span>') + "</td>" +
       "<td>" + (c.fld ? '<span class="tag ' + c.fld + '">' + esc(FLD[c.fld]) + "</span>" : '<span class="tag">미분류</span>') + "</td>" +
       '<td class="cats">' + c.cat.map(function (k) { return '<span class="tag">' + esc(CAT[k]) + "</span>"; }).join("") +
@@ -192,7 +200,7 @@
       "<div>" + (c.fld ? '<span class="tag ' + c.fld + '">' + esc(FLD[c.fld]) + "</span>" : "") +
       c.cat.map(function (k) { return '<span class="tag">' + esc(CAT[k]) + "</span>"; }).join("") +
       c.ind.map(function (k) { return '<span class="tag ind">' + esc(IND[k]) + "</span>"; }).join("") + "</div>" +
-      (c.web ? '<div><a class="dlink" href="' + esc(c.web) + '" target="_blank" rel="noopener">회사 홈페이지 ↗</a></div>' : "") +
+      '<div class="dlinks">' + (c.web ? '<a class="dlink" href="' + esc(c.web) + '" target="_blank" rel="noopener">회사 홈페이지 ↗</a>' : '<a class="dlink" style="background:#5f6b7d" href="https://www.google.com/search?q=' + encodeURIComponent(c.n + " official website") + '" target="_blank" rel="noopener">홈페이지 검색 ↗ (명단에 주소 없음)</a>') + "</div>" +
       (c.ko ? "<div><h4>무엇을 만드는 회사인가 (한국어 요약 · 기계번역)</h4><p class=\"desc\">" + esc(c.ko) + "</p></div>" : "") +
       "<div><h4>전시회 소개글 원문</h4>" + (c.desc ? '<p class="desc">' + esc(c.desc) + "</p>" : "<p>소개글 없음 — 이 전시회는 회사명·부스만 공개합니다.</p>") + "</div>" +
       (c.show ? "<div><h4>무엇을 전시했는가 (전시 하이라이트)</h4><p class=\"desc\">" + (c.show_ko ? esc(c.show_ko) + "\n\n" : "") + esc(c.show) + "</p></div>" : "") +
@@ -296,7 +304,7 @@
         var seen = {};
         return '<tr class="co" data-k="' + esc(c.k) + '">' +
           '<td style="white-space:nowrap;font-weight:700">' + (r.b ? '<a class="flink" href="' + esc(r.u || f.url) + '" target="_blank" rel="noopener">' + esc(r.b) + "</a>" : '<span style="color:var(--dim)">—</span>') + "</td>" +
-          '<td class="nm">' + esc(c.n) + (c.ja ? "<small>" + esc(c.ja) + "</small>" : "") + "</td>" +
+          '<td class="nm">' + esc(c.n) + (c.ja ? "<small>" + esc(c.ja) + "</small>" : "") + '<div class="web">' + webHtml(c) + "</div></td>" +
           "<td>" + (c.c.length ? c.c.map(function (x) { return '<span class="tag cc">' + esc(ccName(x)) + "</span>"; }).join("") : '<span class="tag cc">—</span>') + "</td>" +
           "<td>" + (c.fld ? '<span class="tag ' + c.fld + '">' + esc(FLD[c.fld]) + "</span>" : '<span class="tag">미분류</span>') + "</td>" +
           '<td class="cats">' + c.cat.map(function (k) { return '<span class="tag">' + esc(CAT[k]) + "</span>"; }).join("") +

@@ -21,6 +21,8 @@
 .rtbl tr.co:hover td{background:#f4f8fd}
 .rtbl .nm{font-weight:700;color:var(--ink);min-width:150px;max-width:210px}
 .rtbl .nm small{display:block;color:var(--dim);font-weight:400;font-size:11px;white-space:normal}
+.rtbl .nm .web{margin-top:3px}
+.rtbl .nm .web .flink{font-weight:600}
 .rtbl .what{color:#3b4656;min-width:340px;max-width:520px}
 .rtbl .what small,.rtbl .str small{display:block;color:var(--dim);font-size:11px;margin-top:3px}
 .rtbl .str{color:#7a5320;min-width:280px;max-width:420px;font-size:12px}

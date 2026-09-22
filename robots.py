@@ -21,6 +21,7 @@ rivals.py가 '우리 경쟁사만' 골라내는 것과 달리, 여기서는 명�
   python3 robots.py --dump     # 전시회별 요약만 출력
 """
 
+import html as _html
 import io
 import json
 import os
@@ -64,6 +65,20 @@ FAIRS = [
     {"key": "promat25", "platform": "mys", "host": "pm2025.mapyourshow.com",
      "title": "ProMat 2025", "when": "2025-03", "kind": "history", "scope": "filter",
      "city": "Chicago", "country": "US", "note": "직전 회차 — 로봇 관련 업체만 추림"},
+    # ── 한국
+    {"key": "robotworld26", "platform": "robotworld", "url": "https://www.robotworld.or.kr/visitors/list_of_exhibitors.php",
+     "title": "로보월드 2026", "when": "2026-11", "kind": "confirmed", "scope": "robot",
+     "city": "고양(킨텍스)", "country": "KR", "note": "국내 최대 로봇 전문전 — 부스·전시분야·홈페이지·회사소개 포함"},
+    {"key": "nextai26", "platform": "nextai", "url": "https://nextaikorea.com/visitors/companies",
+     "title": "THE NEXT AI 피지컬AI·스마트팩토리산업전 2026", "when": "2026-10", "kind": "confirmed", "scope": "robot",
+     "city": "창원", "country": "KR", "note": "신설 전시회 — 소개·출품내역·홈페이지 포함, 부스 미공개"},
+    {"key": "robottech26", "platform": "exporum", "url": "https://smarttechkorea.com/exhibitor-directory",
+     "api": "https://floorplan.exporum.com/api/exhibitors?exhibitionId=2", "zone": "ROBOT TECH SHOW",
+     "title": "Robot Tech Show 2026 (스마트테크코리아)", "when": "2026-06", "kind": "history", "scope": "robot",
+     "city": "서울(코엑스)", "country": "KR", "note": "직전 회차 — 회사명·부스만 (다음 2027-06)"},
+    {"key": "robex25", "platform": "fixkorea", "url": "https://fixkorea.or.kr/participation/bis_info_list.asp?site=robex&yy=2025&lang=kor",
+     "title": "ROBEX 대구국제로봇산업전 2025", "when": "2025-10", "kind": "history", "scope": "robot",
+     "city": "대구(엑스코)", "country": "KR", "note": "직전 회차 — FIX 디렉토리 등록 업체만(실제 출품사의 일부), 전시품목·홈페이지 포함"},
 ]
 
 # ================================================================ 분류 규칙 (영·일·한·중)
@@ -298,7 +313,154 @@ def fetch_aut(f):
     return rows, len(rows), f["url"]
 
 
-FETCH = {"mys": fetch_mys, "irex": fetch_irex, "aut": fetch_aut}
+TR = re.compile(r"<tr>(.*?)</tr>", re.S)
+TD = re.compile(r"<td[^>]*>(.*?)</td>", re.S)
+
+
+def _txt(x):
+    return clean(_html.unescape(TAG.sub(" ", x or "")))
+
+
+def fetch_robotworld(f):
+    """로보월드 — 참가업체 목록(10건씩 offset)과 업체별 팝업(회사소개·제품소개)을 읽는다."""
+    op = opener()
+    rows, offset, total = [], 0, None
+    while True:
+        t = get(op, f"{f['url']}?offset={offset}", timeout=60).decode("utf-8", "replace")
+        m = re.search(r"총\s*([\d,]+)\s*개", t)
+        total = int(m.group(1).replace(",", "")) if m else total
+        body = re.search(r"<tbody>(.*?)</tbody>", t, re.S)
+        got = 0
+        for tr in TR.findall(body.group(1) if body else ""):
+            td = [_txt(x) for x in TD.findall(tr)]
+            idx = re.search(r"idx=(\d+)", tr)
+            if len(td) < 7 or not td[2] or td[2] == "(주) 업체명":
+                continue
+            got += 1
+            rows.append({"name": td[3] or td[2], "name_ja": td[2] if td[3] else "", "booth": td[0],
+                         "desc": "", "show": "", "tags": [x for x in (td[4], td[5]) if x], "web": td[6],
+                         "country": "KR" if re.search(r"주식회사|\(주\)|㈜|[가-힣]", td[2]) else "",
+                         "src": f"https://www.robotworld.or.kr/visitors/pop_list_of_exhibitors.php?idx={idx.group(1)}" if idx else f["url"],
+                         "_idx": idx.group(1) if idx else ""})
+        offset += 10
+        if not got or (total and offset >= total) or offset > 2000:
+            break
+
+    def detail(r):
+        if not r["_idx"]:
+            return
+        try:
+            d = get(op, r["src"], timeout=40).decode("utf-8", "replace")
+        except Exception:  # noqa: BLE001
+            return
+        d = re.sub(r"<script.*?</script>|<style.*?</style>", " ", d, flags=re.S)
+        kv = {}
+        for th, td in re.findall(r"<th>(.*?)</th>\s*<td[^>]*>(.*?)</td>", d, re.S):
+            kv[_txt(th)] = _txt(td)
+        r["desc"] = (kv.get("회사소개(국문)") or kv.get("회사소개(영문)") or "")[:1500]
+        r["show"] = " / ".join(v for k, v in kv.items() if k.startswith("제품소개") and v)[:800]
+        r["web"] = r["web"] or kv.get("홈페이지", "")
+        if not r["country"] and re.search(r"Korea|대한민국|경기|서울|인천|부산|대구|광주|대전|울산|경남|경북|충청|전라|강원", kv.get("국문주소", "") + kv.get("영문주소", "")):
+            r["country"] = "KR"
+        time.sleep(0.15)
+    with ThreadPool(6) as pool:
+        pool.map(detail, rows)
+    for r in rows:
+        r.pop("_idx", None)
+    return rows, total or len(rows), f["url"]
+
+
+def fetch_nextai(f):
+    """THE NEXT AI(창원) — 업체 카드 12건씩 페이지, 상세에서 홈페이지·소개·출품내역."""
+    op = opener()
+    rows, page = [], 1
+    while page < 60:
+        t = get(op, f"{f['url']}?q=&page={page}", timeout=60).decode("utf-8", "replace")
+        cards = re.findall(r'<a class="nx-company-card".*?</a>', t, re.S)
+        if not cards:
+            break
+        for c in cards:
+            ko = re.search(r'nx-company-name">([^<]*)', c)
+            en = re.search(r'nx-company-name-en">([^<]*)', c)
+            href = re.search(r'href="([^"]+)"', c)
+            url = href.group(1) if href else ""
+            if url.startswith("/"):
+                url = "https://nextaikorea.com" + url
+            name_ko = _txt(ko.group(1) if ko else "")
+            name_en = _txt(en.group(1) if en else "")
+            rows.append({"name": name_en or name_ko, "name_ja": name_ko if name_en else "", "booth": "",
+                         "desc": "", "show": "", "tags": [], "web": "",
+                         "country": "KR" if re.search(r"[가-힣]", name_ko) else "", "src": url or f["url"]})
+        if f'page={page + 1}"' not in t:
+            break
+        page += 1
+
+    def detail(r):
+        if not r["src"].startswith("https://nextaikorea.com/visitors/companies/view"):
+            return
+        try:
+            d = get(op, r["src"], timeout=40).decode("utf-8", "replace")
+        except Exception:  # noqa: BLE001
+            return
+        site = re.search(r'class="nx-icon-btn"[^>]*href="(https?://[^"]+)"', d, re.S)
+        secs = dict(re.findall(r"<h3>([^<]+)</h3>\s*<div class=\"nx-box\">\s*<div>(.*?)</div>", d, re.S))
+        r["web"] = site.group(1) if site else ""
+        r["desc"] = _txt(secs.get("소개/주요사업", ""))[:1500]
+        r["show"] = _txt(secs.get("전시/출품 내역", ""))[:800]
+        time.sleep(0.15)
+    with ThreadPool(6) as pool:
+        pool.map(detail, rows)
+    return rows, len(rows), f["url"]
+
+
+def fetch_exporum(f):
+    """엑스포럼 부스 배치도 API(스마트테크코리아 계열) — 존(zone) 이름으로 로봇테크쇼 출품사만 고른다."""
+    raw = get(opener(), f["api"], timeout=60)
+    d = json.loads(raw.decode("utf-8", "replace"))
+    rows = []
+    for x in d:
+        cats = [c.get("nameEn", "") for c in x.get("categories", [])]
+        if f.get("zone") and not any(c.strip().upper() == f["zone"] for c in cats):
+            continue
+        ko, en = clean(x.get("nameKo")), clean(x.get("nameEn"))
+        rows.append({"name": en or ko, "name_ja": ko if en else "", "booth": clean(x.get("boothNo")),
+                     "desc": "", "show": "", "tags": [c.get("nameKo") or c.get("nameEn") for c in x.get("categories", [])],
+                     "country": "KR" if re.search(r"[가-힣]", ko) else "", "src": f["url"]})
+    return rows, len(rows), f["url"]
+
+
+def fetch_fixkorea(f):
+    """FIX(대구 기계·로봇 통합전) 참가업체 소개 — dl.list_box 단위, 회사명(국문<br>영문)·전시품목·홈페이지."""
+    op = opener()
+    rows, page = [], 1
+    while page < 40:
+        t = get(op, f"{f['url']}&gotoPage={page}", timeout=60).decode("utf-8", "replace")
+        boxes = re.findall(r'<dl class="list_box".*?</dl>', t, re.S)
+        if not boxes:
+            break
+        for box in boxes:
+            tit = re.search(r'<dd class="tit">(.*?)</dd>', box, re.S)
+            tit = re.sub(r"<!--.*?-->", "", tit.group(1) if tit else "", flags=re.S)
+            names = [_txt(n) for n in re.split(r"<br\s*/?>", tit)]
+            items = re.search(r'<dd class="cont_t[^"]*">(.*?)</dd>', box, re.S)
+            site = re.search(r'<dd class="cont_site">.*?href="([^"]+)"', box, re.S)
+            num = re.search(r"num=(\d+)", box)
+            name_ko, name_en = names[0], (names[1] if len(names) > 1 else "")
+            if not name_ko:
+                continue
+            rows.append({"name": name_en or name_ko, "name_ja": name_ko if name_en else "", "booth": "",
+                         "desc": "", "show": _txt(items.group(1) if items else "")[:800], "tags": [],
+                         "web": site.group(1) if site else "", "country": "KR",
+                         "src": f"{f['url']}&num={num.group(1)}&mode=cont" if num else f["url"]})
+        m = re.search(r"총\s*(\d+)\s*\(\s*\d+\s*/\s*(\d+)\s*\)", TAG.sub(" ", t))
+        if m and page >= int(m.group(2)):
+            break
+        page += 1
+    return rows, len(rows), f["url"]
+
+
+FETCH = {"mys": fetch_mys, "irex": fetch_irex, "aut": fetch_aut, "robotworld": fetch_robotworld,
+         "nextai": fetch_nextai, "exporum": fetch_exporum, "fixkorea": fetch_fixkorea}
 
 
 def one(f):
@@ -407,7 +569,6 @@ def build_companies(per_fair):
 # 크롬 사전 확장이 쓰는 구글 번역 엔드포인트(키 없음)를 쓴다. 문장마다 data/ko_cache.json에 저장해
 # 다음 날부터는 새로 생긴 문장만 번역한다. 막히면(429 등) 그 문장은 원문 그대로 둔다.
 import hashlib
-import html as _html
 import ssl
 import threading
 
@@ -520,7 +681,10 @@ def robot_expos():
 
 
 # 명단을 확보한 전시회 ↔ DB의 전시회 이름 연결
-LIST_MATCH = {"automate": ["automate27", "automate26"], "robot show": [], "irex": ["irex25"],
+LIST_MATCH = {"automate": ["automate27", "automate26"], "irex": ["irex25"],
+              "로보월드": ["robotworld26"], "robot world": ["robotworld26"], "robotworld": ["robotworld26"],
+              "next ai": ["nextai26"], "피지컬ai": ["nextai26"], "robot tech show": ["robottech26"],
+              "robex": ["robex25"],
               "国際ロボット展": ["irex25"], "international robot exhibition": ["irex25"],
               "automatica": ["automatica25"], "promat": ["promat27", "promat25"]}
 
