@@ -52,7 +52,7 @@
   // ---------------------------------------------------------------- 상태
   var S = {
     tab: "soon", q: "", span: "90", scope: "all", rel: 0, sup: false,
-    inds: {}, conts: {}, cc: "", riv: "", limit: 120, cal: TODAY.slice(0, 7), newDays: 7,
+    inds: {}, conts: {}, cc: "", riv: "", rivFld: "", limit: 120, cal: TODAY.slice(0, 7), newDays: 7,
   };
   function anyOn(o) { for (var k in o) if (o[k]) return true; return false; }
   function keysOn(o) { return Object.keys(o).filter(function (k) { return o[k]; }); }
@@ -505,17 +505,47 @@
   }
 
   function viewRiv() {
+    var FLD = RIVDATA.fields || [["robot", "🤖 로봇·자동화"], ["defense", "🛡 방산·항공"],
+      ["auto", "🚗 자동차"], ["factory", "🏭 산업·기계"], ["medical", "🏥 의료"],
+      ["connector", "🔌 커넥터·케이블 전문"], ["elec", "💻 전자·IT"]];
+    var fldName = {};
+    FLD.forEach(function (x) { fldName[x[0]] = x[1]; });
+    // 전시회가 79개라 한 화면에 섞으면 못 본다 → 분야를 하나 골라 그 안에서만 본다
+    var inFld = function (f) { return !S.rivFld || (f.field || "elec") === S.rivFld; };
+    var fldOfKey = {};
+    (RIVDATA.fairs || []).forEach(function (f) { fldOfKey[f.key] = f.field || "elec"; });
+    var evInFld = function (e) {
+      if (!S.rivFld) return true;
+      var keys = e.fks || (e.fk ? [e.fk] : []);
+      if ((e.riv || []).length) {
+        keys = keys.concat(e.riv.map(function (x) { return x.fk; }));
+      }
+      return keys.some(function (k) { return k && fldOfKey[k] === S.rivFld; });
+    };
+
     var counts = {};                       // 경쟁사 → 이름이 나온 전시회 목록
     Object.keys(REXH).forEach(function (fk) {
+      if (S.rivFld && fldOfKey[fk] !== S.rivFld) return;
       REXH[fk].forEach(function (r) {
         if (r[2]) (counts[r[2]] = counts[r[2]] || {})[fk] = 1;
       });
     });
     var nFair = function (k) { return Object.keys(counts[k] || {}).length; };
 
-    var ranked = RFAIRS.filter(function (f) { return !f.error; })
+    var ranked = RFAIRS.filter(function (f) { return !f.error && inFld(f); })
       .sort(function (a, b) { return (b.rivals || 0) - (a.rivals || 0); });
     var okFairs = ranked.filter(function (f) { return f.exhibitors; });
+
+    var fldCount = {};
+    (RIVDATA.fairs || []).forEach(function (f) {
+      if (f.exhibitors) fldCount[f.field || "elec"] = (fldCount[f.field || "elec"] || 0) + 1;
+    });
+    var fldChips = '<button class="chip' + (S.rivFld ? "" : " on") + '" data-rivfld="">전체 <b>' +
+      num(Object.keys(fldCount).reduce(function (a, k) { return a + fldCount[k]; }, 0)) + "</b></button>" +
+      FLD.filter(function (x) { return fldCount[x[0]]; }).map(function (x) {
+        return '<button class="chip' + (S.rivFld === x[0] ? " on" : "") + '" data-rivfld="' + x[0] + '">' +
+          esc(x[1]) + " <b>" + num(fldCount[x[0]]) + "</b></button>";
+      }).join("");
 
     var chips = RIVDATA.list.filter(function (r) { return nFair(r.key); })
       .sort(function (a, b) { return nFair(b.key) - nFair(a.key); })
@@ -527,12 +557,16 @@
       .map(function (r) { return esc(r.name); }).join(", ");
 
     var confirmed = EV.filter(function (e) { return e.riv && e.riv.length; })
+      .filter(evInFld)
       .filter(function (e) { return !S.riv || e.riv.some(function (x) { return x.r === S.riv; }); })
       .sort(function (a, b) { return a.s < b.s ? -1 : 1; });
 
-    var disc = RDISC.filter(function (c) { return !S.riv; }).slice(0, 60);
+    var disc = RDISC.filter(function (c) { return !S.riv; })
+      .filter(function (c) { return !S.rivFld || c.f.some(function (k) { return fldOfKey[k] === S.rivFld; }); })
+      .slice(0, 60);
     // 커넥터·케이블이 주제인 전시회 — 명단이 없어도 목록에서 사라지지 않게 따로 뽑는다
     var connFairs = EV.filter(function (e) { return e.cf && (e.e || e.s) >= TODAY; })
+      .filter(function (e) { return !S.rivFld || S.rivFld === "connector" || evInFld(e); })
       .filter(function (e) { return !S.riv || (e.riv || []).some(function (x) { return x.r === S.riv; }); })
       .sort(function (a, b) { return a.s < b.s ? -1 : 1; });
 
@@ -541,7 +575,10 @@
       '<div class="sec-title"><h2>🏁 경쟁사 출품 레이더</h2><small>' +
       "전시회 공식 출품사 명단 " + num(okFairs.length) + "개 · 출품사 " +
       num(okFairs.reduce(function (a, f) { return a + f.exhibitors; }, 0)) + "개사를 훑어 " +
-      "우리 경쟁사 " + num(Object.keys(counts).length) + "곳을 찾았습니다 · " + esc(RIVDATA.generated || "") + "</small></div>" +
+      "우리 경쟁사 " + num(Object.keys(counts).length) + "곳을 찾았습니다" +
+      (S.rivFld ? " (" + esc(fldName[S.rivFld] || "") + "만 보는 중)" : "") + " · " +
+      esc(RIVDATA.generated || "") + "</small></div>" +
+      '<div class="frow"><span class="flabel">분야</span>' + fldChips + "</div>" +
       '<div class="frow"><span class="flabel">경쟁사</span>' + chips +
       (S.riv ? ' <button class="chip on" data-riv="">전체 ✕</button>' : "") + "</div>" +
       (none ? '<div class="note" style="margin-top:8px">아직 명단에서 못 본 곳: ' + none + "</div>" : "") +
@@ -594,6 +631,14 @@
         var k = b.getAttribute("data-riv");
         S.riv = (S.riv === k) ? "" : k;
         render();
+      };
+    });
+    Array.prototype.forEach.call(main.querySelectorAll("[data-rivfld]"), function (b) {
+      b.onclick = function () {
+        S.rivFld = b.getAttribute("data-rivfld");
+        S.riv = "";                        // 분야를 바꾸면 경쟁사 선택은 푼다
+        render();
+        window.scrollTo(0, 0);
       };
     });
     Array.prototype.forEach.call(main.querySelectorAll("[data-fair]"), function (b) {

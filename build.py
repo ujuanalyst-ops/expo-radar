@@ -441,6 +441,7 @@ def write_app(events, report, rivals=None, riv_unmatched=None):
             "companies": (rivals or {}).get("companies", []),
             "discovered": (rivals or {}).get("discovered", []),
             "generated": (rivals or {}).get("generated", ""),
+            "fields": (rivals or {}).get("fields", []),
             "unmatched": riv_unmatched or [],
         },
         "events": events,

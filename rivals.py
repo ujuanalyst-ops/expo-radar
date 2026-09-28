@@ -170,6 +170,28 @@ def match_rivals(name):
     return [k for k, rx in RIVAL_RE if rx.search(name)]
 
 
+# ================================================================ 분야 구분
+# 전시회가 79개까지 늘어 한 화면에 섞으면 못 본다. 분야 하나씩 나눠 보도록 꼬리표를 붙인다.
+FIELD_RULES = [
+    ("robot", "🤖 로봇·자동화", ("rb_", "automate")),
+    ("defense", "🛡 방산·항공", ("eurosatory", "dsei", "siae", "ausa", "xponential", "farnborough")),
+    ("auto", "🚗 자동차", ("jsae", "ampa", "aapex", "sema", "koaa")),
+    ("factory", "🏭 산업·기계", ("hannover", "sps26", "autoworld", "imts", "packexpo")),
+    ("medical", "🏥 의료", ("mdmwest",)),
+    ("connector", "🔌 커넥터·케이블 전문", ("ich_", "interwire", "wire_")),
+    # 나머지는 전자·IT (전자부품·반도체·광통신·데이터센터·통신·AV)
+]
+FIELD_DEFAULT = ("elec", "💻 전자·IT")
+FIELD_NAMES = [(k, n) for k, n, _ in FIELD_RULES] + [FIELD_DEFAULT]
+
+
+def field_of(key):
+    for k, _, pats in FIELD_RULES:
+        if any(key.startswith(p) or p in key for p in pats):
+            return k
+    return FIELD_DEFAULT[0]
+
+
 # ================================================================ HTTP (쿠키 유지)
 def opener():
     cj = http.cookiejar.CookieJar()
@@ -1286,7 +1308,7 @@ def one(f):
         cache_rows(f["key"], [list(r) for r in rows])
     if not rows:
         return f, [], [], {"key": f["key"], "title": f["title"], "platform": f["platform"],
-                           "exhibitors": 0, "rivals": 0, "error": err,
+                           "field": field_of(f["key"]), "exhibitors": 0, "rivals": 0, "error": err,
                            "sec": round(time.time() - t0, 1), "when": f["when"], "kind": f["kind"],
                            "city": f["city"], "country": f["country"], "match": f["match"],
                            "url": f.get("page") or f.get("url", ""), "note": f.get("note", "")}
@@ -1306,6 +1328,7 @@ def one(f):
             seen.add((k, name))
             recs.append({"rival": k, "matched": name[:80], "booth": booth[:24],
                          "fair_key": f["key"], "fair": f["title"], "match": f["match"],
+                         "field": field_of(f["key"]),
                          "when": f["when"], "kind": f["kind"], "cycle": f.get("cycle", 1),
                          "city": f["city"],
                          "country": f["country"], "url": src, "note": f.get("note", "")})
@@ -1316,7 +1339,7 @@ def one(f):
         "conn": nconn, "kind": f["kind"], "when": f["when"], "cycle": f.get("cycle", 1),
         "city": f["city"],
         "country": f["country"], "error": err, "stale": stale, "sec": round(time.time() - t0, 1),
-        "url": src, "note": f.get("note", "")}
+        "field": field_of(f["key"]), "url": src, "note": f.get("note", "")}
 
 
 def norm_co(name):
@@ -1368,6 +1391,7 @@ def collect_all():
     report.sort(key=lambda r: -(r.get("rivals") or 0))
     return {
         "generated": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "fields": [[k, n] for k, n in FIELD_NAMES],
         "rivals": [RIVAL_META[k] for k, *_ in RIVALS],
         "fairs": report,
         "records": records,

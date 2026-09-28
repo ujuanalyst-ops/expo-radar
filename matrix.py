@@ -105,83 +105,60 @@ def build(base_path=None):
     d = json.load(open(RIVALS_JSON, encoding="utf-8"))
     base = load_base(base_path)
     linked = set()
+    fields = d.get("fields") or [["elec", "전자·IT"]]
+    fname = dict(fields)
 
-    # 전시회별 → 경쟁사별 확인 내역
     found = {}
     for r in d["records"]:
         found.setdefault(r["fair_key"], {}).setdefault(r["rival"], []).append(r)
-    reports = {f["key"]: f for f in d["fairs"]}
 
     wb = Workbook()
-    ws = wb.active
-    ws.title = "전시회 매트릭스"
+    wb.remove(wb.active)
 
-    title_row = ["#", "전시회", "지역", "분야", "일정/장소", "출품사 명단",
-                 "확인 출품사", "확인일"] + [n for _, n in TRACKED] + \
-                ["추적 10곳 확인", "그 외 경쟁사", "적합도", "규모", "고객접점", "우선순위", "명단 출처"]
-    ws.append(["우주일렉트로닉스 — 커넥터 경쟁사 전시회 참가 매트릭스 (공식 출품사 명단 검증본)"])
-    ws.append([f"● 공식 명단에서 확인   ✕ 명단을 받아 확인했으나 없음   ○ 명단을 못 받아 추정 유지   (생성 {TODAY})"])
-    ws.append([])
-    ws.append(title_row)
-
-    rows_meta = []
+    # ── 분야마다 시트 하나 (전시회가 79개라 한 장에 다 넣으면 못 본다)
     order = sorted(d["fairs"], key=lambda f: -len(found.get(f["key"], {})))
-    n = 0
-    for f in order:
-        key = f["key"]
-        got = f.get("exhibitors") or 0
-        checked = bool(got) and not f.get("error")
-        name, brow = base_for(f, base)
-        if name:
-            linked.add(name)
-        n += 1
-        hits = found.get(key, {})
-        line = [n, f["title"], (brow or {}).get("지역", ""), (brow or {}).get("분야", "") or f.get("note", "")[:22],
-                f.get("when", "") + (f" · {f.get('city','')}" if f.get("city") else ""), "확인" if checked else "미확보",
-                got, (d.get("generated") or "")[:10]]
+    counts = {}
+    for fk, fn in fields:
+        rows = [f for f in order if (f.get("field") or "elec") == fk]
+        if not rows:
+            continue
+        counts[fk] = len(rows)
+        ws = wb.create_sheet(_sheet_name(fn))
+        _sheet(ws, fn, rows, found, base, linked)
+
+    # ── 맨 앞에 한눈 요약
+    ws0 = wb.create_sheet("요약", 0)
+    ws0.append(["우주일렉트로닉스 — 커넥터 경쟁사 전시회 참가 (공식 출품사 명단 검증본)"])
+    ws0.append([f"생성 {TODAY} · 분야별로 시트가 나뉘어 있습니다"])
+    ws0.append([])
+    ws0.append(["분야", "수집 전시회", "추적 10곳이 나온 전시회"] + [n for _, n in TRACKED])
+    for fk, fn in fields:
+        if fk not in counts:
+            continue
+        rows = [f for f in order if (f.get("field") or "elec") == fk]
+        per = []
         for rk, _ in TRACKED:
-            if rk in hits:
-                line.append("●")
-            elif checked:
-                line.append("✕")
-            else:
-                line.append((brow or {}).get("추정", {}).get(rk, ""))
-        line += ["", len([k for k in hits if k not in dict(TRACKED)]),
-                 (brow or {}).get("적합도", ""), (brow or {}).get("규모", ""), (brow or {}).get("접점", ""),
-                 (brow or {}).get("우선순위", ""), f.get("url", "")]
-        ws.append(line)
-        rows_meta.append((ws.max_row, key, hits, checked))
+            per.append(sum(1 for f in rows if rk in found.get(f["key"], {})))
+        ws0.append([fn, counts[fk], sum(1 for f in rows if found.get(f["key"]))] + per)
+    _style(ws0, 3 + len(TRACKED), head_row=4)
+    ws0.column_dimensions["A"].width = 22
+    ws0.column_dimensions["B"].width = 12
+    ws0.column_dimensions["C"].width = 20
 
-    # 확인 개수는 수식으로 (칸을 고치면 바로 반영되게)
-    c0 = get_column_letter(9)
-    c1 = get_column_letter(8 + len(TRACKED))
-    for r, _, _, _ in rows_meta:
-        ws.cell(row=r, column=9 + len(TRACKED)).value = f'=COUNTIF({c0}{r}:{c1}{r},"●")'
-
-    # 부스·법인명은 셀 메모로
-    for r, key, hits, _ in rows_meta:
-        for i, (rk, _) in enumerate(TRACKED):
-            if rk in hits:
-                rec = hits[rk][0]
-                cell = ws.cell(row=r, column=9 + i)
-                cell.comment = Comment(f"{rec['matched']}\n부스 {rec.get('booth') or '-'}\n출처 {rec.get('url','')}", "expo-radar")
-
-    _style(ws, len(title_row), rows_meta)
-
-    # ── 확인 상세
+    # ── 확인 상세 (전체)
     ws2 = wb.create_sheet("확인 상세")
-    ws2.append(["전시회", "국가", "시기", "경쟁사", "명단에 적힌 법인명", "부스", "구분", "출처"])
+    ws2.append(["분야", "전시회", "국가", "시기", "경쟁사", "명단에 적힌 법인명", "부스", "구분", "출처"])
     nm = {}
     for rv in d.get("rivals", []):
         if isinstance(rv, dict):
             nm[rv.get("key")] = rv.get("name", "")
-    for r in sorted(d["records"], key=lambda x: (x["fair"], x["rival"])):
-        ws2.append([r["fair"], r.get("country", ""), r.get("when", ""),
+    for r in sorted(d["records"], key=lambda x: (x.get("field", ""), x["fair"], x["rival"])):
+        ws2.append([fname.get(r.get("field", ""), ""), r["fair"], r.get("country", ""), r.get("when", ""),
                     nm.get(r["rival"], r["rival"]), r["matched"], r.get("booth", ""),
                     "추적 10곳" if r["rival"] in dict(TRACKED) else "그 외", r.get("url", "")])
-    _style(ws2, 8)
+    _style(ws2, 9, head_row=1)
 
-    # ── 기존 매트릭스에서 우리가 명단을 못 받은 전시회
+    # ── 아직 명단을 못 받은 전시회
     ws3 = wb.create_sheet("미검증(추정 유지)")
     ws3.append(["전시회", "지역", "분야", "일정/장소", "적합도", "규모", "고객접점", "우선순위"] +
                [n for _, n in TRACKED] + ["비고"])
@@ -191,16 +168,58 @@ def build(base_path=None):
         ws3.append([name, row["지역"], row["분야"], row["일정"], row["적합도"], row["규모"], row["접점"],
                     row["우선순위"]] + [row["추정"].get(k, "") for k, _ in TRACKED] +
                    ["출품사 명단을 아직 못 받은 전시회 — 표기는 사람이 넣은 추정치"])
-    _style(ws3, 9 + len(TRACKED))
+    _style(ws3, 9 + len(TRACKED), head_row=1)
 
     os.makedirs(OUT_DIR, exist_ok=True)
     out = os.path.join(OUT_DIR, f"UJU_전시회_경쟁사_매트릭스_검증_{TODAY}.xlsx")
     wb.save(out)
-    return out, len(rows_meta), len(d["records"])
+    return out, len(order), len(d["records"])
 
 
-def _style(ws, ncol, rows_meta=None):
-    head_row = 4 if rows_meta is not None else 1
+def _sheet_name(fn):
+    """시트 이름에 못 쓰는 글자를 걷어낸다(이모지는 남겨도 된다)."""
+    return re.sub(r"[\\/*?:\[\]]", "", fn)[:31]
+
+
+def _sheet(ws, fname, fairs, found, base, linked):
+    ws.append([f"{fname} — 커넥터 경쟁사 참가 현황"])
+    ws.append(["● 공식 명단에서 확인   ✕ 명단을 받아 확인했으나 없음   ○ 명단을 못 받아 추정 유지"])
+    ws.append([])
+    ws.append(["#", "전시회", "일정·장소", "확인 출품사"] + [n for _, n in TRACKED] +
+              ["추적 10곳", "그 외 경쟁사", "적합도", "규모", "고객접점", "우선순위", "명단 출처"])
+    metas = []
+    for i, f in enumerate(fairs, 1):
+        got = f.get("exhibitors") or 0
+        checked = bool(got) and not f.get("error")
+        name, brow = base_for(f, base)
+        if name:
+            linked.add(name)
+        hits = found.get(f["key"], {})
+        line = [i, f["title"], f.get("when", "") + (f" · {f.get('city','')}" if f.get("city") else ""),
+                got if checked else "미확보"]
+        for rk, _ in TRACKED:
+            line.append("●" if rk in hits else ("✕" if checked else (brow or {}).get("추정", {}).get(rk, "")))
+        line += ["", len([k for k in hits if k not in dict(TRACKED)]),
+                 (brow or {}).get("적합도", ""), (brow or {}).get("규모", ""), (brow or {}).get("접점", ""),
+                 (brow or {}).get("우선순위", ""), f.get("url", "")]
+        ws.append(line)
+        metas.append((ws.max_row, hits))
+    c0, c1 = get_column_letter(5), get_column_letter(4 + len(TRACKED))
+    for r, hits in metas:
+        ws.cell(row=r, column=5 + len(TRACKED)).value = f'=COUNTIF({c0}{r}:{c1}{r},"●")'
+        for i, (rk, _) in enumerate(TRACKED):
+            if rk in hits:
+                rec = hits[rk][0]
+                ws.cell(row=r, column=5 + i).comment = Comment(
+                    f"{rec['matched']}\n부스 {rec.get('booth') or '-'}\n출처 {rec.get('url','')}", "expo-radar")
+    _style(ws, 10 + len(TRACKED), head_row=4)
+    ws.column_dimensions["A"].width = 5
+    ws.column_dimensions["B"].width = 42
+    ws.column_dimensions["C"].width = 22
+    ws.column_dimensions["D"].width = 11
+
+
+def _style(ws, ncol, head_row=1, rows_meta=None):
     for c in range(1, ncol + 1):
         cell = ws.cell(row=head_row, column=c)
         cell.font = Font(name=ARIAL, bold=True, color="FFFFFF", size=10)
@@ -213,12 +232,12 @@ def _style(ws, ncol, rows_meta=None):
             if cell.value in ("●", "✕", "○"):
                 cell.alignment = Alignment(horizontal="center")
                 cell.fill = {"●": OK_FILL, "✕": NO_FILL, "○": GUESS_FILL}[cell.value]
-    if rows_meta is not None:
+    if head_row > 1:
         ws["A1"].font = Font(name=ARIAL, bold=True, size=13)
         ws["A2"].font = Font(name=ARIAL, size=9, color="7F7F7F")
-    widths = {1: 5, 2: 40, 3: 8, 4: 18, 5: 20, 6: 11, 7: 10, 8: 11}
     for c in range(1, ncol + 1):
-        ws.column_dimensions[get_column_letter(c)].width = widths.get(c, 10)
+        if get_column_letter(c) not in ws.column_dimensions:
+            ws.column_dimensions[get_column_letter(c)].width = 10
     ws.freeze_panes = ws.cell(row=head_row + 1, column=3)
 
 
