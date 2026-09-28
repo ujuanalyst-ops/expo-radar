@@ -95,6 +95,7 @@ main{max-width:1480px;margin:0 auto;padding:22px 28px 70px}
 .flag{font-size:16px}
 .tag{border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700;background:#eef2f7;color:var(--muted);white-space:nowrap}
 .tag.kr{background:#e8f1fb;color:var(--kr)}
+.tag.past{background:#eef0f3;color:#5f6b7d}
 .tag.ov{background:#e3f6f7;color:var(--ov)}
 .tag.sup{background:#fff3d9;color:#8a5c00}
 .tag.ufi{background:#efe9fb;color:#5b3fb5}

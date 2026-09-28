@@ -7,7 +7,10 @@
   D.rivals.forEach(function (r) { RIV[r.key] = r; });
   D.fields.forEach(function (f) { FLD[f.key] = f.name; });
 
-  var S = { tab: "pair", q: "", riv: "", fld: "", year: "", freshOnly: false, kind: "", limit: 200 };
+  // 다른 화면에서 traces.html?q=InnoTrans 로 넘어오면 그 검색어로 열어 준다
+  var q0 = (location.search.match(/[?&]q=([^&]*)/) || [])[1];
+  q0 = q0 ? decodeURIComponent(q0.replace(/\+/g, " ")) : "";
+  var S = { tab: "pair", q: q0, riv: "", fld: "", year: "", freshOnly: false, kind: "", limit: 200 };
   var main = document.getElementById("main");
   var drawer = document.getElementById("drawer");
   var scrim = document.getElementById("scrim");
@@ -381,6 +384,7 @@
     else tabPair();
   }
 
+  if (S.q) { tq.value = S.q; document.getElementById("tclear").hidden = false; }
   header();
   render();
 })();

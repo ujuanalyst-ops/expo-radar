@@ -57,6 +57,35 @@
   function anyOn(o) { for (var k in o) if (o[k]) return true; return false; }
   function keysOn(o) { return Object.keys(o).filter(function (k) { return o[k]; }); }
 
+  // 우리말로 부르는 이름 ↔ 원래 이름. 명단에는 영문만 있는 전시회가 많아, 우리말로 치면
+  // 아무것도 안 나오는 일이 잦았다(예: "인터배터리" → 자료에는 INTERBATTERY 뿐).
+  var ALIAS = {
+    "인터배터리": "interbattery", "컴퓨텍스": "computex", "일렉트로니카": "electronica",
+    "프로덕트로니카": "productronica", "하노버": "hannover", "하노버메세": "hannover messe",
+    "이노트랜스": "innotrans", "오토메카니카": "automechanika", "세미콘": "semicon",
+    "네프콘": "nepcon", "디자인콘": "designcon", "오토마티카": "automatica",
+    "임베디드월드": "embedded world", "씨텍": "ceatec", "시텍": "ceatec",
+    "유로사토리": "eurosatory", "파른보로": "farnborough", "판보로": "farnborough",
+    "메디카": "medica", "콤파메드": "compamed", "인터몰드": "intermold",
+    "로지마트": "logimat", "프로매트": "promat", "모덱스": "modex",
+    "아이렉스": "irex", "아펙스": "apex", "픽심": "pcim", "엠더블유씨": "mwc",
+    "모바일월드콩그레스": "mwc mobile world congress", "씨이에스": "ces",
+    "제이피시에이": "jpca", "인포콤": "infocomm", "아이에스이": "ise",
+    "아이엠티에스": "imts", "팩엑스포": "pack expo", "세마쇼": "sema show",
+    "아펙스엑스포": "ipc apex", "인터와이어": "interwire", "와이어": "wire",
+    "디에스이아이": "dsei", "아우사": "ausa", "엑스포넨셜": "xponential",
+    "파리에어쇼": "paris air show", "에어쇼": "air show", "아덱스": "adex",
+    "키메스": "kimes", "시모스": "simtos", "심토스": "simtos",
+    "오토모티브월드": "automotive world", "재팬모빌리티쇼": "japan mobility show",
+    "도쿄모터쇼": "tokyo motor show", "광저우": "guangzhou", "선전": "shenzhen",
+    "심천": "shenzhen", "상하이": "shanghai", "상해": "shanghai", "베이징": "beijing",
+    "북경": "beijing", "도쿄": "tokyo", "동경": "tokyo", "오사카": "osaka",
+    "뮌헨": "munich münchen", "뉘른베르크": "nuremberg nürnberg", "프랑크푸르트": "frankfurt",
+    "뒤셀도르프": "düsseldorf dusseldorf", "라스베이거스": "las vegas", "라스베가스": "las vegas"
+  };
+  // 띄어쓰기·기호를 떼고 비교하기 위한 꼴 ("서울ADEX"로 쳐도 "서울 ADEX"가 걸리게)
+  function squash(t) { return String(t || "").toLowerCase().replace(/[^0-9a-z가-힣ぁ-んァ-ヶ一-龯]+/g, ""); }
+
   function matchQ(e, q) {
     if (!q) return true;
     var hay = (e.t + " " + (e.te || "") + " " + (e.ci || "") + " " + (e.v || "") + " " + cname(e.c) +
@@ -66,7 +95,14 @@
       // 산업 분류도 검색어에 넣는다 — 소개글이 짧은 전시회가 많아 제목만으로는 잘 안 걸린다
       " " + (e.ind || []).map(function (c) { return IND[c] ? IND[c].name : ""; }).join(" ") +
       (e.cf ? " 커넥터 connector 케이블 cable 하네스" : "")).toLowerCase();
-    return q.toLowerCase().split(/\s+/).every(function (w) { return hay.indexOf(w) >= 0; });
+    var flat = squash(hay);
+    return q.toLowerCase().split(/\s+/).every(function (w) {
+      if (hay.indexOf(w) >= 0) return true;
+      var a = ALIAS[squash(w)];
+      if (a && a.split(" ").some(function (x) { return hay.indexOf(x) >= 0; })) return true;
+      var fw = squash(w);
+      return fw.length > 1 && flat.indexOf(fw) >= 0;
+    });
   }
 
   function filtered(opt) {
@@ -79,8 +115,11 @@
     var inds = keysOn(S.inds), conts = keysOn(S.conts);
     return EV.filter(function (e) {
       var end = e.e || e.s;
+      // 이름으로 찾을 때는 지난 전시까지 함께 본다. 며칠 전에 끝난 전시회(InnoTrans 2026 등)가
+      // 검색 결과에서 통째로 사라져 "검색이 안 된다"는 오해를 만들었다.
+      // 기간을 직접 고른 경우(30일·3개월·6개월·지난 전시)는 그 선택을 그대로 지킨다.
       if (S.span === "past") { if (end >= TODAY) return false; }
-      else if (end < TODAY) return false;
+      else if (end < TODAY && !(q && S.span === "all")) return false;
       if (horizon && e.s > horizon) return false;
       if (S.scope === "kr" && !isKR(e)) return false;
       if (S.scope === "ov" && isKR(e)) return false;
@@ -97,6 +136,7 @@
   // ---------------------------------------------------------------- 공통 조각
   function rowHTML(e) {
     var dd = dday(e), tags = [];
+    if ((e.e || e.s) < TODAY) tags.push('<span class="tag past">지난 전시</span>');
     if (isKR(e)) tags.push('<span class="tag kr">국내</span>');
     if (e.sup) tags.push('<span class="tag sup">국고지원</span>');
     if (e.ap) {
@@ -125,7 +165,16 @@
   }
 
   function listHTML(list, limit, nogroup) {
-    if (!list.length) return '<div class="card empty">조건에 맞는 전시회가 없습니다.</div>';
+    if (!list.length) {
+      // 찾는 중이면 빈 화면만 보여주지 말고 다음에 볼 곳을 알려 준다.
+      // 우리 전시회 DB에 없는 전시회라도 경쟁사 흔적 쪽에는 남아 있을 수 있다.
+      var q0 = S.q.trim();
+      return '<div class="card empty">조건에 맞는 전시회가 없습니다.' +
+        (q0 ? '<div class="note" style="margin-top:8px">' +
+          "다른 조건(관련도·산업·대륙·국내/해외)이 걸려 있지 않은지 확인해 보세요. " +
+          '<a class="rivsearch" href="traces.html?q=' + encodeURIComponent(q0) +
+          '">뉴스·광고 흔적에서 「' + esc(q0) + '」 찾기 →</a></div>' : "") + "</div>";
+    }
     var shown = list.slice(0, limit || list.length), out = [], cur = "";
     shown.forEach(function (e) {
       var ym = e.s.slice(0, 7);
@@ -528,6 +577,26 @@
       return keys.some(function (k) { return k && fldOfKey[k] === S.rivFld; });
     };
 
+    // 위쪽 검색창이 이 탭에서도 먹히게 한다. 이 탭은 '전시회 목록'이 아니라 네 덩어리(일정·밀집도·
+    // 커넥터 전용전·새로 찾은 업체)라 다른 탭의 filtered()를 그대로 쓸 수 없어 여기서 따로 건다.
+    // 찾는 대상: 전시회 이름·도시·나라, 그 전시회 출품사 이름, 경쟁사 이름.
+    var rq = S.q.trim(), rw = rq ? rq.toLowerCase().split(/\s+/) : [];
+    function hit(hay) {
+      if (!rw.length) return true;
+      var h = String(hay || "").toLowerCase();
+      return rw.every(function (w) { return h.indexOf(w) >= 0; });
+    }
+    var fairHay = {};
+    function fairText(f) {
+      if (fairHay[f.key] == null) {
+        fairHay[f.key] = [f.title, f.city, cname(f.country), f.when, f.note || "",
+          (REXH[f.key] || []).map(function (r) {
+            return r[0] + " " + (r[2] ? rivName(r[2]) : "");
+          }).join(" ")].join(" ");
+      }
+      return fairHay[f.key];
+    }
+
     var counts = {};                       // 경쟁사 → 이름이 나온 전시회 목록
     Object.keys(REXH).forEach(function (fk) {
       if (S.rivFld && fldOfKey[fk] !== S.rivFld) return;
@@ -537,7 +606,7 @@
     });
     var nFair = function (k) { return Object.keys(counts[k] || {}).length; };
 
-    var ranked = RFAIRS.filter(function (f) { return !f.error && inFld(f); })
+    var ranked = RFAIRS.filter(function (f) { return !f.error && inFld(f) && hit(fairText(f)); })
       .sort(function (a, b) { return (b.rivals || 0) - (a.rivals || 0); });
     var okFairs = ranked.filter(function (f) { return f.exhibitors; });
 
@@ -564,15 +633,20 @@
     var confirmed = EV.filter(function (e) { return e.riv && e.riv.length; })
       .filter(evInFld)
       .filter(function (e) { return !S.riv || e.riv.some(function (x) { return x.r === S.riv; }); })
+      .filter(function (e) { return matchQ(e, rq) || (e.fk && RFAIR[e.fk] && hit(fairText(RFAIR[e.fk]))); })
       .sort(function (a, b) { return a.s < b.s ? -1 : 1; });
 
     var disc = RDISC.filter(function (c) { return !S.riv; })
       .filter(function (c) { return !S.rivFld || c.f.some(function (k) { return fldOfKey[k] === S.rivFld; }); })
+      .filter(function (c) {
+        return hit(c.n + " " + c.f.map(function (k) { return (RFAIR[k] || {}).title || k; }).join(" "));
+      })
       .slice(0, 60);
     // 커넥터·케이블이 주제인 전시회 — 명단이 없어도 목록에서 사라지지 않게 따로 뽑는다
     var connFairs = EV.filter(function (e) { return e.cf && (e.e || e.s) >= TODAY; })
       .filter(function (e) { return !S.rivFld || S.rivFld === "connector" || evInFld(e); })
       .filter(function (e) { return !S.riv || (e.riv || []).some(function (x) { return x.r === S.riv; }); })
+      .filter(function (e) { return matchQ(e, rq); })
       .sort(function (a, b) { return a.s < b.s ? -1 : 1; });
 
     main.innerHTML =
@@ -586,6 +660,15 @@
       '<div class="frow"><span class="flabel">분야</span>' + fldChips + "</div>" +
       '<div class="frow"><span class="flabel">경쟁사</span>' + chips +
       (S.riv ? ' <button class="chip on" data-riv="">전체 ✕</button>' : "") + "</div>" +
+      (rq ? '<div class="note" style="margin-top:8px">🔍 <b>' + esc(rq) + '</b> 로 추린 결과 — ' +
+        "전시회 " + num(ranked.length) + "개 · 일정 " + num(confirmed.length) + "건 · 새로 찾은 업체 " +
+        num(disc.length) + "곳" +
+        (ranked.length + confirmed.length + connFairs.length + disc.length === 0
+          ? " · <b>이 탭에는 맞는 것이 없습니다.</b> 여기는 <b>출품사 명단을 받은 전시회</b>만 봅니다" +
+            ' — <button class="rivsearch" data-gotab="soon">전체 전시회에서 찾기 →</button>' +
+            ' <a class="rivsearch" href="traces.html?q=' + encodeURIComponent(rq) +
+            '">뉴스·광고 흔적에서 찾기 →</a>' : "") +
+        "</div>" : "") +
       (none ? '<div class="note" style="margin-top:8px">아직 명단에서 못 본 곳: ' + none + "</div>" : "") +
       "</div>" +
 
@@ -601,7 +684,8 @@
 
       '<div class="sec-title"><h2>📊 전시회별 경쟁사 밀집도</h2><small>' +
       "경쟁사 " + WATCH + "곳 이상이면 <b>관심</b> — 전시회를 누르면 출품사 전체 명단이 열립니다</small></div>" +
-      '<div class="frows">' + ranked.map(fairRow).join("") + "</div>" +
+      (ranked.length ? '<div class="frows">' + ranked.map(fairRow).join("") + "</div>"
+        : '<div class="card empty">맞는 전시회가 없습니다.</div>') +
 
       '<div class="sec-title" style="margin-top:26px"><h2>🔌 커넥터·케이블 전용 전시회</h2><small>' +
       "우리 업이 주제인 전시회 — 출품사 명단을 공개하지 않는 곳도 빠뜨리지 않으려고 따로 모았습니다</small></div>" +
@@ -631,6 +715,16 @@
             }).join(" · ") + "</div></button>";
         }).join("") + "</div>" : "");
 
+    Array.prototype.forEach.call(main.querySelectorAll("[data-gotab]"), function (b) {
+      b.onclick = function () {
+        S.tab = b.getAttribute("data-gotab");
+        S.span = "all";                    // 찾을 때는 기간을 풀어 전체에서 본다
+        S.limit = 120;
+        syncTabs();
+        render();
+        window.scrollTo(0, 0);
+      };
+    });
     Array.prototype.forEach.call(main.querySelectorAll("[data-riv]"), function (b) {
       b.onclick = function () {
         var k = b.getAttribute("data-riv");
