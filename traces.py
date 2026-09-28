@@ -395,6 +395,13 @@ def build_fair_dict():
 FAIRDICT = build_fair_dict()
 
 
+# 전시회가 아닌데 이름만 전시회처럼 생긴 것 (행사장 이름·자선행사·채용박람회)
+NOT_FAIR = re.compile(
+    r"convention cent(er|re)|congress cent(er|re)|exhibition cent(er|re)|mccormick place|"
+    r"health\s*&?\s*fitness|marathon|job\s*fair|career\s*fair|hiring\s*event|채용\s*박람회|"
+    r"food\s*(fair|festival)|book\s*fair|art\s*fair|county\s*fair|state\s*fair", re.I)
+
+
 def find_fairs(text):
     """글에서 전시회 이름과 (있으면) 연도를 뽑는다."""
     hits = []
@@ -409,6 +416,8 @@ def find_fairs(text):
         # 이름 주변 40자에서 연도를 찾는다
         near = text[max(0, m.start() - 15):m.end() + 40]
         y = re.search(r"(?<!\d)(20[0-3]\d)(?!\d)", near)
+        if NOT_FAIR.search(name):
+            continue
         hits.append({"fair": name, "field": fld, "year": int(y.group(1)) if y else 0, "src": src})
         if len(hits) >= 4:
             break
@@ -459,7 +468,7 @@ def guess_fairs(text):
                           n2)[0].strip(" -–—·,")
             if len(n2) < 4 or len(n2) > 55 or n2.lower() in seen:
                 continue
-            if GUESS_STOP.search(n2):
+            if GUESS_STOP.search(n2) or NOT_FAIR.search(n2):
                 continue
             # 전시회 같은 말이 들어 있거나, 연도가 붙어 있고 대문자로 시작하는 고유명사여야 한다
             if not (GUESS_GOOD.search(n2)
