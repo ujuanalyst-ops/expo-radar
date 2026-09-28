@@ -22,6 +22,7 @@
   python3 rivals.py --dump     # 전시회별 경쟁사 목록을 자세히 출력
 """
 
+import html as _html
 import http.cookiejar
 import io
 import json
@@ -268,6 +269,93 @@ FAIRS = [
      "title": "wire Russia / Metallurgy Russia 2027", "match": "wire Russia", "when": "2027-05",
      "kind": "confirmed", "city": "Moscow", "country": "RU", "step": 5000, "max_rows": 5000,
      "note": "와이어·케이블·금속 동시 개최 — 참가업체 카탈로그가 한 쪽에 전부 나온다(러시아어 음차 표기)"},
+    # ── IT·데이터센터·광통신·반도체 (기존 수집기를 그대로 쓰는 곳)
+    {"key": "ofc27", "platform": "mys", "host": "ofc27.mapyourshow.com",
+     "title": "OFC 2027 (광통신)", "match": "OFC", "when": "2027-03", "kind": "confirmed", "cycle": 1,
+     "city": "San Diego", "country": "US",
+     "note": "세계 최대 광통신 전시회 — 데이터센터 고속 인터커넥트 접점"},
+    {"key": "pcim26", "platform": "mfesb",
+     "api": "https://api.messefrankfurt.com/service/esb_api/exhibitor-service/api/2.1/public/exhibitor/search",
+     "api_key": "LXnMWcYQhipLAS7rImEzmZ3CkrU033FMha9cwVSngG4vbufTsAOCQQ==", "event": "PCIMEUROPE",
+     "page": "https://pcim.mesago.com/nuernberg/en/exhibitor-search.html",
+     "title": "PCIM Europe 2026 (전력전자)", "match": "PCIM", "when": "2026-05", "kind": "history", "cycle": 1,
+     "city": "Nuremberg", "country": "DE", "note": "전력전자 — 홈페이지·주소·홀/부스까지 나온다"},
+    {"key": "productronica25", "platform": "xlsx",
+     "url": "https://exhibitors.productronica.com/download/informationsmaterial/"
+            "xls_productronica_Export_2025_de/productronica_export_2025_de.xlsx",
+     "page": "https://exhibitors.productronica.com/ausstellerportal/2025/aussteller/",
+     "title": "productronica 2025 (전자 생산장비)", "match": "PRODUCTRONICA", "when": "2025-11",
+     "kind": "history", "cycle": 2, "city": "Munich", "country": "DE",
+     "note": "격년(다음 2027-11) — electronica와 같은 포털. 주최측 표기상 상업적 이용 불가 자료"},
+    {"key": "ocp26", "platform": "ocp",
+     "page": "https://ocpstagingweb2.opencompute.org/summit/global-summit/sponsorship",
+     "title": "OCP Global Summit 2026 (데이터센터)", "match": "OCP", "when": "2026-10", "kind": "confirmed",
+     "cycle": 1, "city": "San Jose", "country": "US",
+     "note": "AI 데이터센터 하드웨어 — 본 사이트가 봇을 막아 스테이징 호스트에서 읽는다(후원 등급=부스, 번호는 미공개)"},
+    {"key": "sc26", "platform": "ungerboeck",
+     "api": "https://hallerickson.ungerboeck.com/prod/api/VFPServer/GetInitialData",
+     "origin": "https://hallerickson.ungerboeck.com", "config": 183,
+     "page": "https://sc26.supercomputing.org/exhibition/exhibitor-list/",
+     "title": "SC26 슈퍼컴퓨팅 (HPC)", "match": "SUPERCOMPUTING", "when": "2026-11", "kind": "confirmed",
+     "cycle": 1, "city": "St. Louis", "country": "US", "note": "HPC·AI 인프라 — 부스·국가·품목코드 포함"},
+    {"key": "embwld26", "platform": "algolia", "app": "4EB6G0V1NT",
+     "api_key": "f0416e3d1b38ae3aa789c8750e12bfe5", "index": "prod_website_companies_en",
+     "filter": 'site:"embwld"', "name_field": "companyName",
+     "page": "https://www.embedded-world.de/en/exhibitors-products/find-exhibitors",
+     "title": "embedded world 2026 (임베디드)", "match": "EMBEDDED WORLD", "when": "2026-03",
+     "kind": "history", "cycle": 1, "city": "Nuremberg", "country": "DE",
+     "note": "임베디드·보드 — 부스·국가 포함"},
+    {"key": "mwc26", "platform": "algolia", "app": "8VVB6VR33K",
+     "api_key": "8cfe02127da8785081bb08f9fbf274c7", "index": "exhibitors-barcelonaMWC",
+     "name_field": "name", "letter_field": "letter",
+     "letters": list("#ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"),
+     "page": "https://www.mwcbarcelona.com/exhibitors",
+     "title": "MWC Barcelona 2026 (통신)", "match": "MWC", "when": "2026-03", "kind": "history",
+     "cycle": 1, "city": "Barcelona", "country": "ES",
+     "note": "세계 최대 통신 전시회 — 머리글자로 나눠 받는다(한 번에 1000건 제한)"},
+    {"key": "semicon_kr26", "platform": "a2z",
+     "api": "https://expo.semi.org/korea2026/Public/Exhibitors.aspx",
+     "page": "https://www.semiconkorea.org", "title": "SEMICON Korea 2026 (반도체)",
+     "match": "SEMICON KOREA", "when": "2026-02", "kind": "history", "cycle": 1,
+     "city": "서울 코엑스", "country": "KR", "note": "반도체 장비·소켓 — 국내 반도체 고객 접점"},
+    {"key": "semicon_tw26", "platform": "a2z",
+     "api": "https://expo.semi.org/taiwan2026/Public/Exhibitors.aspx",
+     "page": "https://www.semicontaiwan.org", "title": "SEMICON Taiwan 2026 (반도체)",
+     "match": "SEMICON TAIWAN", "when": "2026-09", "kind": "history", "cycle": 1,
+     "city": "Taipei", "country": "TW", "note": "대만 반도체 — 커넥터·소켓 업체 다수"},
+    {"key": "semicon_us26", "platform": "a2z",
+     "api": "https://expo.semi.org/west2026/Public/eventmap.aspx",
+     "page": "https://www.semiconwest.org", "title": "SEMICON West 2026 (반도체)",
+     "match": "SEMICON WEST", "when": "2026-10", "kind": "history", "cycle": 1,
+     "city": "Phoenix", "country": "US", "note": "출품사 목록 페이지가 막혀 배치도 페이지에서 읽는다"},
+    {"key": "cioe26", "platform": "cioe",
+     "api": "https://exhibitors.cioe.cn/gwen/data/zslist.ashx?method=dg_zhanshang&random=1",
+     "page": "https://exhibitors.cioe.cn/gwen/index.html",
+     "title": "CIOE 2026 (선전 광전자)", "match": "CIOE", "when": "2026-09", "kind": "history", "cycle": 1,
+     "city": "Shenzhen", "country": "CN", "note": "중국 최대 광전자 — 홀·부스·주요품목 포함(응답이 느리다)"},
+    {"key": "wis26", "platform": "wis", "api": "https://www.worlditshow.co.kr/src/visit_list.php",
+     "year": 2026, "page": "https://www.worlditshow.co.kr/visit/03.php",
+     "title": "월드IT쇼 2026", "match": "월드IT쇼", "when": "2026-04", "kind": "history", "cycle": 1,
+     "city": "서울 코엑스", "country": "KR", "note": "국내 ICT 종합 — 회사명·소개·홈페이지(부스는 팝업)"},
+    {"key": "ectc27", "platform": "ectc", "page": "https://www.ectc.net/exhibitors/",
+     "title": "ECTC 2027 (패키징·인터커넥트)", "match": "ECTC", "when": "2027-06", "kind": "confirmed",
+     "cycle": 1, "city": "Denver", "country": "US", "note": "패키징·인터커넥트 학회 전시(회사명만)"},
+    {"key": "apec27", "platform": "cadmium",
+     "api": "https://www.conferenceharvester.com/floorplan/v2/ajaxcalls/CreateRentedBoothList.asp",
+     "event_id": 27332, "client_id": 2458, "event_key": "DDUCYCSD",
+     "page": "https://www.conferenceharvester.com/floorplan/v2/index.asp?EventKey=DDUCYCSD",
+     "title": "APEC 2027 (전력전자)", "match": "APEC", "when": "2027-03", "kind": "confirmed", "cycle": 1,
+     "city": "New Orleans", "country": "US", "note": "전력전자 — 부스 포함"},
+    {"key": "sensors27", "platform": "a2z",
+     "api": "https://s36.a2zinc.net/clients/questex/sensors27/Public/eventmap.aspx",
+     "page": "https://www.sensorsconverge.com", "title": "Sensors Converge 2027 (센서·IoT)",
+     "match": "SENSORS CONVERGE", "when": "2027-06", "kind": "confirmed", "cycle": 1,
+     "city": "Santa Clara", "country": "US", "note": "다가오는 회차 — 명단이 아직 초기(92곳)"},
+    {"key": "ecoc26", "platform": "wpjson",
+     "api": "https://www.ecocexhibition.com/wp-json/wp/v2/exhibitor-post",
+     "page": "https://www.ecocexhibition.com/exhibit/exhibitor-list/",
+     "title": "ECOC 2026 (유럽 광통신)", "match": "ECOC", "when": "2026-09", "kind": "history", "cycle": 1,
+     "city": "Europe", "country": "DE", "note": "유럽 광통신 — 회사명만(부스는 업체별 상세에 있음)"},
     # ── 방산·항공 (커넥터 수요처인데 그동안 우리 자료에 아예 없던 분야)
     {"key": "eurosatory26", "platform": "finderr",
      "api": "https://eurosatory.finderr.cloud/api/catalog/search_exhibitors",
@@ -898,6 +986,210 @@ def fetch_coexems(f):
     return rows, int(d.get("totalRows") or data.get("totalRows") or len(rows)), f["page"]
 
 
+# ================================================================ IT·데이터센터·반도체
+def fetch_ocp(f):
+    """OCP 글로벌 서밋(데이터센터) — 출품사 명단이 따로 없고 후원 등급별 로고 벽이 곧 부스 명단이다.
+    본 사이트는 봇을 막아 두어(Cloudflare 403) 같은 내용을 내주는 스테이징 호스트에서 읽는다.
+    스테이징이라 인증서가 만료돼 있다(우리 opener는 검증을 끄고 쓴다)."""
+    t = get(opener(), f["page"], timeout=90).decode("utf-8", "replace")
+    tier, rows = "", []
+    for m in re.finditer(r'(?s)<h[1-6][^>]*>(.*?)</h[1-6]>'
+                         r'|<a[^>]+href="([^"]*)"[^>]*>\s*<img[^>]*alt="([^"]*) logo"', t):
+        if m.group(1) is not None:
+            x = clean(TAG.sub("", m.group(1)))
+            if x:
+                tier = x
+            continue
+        name = clean(_html.unescape(m.group(3)))
+        if name:
+            rows.append((name[:90], "", f"{tier} {m.group(2)}"[:600]))
+    return rows, len(rows), f["page"]
+
+
+def fetch_ungerboeck(f):
+    """Momentus(Ungerboeck) 부스 배치도 API — SC(슈퍼컴퓨팅) 등이 쓴다.
+    토큰이 필요 없고 ConfigID 하나로 명단을 통째로 준다."""
+    import uuid
+    hd = {"Accept": "application/json", "Content-Type": "application/json", "appcode": "VFP",
+          "authorization": "Bearer", "clientappcategory": "30", "clientapptype": "2",
+          "emailaddress": "", "servicerequeststart": "", "showactionid": "false",
+          "ucn": "", "udf": "", "uldf": "", "utf": "", "utmf": "", "utsf": "",
+          "version": "25.3.9508.32422", "workstationname": uuid.uuid4().hex,
+          "wsid": uuid.uuid4().hex[:24], "x-nonce": str(uuid.uuid4()),
+          "User-Agent": UA, "Origin": f["origin"]}
+    req = urllib.request.Request(f["api"], data=json.dumps(["", 0, "", f["config"], "", 0]).encode(),
+                                 headers=hd, method="POST")
+    j = json.loads(urllib.request.urlopen(req, timeout=120).read().decode("utf-8", "replace"))
+    if isinstance(j, list):
+        j = j[0]
+    if isinstance(j, str):
+        j = json.loads(j)
+    rows = []
+    for e in (j.get("ReturnObj") or {}).get("ExhibitorList", []):
+        name = clean(e.get("Name"))
+        if not name:
+            continue
+        rows.append((name[:90], ", ".join(e.get("BoothNames") or [])[:24],
+                     " ".join([clean(e.get("CatCountryDesc")), " ".join(e.get("ProductCodes") or [])])[:600]))
+    return rows, len(rows), f["page"]
+
+
+def fetch_algolia(f):
+    """전시회 검색이 Algolia로 돌아가는 곳(NürnbergMesse·GSMA 계열).
+    앱ID·키는 화면 코드에 박힌 열람용이라 주최측이 바꾸면 다시 뽑아야 한다.
+    한 번에 1000건까지만 주므로 letters가 있으면 머리글자로 나눠 받는다."""
+    url = f"https://{f['app']}-dsn.algolia.net/1/indexes/{f['index']}/query"
+    hd = {"X-Algolia-Application-Id": f["app"], "X-Algolia-API-Key": f["api_key"],
+          "Content-Type": "application/json", "User-Agent": UA}
+    rows, seen, total = [], set(), 0
+    for key in (f.get("letters") or [None]):
+        body = {"query": "", "hitsPerPage": 1000, "attributesToHighlight": []}
+        flt = [f["filter"]] if f.get("filter") else []
+        if key is not None:
+            flt.append(f'{f["letter_field"]}:"{key}"')
+        if flt:
+            body["filters"] = " AND ".join(flt)
+        d = _json_post(url, json.dumps(body).encode(), hd, timeout=120)
+        total += int(d.get("nbHits") or 0)
+        for h in d.get("hits", []):
+            name = clean(h.get(f["name_field"]))
+            if not name or name in seen:
+                continue
+            seen.add(name)
+            b = h.get("booth")
+            if isinstance(b, list) and b and isinstance(b[0], dict):
+                booth = ", ".join(clean(f"{x.get('boothHall','')} {x.get('boothNumber','')}") for x in b)
+            else:
+                st = h.get("stands") or h.get("booth") or ""
+                booth = clean(", ".join(str(x) for x in st) if isinstance(st, list) else str(st))
+            extra = " ".join(str(h.get(k) or "") for k in ("country", "city", "building"))
+            rows.append((name[:90], booth[:24], clean(extra)[:600]))
+    return rows, total or len(rows), f["page"]
+
+
+def fetch_a2z(f):
+    """a2zinc 출품사 표(SEMI 계열·Questex 등) — 한 쪽에 전부 나오는 정적 HTML."""
+    t = get(opener(), f["api"], timeout=180).decode("utf-8", "replace")
+    rows = []
+    for tr in re.findall(r"(?s)<tr[^>]*>(.*?)</tr>", t):
+        m = re.search(r'(?s)class="exhibitorName"[^>]*href="(eBooth\.aspx[^"]*)"[^>]*>(.*?)</a>', tr)
+        if not m:
+            continue
+        name = clean(TAG.sub(" ", m.group(2)))
+        if not name:
+            continue
+        booths = [clean(TAG.sub(" ", x)) for x in
+                  re.findall(r'(?s)<td[^>]*class="[^"]*boothLabel[^"]*"[^>]*>(.*?)</td>', tr)]
+        rows.append((name[:90], " ".join(x for x in booths if x)[:24], ""))
+    return rows, len(rows), f.get("page") or f["api"]
+
+
+def fetch_cioe(f):
+    """CIOE(선전 광전자) — 목록이 ashx AJAX로 오고, 본문과 페이저가 구분자로 붙어 온다."""
+    op = opener()
+    rows, page, total = [], 1, 0
+    while page < 40:
+        body = urllib.parse.urlencode({"pageindex": page, "pagesize": 200, "zq": "", "zg": "",
+                                       "zsqy": "", "zslx": "", "cxtj": "", "zpfw": ""}).encode()
+        req = urllib.request.Request(f["api"], data=body, headers={
+            "User-Agent": UA, "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8", "Referer": f["page"]})
+        t = op.open(req, timeout=180).read().decode("utf-8", "replace")
+        part = t.split("!@#$%^&*")
+        lst = part[0]
+        if len(part) > 1 and not total:
+            m = re.search(r"Total:(\d+)", part[1])
+            total = int(m.group(1)) if m else 0
+        got = 0
+        for li in re.findall(r"(?s)<li>.*?</li>", lst):
+            g = lambda p: (clean(TAG.sub(" ", re.search(p, li, re.S).group(1))) if re.search(p, li, re.S) else "")  # noqa: E731
+            name = g(r'<h3 class="title">(.*?)</h3>')
+            if not name:
+                continue
+            got += 1
+            rows.append((name[:90], f"{g(r'Hall：</dt><dd>(.*?)</dd>')} {g(r'Booth No：</dt><dd>(.*?)</dd>')}".strip()[:24],
+                         g(r"Main products：</dt><dd>(.*?)</dd>")[:600]))
+        if not got or len(rows) >= (total or 10 ** 9):
+            break
+        page += 1
+    return rows, total or len(rows), f["page"]
+
+
+def fetch_wis(f):
+    """월드IT쇼 — 목록이 16건씩 JSON으로 온다. 부스는 팝업에만 있어 여기선 안 가져온다."""
+    op = opener()
+    rows, page = [], 1
+    while page < 80:
+        u = f["api"] + "?" + urllib.parse.urlencode({"page": page, "order": "", "make": "com_name",
+                                                     "search": "", "insert_year": f["year"]})
+        req = urllib.request.Request(u, headers={"User-Agent": UA, "Referer": f["page"]})
+        d = json.loads(op.open(req, timeout=60).read().decode("utf-8", "replace"))
+        if not d:
+            break
+        for r in d:
+            name = clean(r.get("com_name"))
+            if name:
+                rows.append((name[:90], "", " ".join([clean(r.get("company_content")),
+                                                      clean(r.get("homepage"))])[:600]))
+        page += 1
+    return rows, len(rows), f["page"]
+
+
+def fetch_ectc(f):
+    """ECTC(패키징·인터커넥트 학회 전시) — 회사명만 <br>로 줄줄이 적힌 정적 페이지."""
+    t = get(opener(), f["page"], timeout=90).decode("utf-8", "replace")
+    seg = t[t.find("Exhibiting Companies"):][:60000]
+    rows = []
+    for para in re.findall(r'(?s)<p class="wp-block-paragraph">(.*?)</p>', seg):
+        for x in re.split(r"<br\s*/?>", para):
+            name = clean(_html.unescape(TAG.sub("", x)))
+            if name and len(name) > 2:
+                rows.append((name[:90], "", ""))
+    return rows, len(rows), f["page"]
+
+
+def fetch_cadmium(f):
+    """Cadmium Conference Harvester 배치도(APEC 등) — 필수 인자를 다 채워야 목록이 온다."""
+    body = urllib.parse.urlencode({
+        "EventID": f["event_id"], "EventClientID": f["client_id"], "EventKey": f["event_key"],
+        "ShowLogos": "Yes", "LogoLocation": "1", "ShowCompanyWithNegativeBalance": 1,
+        "OpenBoothPopupLink": "ajaxcalls/OpenBoothPopup.asp?",
+        "RentedBoothPopupLink": "ajaxcalls/ExhibitorInfoPopup.asp?",
+        "BlockLogosBeforeLogoTaskCompletion": "true"}).encode()
+    d = _json_post(f["api"], body, {
+        "X-Requested-With": "XMLHttpRequest",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "Referer": f["page"]}, timeout=90)
+    rows = []
+    for x in d.get("boothList") or []:
+        name = clean(x.get("exhibitorName"))
+        if name:
+            rows.append((name[:90], clean(x.get("boothNumber"))[:24], ""))
+    return rows, len(rows), f["page"]
+
+
+def fetch_wpjson(f):
+    """워드프레스 REST로 출품사를 내주는 곳(ECOC) — 100건씩 넘긴다."""
+    op = opener()
+    rows, page = [], 1
+    while page < 30:
+        try:
+            raw = get(op, f["api"] + f"?per_page=100&page={page}&_fields=id,title,link", timeout=90)
+        except Exception:  # noqa: BLE001
+            break
+        items = json.loads(raw.decode("utf-8", "replace"))
+        if not isinstance(items, list) or not items:
+            break
+        for x in items:
+            name = clean(_html.unescape(TAG.sub("", (x.get("title") or {}).get("rendered", ""))))
+            if name:
+                rows.append((name[:90], "", clean(x.get("link"))[:600]))
+        if len(items) < 100:
+            break
+        page += 1
+    return rows, len(rows), f["page"]
+
+
 def fetch_robots(f):
     """robots.py가 모아 둔 로봇 전시회 출품사 명단(data/robots.json)을 그대로 읽는다.
     로봇·자동화는 커넥터 수요처인데 여기선 따로 긁지 않고 이미 받아 둔 것을 재사용한다
@@ -939,6 +1231,9 @@ FETCH = {"mys": fetch_mys, "xlsx": fetch_xlsx, "jsae": fetch_jsae, "ceatec": fet
          "robots": fetch_robots, "finderr": fetch_finderr, "hubj2c": fetch_hubj2c,
          "aspevents": fetch_aspevents, "eshow": fetch_eshow, "farnborough": fetch_farnborough,
          "hmcsv": fetch_hmcsv, "mfesb": fetch_mfesb, "coexems": fetch_coexems,
+         "ocp": fetch_ocp, "ungerboeck": fetch_ungerboeck, "algolia": fetch_algolia,
+         "a2z": fetch_a2z, "cioe": fetch_cioe, "wis": fetch_wis, "ectc": fetch_ectc,
+         "cadmium": fetch_cadmium, "wpjson": fetch_wpjson,
          "kes": fetch_kes, "table": fetch_table, "tems": fetch_tems, "hktdc": fetch_hktdc,
          "taitra": fetch_taitra, "manual": fetch_manual}
 

@@ -141,6 +141,23 @@
 - **전세계 로봇 전시회 목록**은 `data/expos.json`에서 제목(core)·설명에 로봇이 들어간 것을 고른다. 명단을 웹에 안 여는 곳(로보월드·ROBEX·WRC·CIROS·TAIROS)은 '미확보'로만 표시.
 - 회차가 바뀌면 `FAIRS`에 새 회차(호스트)를 한 줄 추가한다. 화면은 `robots.html`(CSV 내려받기 포함).
 
+
+### 분야 확장 (2026-09-28) — 자동차 쏠림 해소
+
+커넥터 경쟁사 추적이 자동차·전자에 몰려 있어 **로봇·IT·산업·방산**으로 넓혔다. 33개 → **79개 전시회**, 기록 238 → **465건**, 검사한 출품사 25,790 → **67,651개**.
+
+| 분야 | 새로 붙인 곳 | 방법 |
+|---|---|---|
+| 로봇 | robots.py가 모은 21회차 재사용 | `platform: robots` — 새로 긁지 않는다 |
+| 방산·항공 | Eurosatory · DSEI · 파리 에어쇼 · AUSA · XPONENTIAL · 판버러 | finderr / ASP.events / hubj2c / eShow |
+| 산업 | Hannover Messe · SPS · 오토메이션월드 | CSV 내려받기 / 메세프랑크푸르트 API(**GET**이어야 함) / 코엑스 EMS(`coex-host` 헤더 필수) |
+| IT·데이터센터 | OFC · ECOC · OCP · SC · embedded world · MWC · CIOE · SEMICON 3곳 · PCIM · productronica · ECTC · APEC · Sensors Converge | MapYourShow / WP REST / Algolia / Ungerboeck / a2zinc / Cadmium |
+
+- **명단을 못 받는 곳**: electronica China(명단 페이지 자체가 없음), K-Display(2027 준비 중), Seoul ADEX·K-DEX(방산, 로그인 전용·목록 없음) — 아시아 커넥터 업체가 방산에 나오는지는 이 두 곳이 열려야 확인된다.
+- **API 키 주의**: Eurosatory·SPS/PCIM·Algolia 키는 화면 코드에 박힌 열람용이라 주최측이 바꾸면 401이 난다 → 번들에서 다시 뽑는다.
+- **저작권 주의**: electronica·productronica 엑셀 명단에는 "상업적 이용 불가" 표기가 있다. 내부 참고용으로만 쓴다.
+- 결과는 `matrix.py`가 엑셀(`share/UJU_전시회_경쟁사_매트릭스_검증_*.xlsx`)로 낸다. ● 확인 / ✕ 명단에 없음 / ○ 명단 미확보(사람 추정)를 구분한다.
+
 ## 업무 관련도 ★
 
 커넥터·와이어하네스(5) > 전자부품·전장·카메라모듈·electronica(4) > 전자·배터리·EV·센서·디스플레이(3) >
