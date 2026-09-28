@@ -4,5 +4,7 @@ __pycache__/
 logs/
 # 수집 원본·날짜별 공유본은 collect/build로 재생성
 data/
+# 단, 링크드인 광고는 브라우저로 손수 받은 것이라 재생성이 안 된다 — 이것만 보관한다
+!data/linkedin_ads.json
 share/
 *.tmp

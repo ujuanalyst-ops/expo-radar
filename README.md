@@ -158,6 +158,46 @@
 - **저작권 주의**: electronica·productronica 엑셀 명단에는 "상업적 이용 불가" 표기가 있다. 내부 참고용으로만 쓴다.
 - 결과는 `matrix.py`가 엑셀(`share/UJU_전시회_경쟁사_매트릭스_검증_*.xlsx`)로 낸다. ● 확인 / ✕ 명단에 없음 / ○ 명단 미확보(사람 추정)를 구분한다.
 
+## 🕵️ 경쟁사 흔적 (`traces.py` → `data/traces.json` · `app-traces.js` · `traces.html`)
+
+`rivals.py`는 **전시회 주최 측의 출품사 명단**을 읽는다. 확실하지만 두 군데가 뚫린다 —
+명단을 안 여는 전시회(서울 ADEX·KADEX·electronica China·InnoTrans 등)와, 이미 끝나 명단이 내려간 과거 회차.
+`traces.py`는 반대편에서 판다: **경쟁사 이름이 박힌 글**을 모아 거기서 전시회 이름을 뽑는다.
+
+### 어디서 모으나
+
+| 출처 | 방법 | 비고 |
+|---|---|---|
+| 구글 뉴스 RSS | `news.google.com/rss/search` (en/ja/ko/zh/de/fr/tw) | 주력. `after:2010-01-01 before:2015-01-01` 같은 **기간 질의**로 옛 기사까지 꺼낸다 |
+| 빙 뉴스 RSS | `bing.com/news/search?format=RSS` | 보조 |
+| 회사 소식란 | 직접 읽기 | 이리소·야자키·I-PEX·JAE·로젠베르거·앱티브만 열린다. 몰렉스·암페놀·TE·하팅·샘텍은 403/타임아웃 |
+| 링크드인 광고 | 브라우저로 받아 `data/linkedin_ads.json` | 서버에서는 403. 갱신 절차는 `tools/linkedin_ads.md` |
+| 빙·덕덕고 웹검색 | **쓰지 않음** | 회사 홈페이지와 스팸만 올라와 2026-09 확인 후 버렸다 |
+
+### 전시회 이름을 알아내는 법
+
+1. **사전 대조** — 직접 정리한 150여 곳(`FAIRS`) + `data/rivals.json`·`data/robots.json`·`data/expos.json`에서
+   가져온 이름 = 약 6,000개. DB에서 온 이름은 앞머리 문자열 검사로 먼저 걸러 정규식을 아낀다.
+2. **문장에서 캐내기**(`guess_fairs`) — 사전에 없으면 `at IOTFA 2017`, `「国際ロボット展」に出展`,
+   `인터배터리 2026에 참가` 같은 꼴에서 이름을 뽑는다. **우리가 모르던 전시회를 찾는 게 목적**이라
+   화면에 `기사에서 캐냄`으로 따로 표시한다.
+3. 이름 주변 40자에서 연도를 읽는다. 같은 경쟁사·같은 해에 이름이 겹치면(`IRCE` / `IRCE Expo`) 하나로 합친다.
+
+`rivals.json`이 이미 명단으로 확인한 짝은 `known: true`로 찍어, 화면에서 **명단 확인됨 / 흔적만**을 구분한다.
+
+### 하루 한도와 쌓기
+
+구글 뉴스는 한 번에 2,000건 넘게 물으면 뒤쪽이 빈 응답으로 온다. 그래서
+**하루 1,200건씩 날짜에 따라 다른 조각**을 돌리고(전체 2,190건 → 이틀에 한 바퀴),
+받은 글은 `data/traces_raw.json`에 누적한다 → **날이 갈수록 흔적이 늘어난다**.
+
+### 한계
+
+- **참가 확정이 아니다.** "나갈 예정" 기사도, 남의 부스에 제품이 걸린 기사도 같이 잡힌다.
+- **안 나온다고 안 나간 게 아니다.** 보도자료를 안 내는 곳(이리소·JST·LEMO·라디알·연호전자)은 흔적이 거의 없다.
+- 링크드인 광고는 **최근 1년치**만 남는다.
+- 한국어 줄은 구글 번역(키 없는 엔드포인트) 기계번역이며 `data/ko_cache.json`에 문장 단위로 캐시한다.
+
 ## 업무 관련도 ★
 
 커넥터·와이어하네스(5) > 전자부품·전장·카메라모듈·electronica(4) > 전자·배터리·EV·센서·디스플레이(3) >
@@ -168,7 +208,7 @@
 
 `collect.py`(수집) + `rivals.py`(경쟁사 출품) → `taxonomy.py`(산업분야·관련도·국내 전시장) + `countries.py`(국가 사전) →
 `build.py`(누적 `data/expos.json`, 상세 캐시 `data/details.json`, 중복 합치기 → `app-data.js`) →
-`index.html / app.js / styles.css`. 세계 지도는 `geo_world.py`가 한 번 만든 `app-geo.js`(로빈슨 투영 SVG 패스).
+`index.html / app.js / styles.css`. 별도 화면은 `robots.html`(로봇 출품사)·`traces.html`(경쟁사 흔적). 세계 지도는 `geo_world.py`가 한 번 만든 `app-geo.js`(로빈슨 투영 SVG 패스).
 
 - 분류만 다시: `python3 build.py --no-fetch`
 - 한 출처만: `python3 build.py --only=gep`

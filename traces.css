@@ -1,0 +1,85 @@
+/* 경쟁사 흔적 추적 — styles.css · robots.css 위에 얹는 페이지 전용 스타일 */
+
+.ttool{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 14px;margin-bottom:12px}
+.ttool select{border:1px solid var(--line);border-radius:9px;padding:7px 9px;font:inherit;background:#fff;color:var(--ink);max-width:260px}
+.ttool label.ck{display:inline-flex;gap:5px;align-items:center;color:var(--muted);font-size:12.5px;white-space:nowrap}
+.ttool .cnt{margin-left:auto;color:var(--muted);font-size:12.5px;white-space:nowrap}
+.ttool .cnt b{color:var(--ink)}
+
+/* 분야 칩 */
+.fchips{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 12px}
+.fchips .lbl{color:var(--dim);font-size:11.5px;font-weight:800;align-self:center;margin-right:2px}
+.fchip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:700;color:var(--muted)}
+.fchip:hover{border-color:var(--brand);color:var(--brand)}
+.fchip.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.fchip b{font-weight:800;margin-left:4px;opacity:.75}
+
+/* 흔적 표 */
+.ttbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.ttbl th{position:sticky;top:0;background:#f7f9fc;color:var(--muted);font-size:11.5px;text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap;z-index:1}
+.ttbl td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.ttbl tr.pr{cursor:pointer}
+.ttbl tr.pr:hover td{background:#f4f8fd}
+.ttbl .riv{font-weight:700;min-width:104px;max-width:170px;white-space:normal}
+.ttbl .riv small{display:block;color:var(--dim);font-weight:400;font-size:11px}
+.ttbl .fr{font-weight:700;color:var(--brand);min-width:132px;max-width:300px;white-space:normal}
+.ttbl .yr{width:52px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ttbl .ev{color:#3b4656;min-width:220px;max-width:620px;white-space:normal}
+.ttbl .ev small{display:block;color:var(--dim);font-size:11px;margin-top:2px}
+.ttbl .n{width:56px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* 근거 뱃지 */
+.badge{display:inline-block;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:700;white-space:nowrap}
+.badge.known{background:#e4f6ee;color:#0f6b4a}
+.badge.fresh{background:#fff2df;color:#8a4b00}
+.badge.news{background:#eef2f7;color:#3b4656}
+.badge.ad{background:#efe8ff;color:#5a2ea6}
+.badge.official{background:#e6f1ff;color:#0d4a9a}
+.badge.web{background:#f5f5f5;color:#555}
+.badge.dig{background:#fdecec;color:#b32d2d}
+
+/* 출처 링크 */
+.srcs{margin-top:4px}
+.srcs a{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:11px;margin:2px 4px 0 0;color:var(--brand);font-weight:600;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
+.srcs a:hover{border-color:var(--brand)}
+.srcs a em{font-style:normal;color:var(--dim);font-weight:400;margin-left:4px}
+
+/* 전시회 카드 */
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
+.tcard{padding:14px 16px}
+.tcard h3{margin:0 0 3px;font-size:15px}
+.tcard .meta{color:var(--muted);font-size:12px;margin-bottom:9px}
+.tcard .rl{display:flex;gap:5px;flex-wrap:wrap}
+.tcard .rl span{background:#eef2f7;border-radius:6px;padding:2px 8px;font-size:11.5px;color:#3b4656}
+.tcard .rl span.fresh{background:#fff2df;color:#8a4b00}
+
+/* 원문 목록 */
+.rawlist{display:flex;flex-direction:column;gap:0}
+.rawrow{display:flex;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line);align-items:flex-start}
+.rawrow:hover{background:#f7fafd}
+.rawrow .when{width:88px;flex:0 0 88px;color:var(--dim);font-size:11.5px;font-variant-numeric:tabular-nums;padding-top:2px}
+.rawrow .who{width:130px;flex:0 0 130px;font-size:12px;font-weight:700;color:#3b4656}
+.rawrow .body{flex:1;min-width:0}
+.rawrow .body a.tt{font-weight:600;color:var(--ink);font-size:13px}
+.rawrow .body a.tt:hover{color:var(--brand);text-decoration:underline}
+.rawrow .body .ko{display:block;color:var(--brand);font-size:12.5px;margin-top:2px}
+.rawrow .body .sub{color:var(--dim);font-size:11.5px;margin-top:3px}
+.rawrow .body .sub b{color:var(--muted);font-weight:700}
+
+.how h3{margin:18px 0 8px;font-size:15px}
+.how h3:first-child{margin-top:0}
+.how ul{margin:0;padding-left:18px;color:#3b4656}
+.how li{margin-bottom:7px}
+.how table{border-collapse:collapse;font-size:12.5px;margin:6px 0 4px}
+.how th,.how td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+.how th{background:#f7f9fc;color:var(--muted);font-size:11.5px}
+
+/* 좁은 화면에서는 근거 칸이 잘리지 않게 표를 접는다 */
+@media (max-width:900px){
+  .ttbl .ev{min-width:0}
+  .ttbl .srcs a{max-width:150px}
+}
+@media (max-width:760px){
+  .rawrow{flex-wrap:wrap}
+  .rawrow .when,.rawrow .who{width:auto;flex:0 0 auto}
+}
