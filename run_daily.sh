@@ -25,6 +25,7 @@ mkdir -p logs
   /usr/bin/python3 -u rivals.py       # 경쟁사 출품 정보(전시회 출품사 명단 + 로봇 전시회 재사용)
   /usr/bin/python3 -u build.py        # -u: 진행 상황이 로그에 바로바로 찍히게
   /usr/bin/python3 build_share.py     # 공유용 단일 HTML(share/)도 매일 갱신
+  /usr/bin/python3 matrix.py          # 경쟁사 매트릭스 엑셀(share/)도 매일 갱신
   publish_github                      # 새 app-data.js를 GitHub(공개 페이지)에 올린다
   echo "──────── $(date '+%F %T') 완료"
 } >> "$LOG" 2>&1

@@ -174,11 +174,12 @@ def match_rivals(name):
 # 전시회가 79개까지 늘어 한 화면에 섞으면 못 본다. 분야 하나씩 나눠 보도록 꼬리표를 붙인다.
 FIELD_RULES = [
     ("robot", "🤖 로봇·자동화", ("rb_", "automate")),
-    ("defense", "🛡 방산·항공", ("eurosatory", "dsei", "siae", "ausa", "xponential", "farnborough")),
-    ("auto", "🚗 자동차", ("jsae", "ampa", "aapex", "sema", "koaa")),
-    ("factory", "🏭 산업·기계", ("hannover", "sps26", "autoworld", "imts", "packexpo")),
-    ("medical", "🏥 의료", ("mdmwest",)),
-    ("connector", "🔌 커넥터·케이블 전문", ("ich_", "interwire", "wire_")),
+    ("defense", "🛡 방산·항공", ("eurosatory", "dsei", "siae", "ausa", "xponential", "farnborough", "droneshow")),
+    ("auto", "🚗 자동차", ("jsae", "ampa", "aapex", "sema", "koaa", "automechanika", "iaa", "seoulmobility")),
+    ("factory", "🏭 산업·기계", ("hannover", "sps26", "autoworld", "imts", "packexpo", "elecs", "h2meet")),
+    ("medical", "🏥 의료", ("mdmwest", "medica")),
+    ("battery", "🔋 배터리·EV", ("tbse", "tbsm", "interbattery", "evtrend")),
+    ("connector", "🔌 커넥터·케이블 전문", ("ich_", "interwire", "wire_", "wire26")),
     # 나머지는 전자·IT (전자부품·반도체·광통신·데이터센터·통신·AV)
 ]
 FIELD_DEFAULT = ("elec", "💻 전자·IT")
@@ -410,6 +411,78 @@ FAIRS = [
      "title": "Touch Taiwan 2026 (디스플레이·FPC)", "match": "TOUCH TAIWAN", "when": "2026-04",
      "kind": "history", "cycle": 1, "city": "Taipei", "country": "TW",
      "note": "디스플레이·FPC — K-Display의 대만판"},
+    {"key": "medica26", "platform": "messedus",
+     "api": "https://finder.messe-duesseldorf.de/vis-api/vis/v1/en/directory/",
+     "vis_domain": "www.compamed-tradefair.com",
+     "page": "https://www.compamed-tradefair.com/vis/v1/en/directory/exhibitors",
+     "title": "MEDICA + COMPAMED 2026 (뒤셀도르프 의료)", "match": "COMPAMED", "when": "2026-11",
+     "kind": "confirmed", "cycle": 1, "city": "Düsseldorf", "country": "DE",
+     "note": "COMPAMED은 의료기기 부품전 — 고신뢰 커넥터 업체가 가장 많이 모이는 곳 중 하나(홀·부스 포함)"},
+    {"key": "wire26", "platform": "messedus",
+     "api": "https://finder.messe-duesseldorf.de/vis-api/vis/v1/en/directory/",
+     "vis_domain": "www.wire-tradefair.com",
+     "page": "https://www.wire-tradefair.com/vis/v1/en/directory/exhibitors",
+     "title": "wire 뒤셀도르프 2026 (와이어·케이블)", "match": "WIRE DUSSELDORF", "when": "2026-04",
+     "kind": "confirmed", "cycle": 2, "city": "Düsseldorf", "country": "DE",
+     "note": "세계 최대 와이어·케이블 전시회(격년) — 우리 업의 상류 공정"},
+    {"key": "tbse26", "platform": "mys", "host": "tbse26.mapyourshow.com",
+     "title": "The Battery Show Europe 2026 (슈투트가르트)", "match": "BATTERY SHOW EUROPE",
+     "when": "2026-06", "kind": "history", "cycle": 1, "city": "Stuttgart", "country": "DE",
+     "note": "유럽 배터리·EV — TE·Amphenol·JAE·야마이치 출품"},
+    {"key": "tbsm26", "platform": "mys", "host": "tbsm26.mapyourshow.com",
+     "title": "The Battery Show North America 2026 (디트로이트)", "match": "BATTERY SHOW",
+     "when": "2026-10", "kind": "history", "cycle": 1, "city": "Detroit", "country": "US",
+     "note": "북미 배터리·EV — 커넥터 업체가 유럽판보다 훨씬 많다"},
+    {"key": "automechanika26", "platform": "mfesb",
+     "api": "https://api.messefrankfurt.com/service/esb_api/exhibitor-service/api/2.1/public/exhibitor/search",
+     "api_key": "LXnMWcYQhipLAS7rImEzmZ3CkrU033FMha9cwVSngG4vbufTsAOCQQ==", "event": "AUTOMECHANIKA",
+     "page": "https://automechanika.messefrankfurt.com",
+     "title": "Automechanika Frankfurt 2026", "match": "AUTOMECHANIKA", "when": "2026-09",
+     "kind": "history", "cycle": 2, "city": "Frankfurt", "country": "DE",
+     "note": "자동차 애프터마켓(격년) — 출품사 4,146곳이지만 커넥터 업체는 사실상 없다"},
+    {"key": "iaa25", "platform": "xlsx",
+     "url": "https://exhibitors.iaa-mobility.com/download/informationsmaterial/"
+            "xls_IAA_Export_2025_en/iaa_export_2025_en.xlsx",
+     "page": "https://exhibitors.iaa-mobility.com/exhibitordirectory/2025/start/",
+     "title": "IAA Mobility 2025 (뮌헨)", "match": "IAA MOBILITY", "when": "2025-09", "kind": "history",
+     "cycle": 2, "city": "Munich", "country": "DE",
+     "note": "격년(다음 2027-09) — 완성차·모빌리티 서비스 위주로 바뀌어 부품사 비중이 낮다"},
+    # ── 한국 (배터리·전력·모빌리티·수소·드론)
+    {"key": "interbattery26", "platform": "coexems",
+     "api": "https://site-api.ems.coex.co.kr/public/company-directories",
+     "coex_host": "www.interbattery.or.kr", "campaign": 2620,
+     "page": "https://www.interbattery.or.kr",
+     "title": "InterBattery 2026 (서울 배터리)", "match": "INTERBATTERY", "when": "2026-03",
+     "kind": "history", "cycle": 1, "city": "서울 코엑스", "country": "KR",
+     "note": "국내 최대 배터리전 — 부스·홈페이지·품목 포함 (2027 회차는 아직 미공개)"},
+    {"key": "evtrend26", "platform": "coexems",
+     "api": "https://site-api.ems.coex.co.kr/public/company-directories",
+     "coex_host": "www.evtrendkorea.co.kr", "campaign": 2639,
+     "page": "https://www.evtrendkorea.co.kr",
+     "title": "EV 트렌드 코리아 2026", "match": "EV TREND", "when": "2026-03", "kind": "history",
+     "cycle": 1, "city": "서울 코엑스", "country": "KR", "note": "EV 충전·인프라 — 규모가 작다(68곳)"},
+    {"key": "elecs26", "platform": "elecs", "year": 2026,
+     "page": "https://elecskorea.org/fairContents.do?FAIRMENU_IDX=6971&hl=KOR",
+     "title": "일렉스 2026 (옛 SIEF 전기전력전)", "match": "일렉스", "when": "2026-10", "kind": "history",
+     "cycle": 1, "city": "서울 코엑스", "country": "KR",
+     "note": "전기·전력 기자재 — 옛 sief.co.kr은 죽고 elecskorea.org로 옮겼다(부스·품목 포함)"},
+    {"key": "h2meet26", "platform": "h2meet",
+     "api": "https://www.h2meet.com/common/inc/company_info.php",
+     "page": "https://www.h2meet.com/html/ko/booth_list.php", "lo": 1, "hi": 200,
+     "title": "H2 MEET 2026 (수소산업전)", "match": "H2 MEET", "when": "2026-09", "kind": "history",
+     "cycle": 1, "city": "고양 킨텍스", "country": "KR",
+     "note": "수소 — 목록 화면은 비어 있지만 업체별 상세가 살아 있어 번호로 훑는다"},
+    {"key": "droneshow26", "platform": "gnuboard",
+     "api": "https://www.droneshowkorea.com/board/bbs/board.php?bo_table=total_company",
+     "page": "https://www.droneshowkorea.com/board/bbs/board.php?bo_table=total_company",
+     "title": "드론쇼코리아 2026 (부산)", "match": "드론쇼코리아", "when": "2026-02", "kind": "history",
+     "cycle": 1, "city": "부산 벡스코", "country": "KR", "note": "국내 최대 드론전 — 회사명만(부스는 상세에 있음)"},
+    {"key": "seoulmobility25", "platform": "kamaxlsx",
+     "url": "https://mobilityshow.or.kr/download/2025/SMS_2025_Exhibitors_List.xlsx",
+     "page": "https://mobilityshow.or.kr/ko/exhibitors_list",
+     "title": "서울모빌리티쇼 2025", "match": "서울모빌리티쇼", "when": "2025-04", "kind": "history",
+     "cycle": 2, "city": "고양 킨텍스", "country": "KR",
+     "note": "격년(다음 2027-04) — 다음 회차 목록은 준비 중이라 지난 회차 엑셀을 쓴다"},
     # ── 방산·항공 (커넥터 수요처인데 그동안 우리 자료에 아예 없던 분야)
     {"key": "eurosatory26", "platform": "finderr",
      "api": "https://eurosatory.finderr.cloud/api/catalog/search_exhibitors",
@@ -663,7 +736,8 @@ def fetch_mys(f):
     rows = []
     for h in d.get("hit", []):
         fl = h.get("fields", {})
-        booth = [b for b in (fl.get("boothsdisplay_la") or []) if "random" not in str(b)]
+        booth = [str(b).replace("randomstring", "").strip() for b in (fl.get("boothsdisplay_la") or [])]
+        booth = [b for b in booth if b]
         rows.append((fl.get("exhname_t", ""), booth[0] if booth else "",
                      (fl.get("exhdesc_t") or "")[:600]))
     return rows, int(d.get("found") or len(rows)), gallery
@@ -1315,6 +1389,133 @@ def fetch_chanchao(f):
     return rows, len(rows), f["page"]
 
 
+def fetch_messedus(f):
+    """메세 뒤셀도르프 공통 출품사 API — 어느 전시회인지는 X-Vis-Domain 헤더로 가른다.
+    한 도메인이 같은 기간 함께 열리는 전시회를 다 담아 온다(MEDICA+COMPAMED처럼).
+    머리글자 a~z를 다 돌아 합친다."""
+    op = opener()
+    rows, seen = [], set()
+    for L in "abcdefghijklmnopqrstuvwxyz":
+        req = urllib.request.Request(f["api"] + L, headers={
+            "User-Agent": UA, "Accept": "application/json", "X-Vis-Domain": f["vis_domain"]})
+        try:
+            d = json.loads(op.open(req, timeout=120).read().decode("utf-8", "replace"))
+        except Exception:  # noqa: BLE001
+            continue
+        for e in d if isinstance(d, list) else []:
+            eid = e.get("exh")
+            if not eid or eid in seen:
+                continue
+            if f.get("only") and not str(eid).startswith(f["only"]):
+                continue
+            seen.add(eid)
+            name = clean(e.get("name") or e.get("exhName"))
+            if not name:
+                continue
+            tags = [t if isinstance(t, str) else str(t.get("name") or t.get("label") or "")
+                    for t in (e.get("tags") or [])]
+            rows.append((name[:90], clean(e.get("location"))[:24],
+                         " ".join([clean(e.get("country")), clean(e.get("city")),
+                                   " ".join(tags)])[:600]))
+        time.sleep(0.1)
+    return rows, len(rows), f["page"]
+
+
+# ================================================================ 한국 전시회
+def fetch_elecs(f):
+    """일렉스(옛 SIEF 전기전력전) — 한 페이지에 2016~2026 회차가 연도별 패널로 다 들어 있다.
+    '<연도> 참가업체 목록' 제목 다음 패널만 잘라 읽는다."""
+    t = get(opener(), f["page"], timeout=120).decode("utf-8", "replace")
+    m = re.search(rf'{f["year"]}\s*참가업체 목록(.*?)(?:참가업체 목록|</body>)', t, re.S)
+    seg = m.group(1) if m else ""
+    rows = []
+    for tr in re.findall(r"(?s)<tr[^>]*>(.*?)</tr>", seg):
+        tds = [clean(_html.unescape(TAG.sub(" ", x))) for x in re.findall(r"(?s)<td[^>]*>(.*?)</td>", tr)]
+        if len(tds) < 3 or not tds[2]:
+            continue
+        rows.append((tds[2][:90], tds[0][:24], " ".join(tds[3:])[:600]))
+    return rows, len(rows), f["page"]
+
+
+def fetch_gnuboard(f):
+    """그누보드 게시판을 출품사 목록으로 쓰는 전시회(드론쇼코리아 등, BEXCO 계열)."""
+    op = opener()
+    rows, seen, page = [], set(), 1
+    while page < 60:
+        t = get(op, f"{f['api']}&page={page}", timeout=90).decode("utf-8", "replace")
+        got = 0
+        for blk in t.split('<li class="element-item')[1:]:
+            wid = re.search(r"wr_id=(\d+)", blk)
+            nm = re.search(r'<p class="item_tlt">\s*(.*?)\s*</p>', blk, re.S)
+            if not wid or not nm or wid.group(1) in seen:
+                continue
+            name = clean(_html.unescape(TAG.sub(" ", nm.group(1))))
+            if not name:
+                continue
+            seen.add(wid.group(1))
+            got += 1
+            rows.append((name[:90], "", ""))
+        if not got:
+            break
+        page += 1
+    return rows, len(rows), f["page"]
+
+
+def fetch_h2meet(f):
+    """H2 MEET — 목록 화면은 새 회차 준비로 비어 있지만 업체별 상세는 그대로 응답한다.
+    번호를 훑어 있는 것만 담는다(없는 번호는 건너뛴다)."""
+    op = opener()
+    rows = []
+
+    def one(n):
+        try:
+            t = get(op, f"{f['api']}?no={n}", referer=f["page"], timeout=40).decode("utf-8", "replace")
+        except Exception:  # noqa: BLE001
+            return None
+        nm = re.search(r'<p class="tt">(.*?)</p>', t, re.S)
+        name = clean(_html.unescape(TAG.sub(" ", nm.group(1)))) if nm else ""
+        if not name:
+            return None
+        b = re.search(r"Booth\s*No\.?\s*[:：]?\s*</[^>]+>\s*([^<]*)", t, re.S) or \
+            re.search(r"부스\s*번호[^<]*</[^>]+>\s*([^<]*)", t, re.S)
+        body = clean(TAG.sub(" ", t))
+        return (name[:90], clean(b.group(1))[:24] if b else "", body[:600])
+    with ThreadPool(6) as pool:
+        for r in pool.map(one, range(f.get("lo", 1), f.get("hi", 200))):
+            if r:
+                rows.append(r)
+    return rows, len(rows), f["page"]
+
+
+def fetch_kamaxlsx(f):
+    """서울모빌리티쇼(KAMA) — 다음 회차 목록은 'Coming Soon'이지만 지난 회차 엑셀이 그대로 열려 있다.
+    열: No | 부스 | 국문사명 | 영문사명 | 국가 | 분야 | 품목군 …"""
+    raw = get(opener(), f["url"], timeout=120)
+    if raw[:2] != b"PK":
+        raise RuntimeError("엑셀이 아님")
+    zf = zipfile.ZipFile(io.BytesIO(raw))
+    shared = [re.sub(r"<[^>]+>", "", x) for x in re.findall(
+        r"<si>(.*?)</si>", zf.read("xl/sharedStrings.xml").decode("utf-8", "replace"), re.S)]
+    sheet = zf.read("xl/worksheets/sheet1.xml").decode("utf-8", "replace")
+    rows = []
+    for row in re.findall(r"<row[^>]*>(.*?)</row>", sheet, re.S):
+        cells = {}
+        for col, attrs, body in CELL.findall(row):
+            v = re.search(r"<v>(.*?)</v>", body or "", re.S)
+            if v:
+                v = v.group(1)
+                cells[col] = shared[int(v)] if 't="s"' in attrs and v.isdigit() and int(v) < len(shared) else v
+        name = clean(_html.unescape(cells.get("D") or cells.get("C") or ""))
+        booth = clean(cells.get("B"))
+        # 제목·머리글 줄 걸러내기 (엑셀 위쪽에 안내 줄이 몇 개 있다)
+        if not name or name.isdigit() or len(name) < 3 or name.lower().startswith("company") \
+                or name.lower() in ("eng.", "kor.", "name") or "booth" in booth.lower():
+            continue
+        rows.append((name[:90], booth[:24],
+                     " ".join(clean(_html.unescape(cells.get(c) or "")) for c in "EFGH")[:600]))
+    return rows, len(rows), f["page"]
+
+
 def fetch_robots(f):
     """robots.py가 모아 둔 로봇 전시회 출품사 명단(data/robots.json)을 그대로 읽는다.
     로봇·자동화는 커넥터 수요처인데 여기선 따로 긁지 않고 이미 받아 둔 것을 재사용한다
@@ -1359,7 +1560,9 @@ FETCH = {"mys": fetch_mys, "xlsx": fetch_xlsx, "jsae": fetch_jsae, "ceatec": fet
          "ocp": fetch_ocp, "ungerboeck": fetch_ungerboeck, "algolia": fetch_algolia,
          "a2z": fetch_a2z, "cioe": fetch_cioe, "wis": fetch_wis, "ectc": fetch_ectc,
          "cadmium": fetch_cadmium, "wpjson": fetch_wpjson, "rxalgolia": fetch_rxalgolia,
-         "jma": fetch_jma, "chanchao": fetch_chanchao,
+         "jma": fetch_jma, "chanchao": fetch_chanchao, "messedus": fetch_messedus,
+         "elecs": fetch_elecs, "gnuboard": fetch_gnuboard, "h2meet": fetch_h2meet,
+         "kamaxlsx": fetch_kamaxlsx,
          "kes": fetch_kes, "table": fetch_table, "tems": fetch_tems, "hktdc": fetch_hktdc,
          "taitra": fetch_taitra, "manual": fetch_manual}
 

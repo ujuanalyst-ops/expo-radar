@@ -60,7 +60,12 @@
   function matchQ(e, q) {
     if (!q) return true;
     var hay = (e.t + " " + (e.te || "") + " " + (e.ci || "") + " " + (e.v || "") + " " + cname(e.c) +
-      " " + (e.sum || "") + " " + (e.items || "") + " " + (e.sec || []).join(" ") + " " + (e.org || "")).toLowerCase();
+      " " + (e.sum || "") + " " + (e.items || "") + " " + (e.sec || []).join(" ") + " " + (e.org || "") +
+      // 경쟁사 이름으로도 찾을 수 있게 (예: "Amphenol" → 그 회사가 나오는 전시회)
+      " " + (e.riv || []).map(function (x) { return rivName(x.r) + " " + (x.m || ""); }).join(" ") +
+      // 산업 분류도 검색어에 넣는다 — 소개글이 짧은 전시회가 많아 제목만으로는 잘 안 걸린다
+      " " + (e.ind || []).map(function (c) { return IND[c] ? IND[c].name : ""; }).join(" ") +
+      (e.cf ? " 커넥터 connector 케이블 cable 하네스" : "")).toLowerCase();
     return q.toLowerCase().split(/\s+/).every(function (w) { return hay.indexOf(w) >= 0; });
   }
 
@@ -934,13 +939,24 @@
   Array.prototype.forEach.call(document.querySelectorAll("#tabs button"), function (b) {
     b.onclick = function () { S.tab = b.getAttribute("data-tab"); S.limit = 120; syncTabs(); render(); };
   });
-  var gq = $("#gq"), timer = null;
+  var gq = $("#gq"), timer = null, spanBeforeSearch = null;
   gq.oninput = function () {
     $("#gclear").hidden = !gq.value;
     clearTimeout(timer);
-    timer = setTimeout(function () { S.q = gq.value; S.limit = 120; render(); }, 180);
+    timer = setTimeout(function () {
+      var had = !!S.q.trim(), has = !!gq.value.trim();
+      // 찾을 때는 기간을 풀어 전체에서 찾는다. 안 그러면 기본 3개월 밖의 전시회가 안 잡혀
+      // "검색이 안 된다"처럼 보인다. 검색어를 지우면 원래 기간으로 되돌린다.
+      if (has && !had) { spanBeforeSearch = S.span; S.span = "all"; }
+      if (!has && had && spanBeforeSearch !== null) { S.span = spanBeforeSearch; spanBeforeSearch = null; }
+      S.q = gq.value; S.limit = 120; render();
+    }, 180);
   };
-  $("#gclear").onclick = function () { gq.value = ""; S.q = ""; $("#gclear").hidden = true; render(); };
+  $("#gclear").onclick = function () {
+    gq.value = ""; S.q = ""; $("#gclear").hidden = true;
+    if (spanBeforeSearch !== null) { S.span = spanBeforeSearch; spanBeforeSearch = null; }
+    render();
+  };
 
   header();
   render();
