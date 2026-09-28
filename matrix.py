@@ -38,8 +38,15 @@ BASE_LINK = {
     "KES 한국전자전": "kes26", "로보월드": "robotworld26", "electronica": "electronica26",
     "DesignCon": "designcon27", "automatica": "automatica25", "CES": "ces27",
     "Computex": "computex26", "IPC APEX Expo": "apex27", "CEATEC": "ceatec26",
-    "iREX": "irex25", "Automate": "automate27", "NEPCON Japan / Automotive World": "jpca26",
-    "스마트공장·자동화산업전": "", "Hannover Messe": "", "SPS": "",
+    "iREX": "irex25", "Automate": "automate27",
+    # 이름이 짧아 자동으로 안 붙던 것들 (아래 fuzzy 매칭은 4글자 이상만 본다)
+    "OFC": "ofc27", "SPS": "sps26", "MWC": "mwc26", "SC (Supercomputing)": "sc26",
+    "Paris Air Show / Eurosatory": "eurosatory26", "ECTC": "ectc27", "APEC": "apec27",
+    "PCIM Europe": "pcim26", "OCP Global Summit": "ocp26", "embedded world": "embwld26",
+    "Embedded World": "embwld26", "SEMICON Korea": "semicon_kr26", "CIOE": "cioe26",
+    "ECOC": "ecoc26", "월드IT쇼": "wis26", "스마트공장·자동화산업전": "autoworld26",
+    "Hannover Messe": "hannover26", "productronica": "productronica25",
+    "Sensors Converge": "sensors27", "IPC APEX Expo": "apex27",
 }
 
 ARIAL = "Arial"

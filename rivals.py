@@ -378,6 +378,38 @@ FAIRS = [
      "page": "https://www.ecocexhibition.com/exhibit/exhibitor-list/",
      "title": "ECOC 2026 (유럽 광통신)", "match": "ECOC", "when": "2026-09", "kind": "history", "cycle": 1,
      "city": "Europe", "country": "DE", "note": "유럽 광통신 — 회사명만(부스는 업체별 상세에 있음)"},
+    {"key": "nepcon_jp27", "platform": "rxalgolia", "app": "XD0U5M6Y4R",
+     "api_key": "d5cd7d4ec26134ff4a34d736a7f9ad47",
+     "index": "evt-545455d1-d612-473c-8b76-79bdddf367d0-index",
+     "edition": "eve-c9ed2b9d-84a3-4932-ab81-e3e1d1441041",
+     "page": "https://www.nepconjapan.jp/tokyo/en-gb/search/2027/directory.html",
+     "title": "NEPCON JAPAN 2027 (도쿄, Automotive World 동시개최)", "match": "NEPCON JAPAN",
+     "when": "2027-01", "kind": "confirmed", "cycle": 1, "city": "Tokyo", "country": "JP",
+     "note": "일본 최대 전자·전장 전시회군 — 전자부품재료전·CAR-ELE·EV재팬이 한 회차에 같이 열린다"},
+    {"key": "nepcon_asia26", "platform": "rxalgolia", "app": "XD0U5M6Y4R",
+     "api_key": "d5cd7d4ec26134ff4a34d736a7f9ad47",
+     "index": "evt-4fdd2120-7ff4-4a0d-b3ac-ecf82875547b-index",
+     "edition": "eve-49c91c88-8eae-425e-8db1-e41f03da4a10",
+     "page": "https://www.nepconasia.com/en-gb/zszx/exhibitor-directory.html",
+     "title": "NEPCON Asia 2026 (선전)", "match": "NEPCON ASIA", "when": "2026-10", "kind": "history",
+     "cycle": 1, "city": "Shenzhen", "country": "CN", "note": "중국 화남 전자제조 — 동남아 EMS 접점"},
+    {"key": "technofrontier26", "platform": "jma",
+     "api": "https://www.jma-exhibition.com/joint/webguide_en_tf/list.php",
+     "page": "https://tf.jma.or.jp/",
+     "title": "TECHNO-FRONTIER 2026 (도쿄, 모터·전원)", "match": "TECHNO-FRONTIER", "when": "2026-07",
+     "kind": "history", "cycle": 1, "city": "Tokyo", "country": "JP",
+     "note": "모터·전원·계측 부품전 — 예전 도메인(techno-frontier.com)은 폐쇄됐다"},
+    {"key": "semicon_jp25", "platform": "a2z",
+     "api": "https://expo.semi.org/japan2025/Public/Exhibitors.aspx",
+     "page": "https://www.semiconjapan.org", "title": "SEMICON Japan 2025 (도쿄)",
+     "match": "SEMICON JAPAN", "when": "2025-12", "kind": "history", "cycle": 1,
+     "city": "Tokyo", "country": "JP", "note": "2026 회차 명단은 아직 미공개 — 직전 회차"},
+    {"key": "touchtaiwan26", "platform": "chanchao",
+     "api": "https://www.touchtaiwan.com/en/visitorExhibitor.asp",
+     "page": "https://www.touchtaiwan.com/en/",
+     "title": "Touch Taiwan 2026 (디스플레이·FPC)", "match": "TOUCH TAIWAN", "when": "2026-04",
+     "kind": "history", "cycle": 1, "city": "Taipei", "country": "TW",
+     "note": "디스플레이·FPC — K-Display의 대만판"},
     # ── 방산·항공 (커넥터 수요처인데 그동안 우리 자료에 아예 없던 분야)
     {"key": "eurosatory26", "platform": "finderr",
      "api": "https://eurosatory.finderr.cloud/api/catalog/search_exhibitors",
@@ -1212,6 +1244,77 @@ def fetch_wpjson(f):
     return rows, len(rows), f["page"]
 
 
+def fetch_rxalgolia(f):
+    """RX 재팬·RX 글로벌 전시회(NEPCON Japan·Automotive World·NEPCON Asia 등).
+    화면은 JS 컴포넌트지만 그 뒤의 Algolia 색인이 그대로 열려 있다. 한 회차 색인에
+    같은 기간 같은 장소의 여러 전시회가 함께 들어 있어(ppsAnswers로 구분) 한 번에 받는다."""
+    url = f"https://{f['app']}-dsn.algolia.net/1/indexes/{f['index']}/query"
+    hd = {"X-Algolia-Application-Id": f["app"], "X-Algolia-API-Key": f["api_key"],
+          "Content-Type": "application/json", "User-Agent": UA}
+    rows, page, pages = [], 0, 1
+    while page < pages and page < 20:
+        params = urllib.parse.urlencode({
+            "query": "", "hitsPerPage": 1000, "page": page,
+            "filters": f"recordType:exhibitor AND eventEditionId:{f['edition']} AND locale:en-gb"})
+        d = _json_post(url, json.dumps({"params": params}).encode(), hd, timeout=120)
+        pages = int(d.get("nbPages") or 1)
+        for h in d.get("hits", []):
+            name = clean(h.get("companyName"))
+            if not name:
+                continue
+            sub = h.get("ppsAnswers") or []
+            sub = [clean(x) for x in sub if isinstance(x, str)]
+            rows.append((name[:90], clean(h.get("standReference"))[:24],
+                         " ".join([clean(h.get("countryName")), clean(h.get("website")),
+                                   clean(h.get("exhibitorDescription")), " ".join(sub[:4])])[:600]))
+        page += 1
+    return rows, len(rows), f["page"]
+
+
+def fetch_jma(f):
+    """일본능률협회(JMA) 전시회 가이드 — 한 쪽에 40건씩 서버에서 그려 준다."""
+    op = opener()
+    rows, page = [], 1
+    while page < 40:
+        t = get(op, f"{f['api']}?page={page}&", timeout=90).decode("utf-8", "replace")
+        got = 0
+        for no, nm, body in re.findall(r'<h2><a href="company\.php\?no=(\d+)"[^>]*>([^<]+)</a>(.*?)</figure>',
+                                       t, re.S):
+            name = clean(_html.unescape(nm))
+            if not name:
+                continue
+            got += 1
+            b = re.search(r"Booth number\s*([^<]+)", body)
+            rows.append((name[:90], clean(b.group(1))[:24] if b else "", clean(TAG.sub(" ", body))[:600]))
+        if not got:
+            break
+        page += 1
+    return rows, len(rows), f["page"]
+
+
+def fetch_chanchao(f):
+    """찬차오(대만) 전시회 — 목록 위에 '인기 출품사' 띠가 매 쪽 반복되므로
+    부스 번호가 붙은 줄만 실제 명단으로 본다."""
+    op = opener()
+    rows, seen, page = [], set(), 1
+    while page < 30:
+        t = get(op, f"{f['api']}?page={page}&Area=&view=&sort=", timeout=90).decode("utf-8", "replace")
+        got = 0
+        for m in re.finditer(r'<h4>\s*<a href="visitorExhibitorDetail\.asp\?comNo=(\d+)[^"]*"[^>]*>(.*?)</a>'
+                             r'(.*?)Booth No\s*[:：]\s*([^<]*)', t, re.S):
+            cid, nm, mid, booth = m.groups()
+            name = clean(TAG.sub(" ", _html.unescape(nm)))
+            if not name or cid in seen:
+                continue
+            seen.add(cid)
+            got += 1
+            rows.append((name[:90], clean(booth)[:24], clean(TAG.sub(" ", mid))[:600]))
+        if not got:
+            break
+        page += 1
+    return rows, len(rows), f["page"]
+
+
 def fetch_robots(f):
     """robots.py가 모아 둔 로봇 전시회 출품사 명단(data/robots.json)을 그대로 읽는다.
     로봇·자동화는 커넥터 수요처인데 여기선 따로 긁지 않고 이미 받아 둔 것을 재사용한다
@@ -1255,7 +1358,8 @@ FETCH = {"mys": fetch_mys, "xlsx": fetch_xlsx, "jsae": fetch_jsae, "ceatec": fet
          "hmcsv": fetch_hmcsv, "mfesb": fetch_mfesb, "coexems": fetch_coexems,
          "ocp": fetch_ocp, "ungerboeck": fetch_ungerboeck, "algolia": fetch_algolia,
          "a2z": fetch_a2z, "cioe": fetch_cioe, "wis": fetch_wis, "ectc": fetch_ectc,
-         "cadmium": fetch_cadmium, "wpjson": fetch_wpjson,
+         "cadmium": fetch_cadmium, "wpjson": fetch_wpjson, "rxalgolia": fetch_rxalgolia,
+         "jma": fetch_jma, "chanchao": fetch_chanchao,
          "kes": fetch_kes, "table": fetch_table, "tems": fetch_tems, "hktdc": fetch_hktdc,
          "taitra": fetch_taitra, "manual": fetch_manual}
 
