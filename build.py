@@ -422,6 +422,31 @@ def fairs_as_events(events, riv):
     return made
 
 
+def stamp_html():
+    """화면 파일들의 `?v=…`에 이번 수집 시각을 찍는다.
+
+    GitHub Pages는 js/css에 `cache-control: max-age=600`을 붙인다. 주소가 `app.js?v=1`로
+    고정이면 브라우저가 옛 파일을 계속 쓰고, 고친 내용이 바로 안 보인다.
+    수집할 때마다 숫자를 바꿔 주소가 달라지게 한다.
+    """
+    ver = datetime.now().strftime("%Y%m%d%H%M")
+    done = []
+    for name in ("index.html", "robots.html", "traces.html"):
+        path = os.path.join(HERE, name)
+        try:
+            with open(path, encoding="utf-8") as f:
+                html = f.read()
+        except OSError:
+            continue
+        new = re.sub(r'(\.(?:js|css))\?v=[0-9a-zA-Z.]+', r"\1?v=" + ver, html)
+        if new != html:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(new)
+            done.append(name)
+    if done:
+        print(f"  화면 파일 버전 {ver} ({', '.join(done)})")
+
+
 def write_app(events, report, rivals=None, riv_unmatched=None):
     used = sorted({e["c"] for e in events if e.get("c")})
     meta = {c: {"ko": countries.ko(c, c), "en": (countries.info(c) or {}).get("en", c),
@@ -488,6 +513,7 @@ def main():
         nriv = sum(1 for e in events if e.get("riv"))
         print(f"  경쟁사 출품 확인 {nriv}개 전시회 (못 맞춘 일정 {len(riv_unmatched)}건)")
         size = write_app(events, report, rivals, riv_unmatched)
+        stamp_html()
         up = sum(1 for e in events if e["s"] >= TODAY.isoformat())
         print(f"[{datetime.now():%H:%M:%S}] 전시회 {len(events)}건(앞으로 {up}건) · "
               f"app-data.js {size // 1024}KB · {time.time() - t0:.0f}s")
