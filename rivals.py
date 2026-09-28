@@ -31,6 +31,7 @@ import ssl
 import sys
 import threading
 import time
+import urllib.parse
 import urllib.request
 import zipfile
 from datetime import date, datetime
@@ -175,6 +176,9 @@ def opener():
                                        urllib.request.HTTPSHandler(context=CTX))
 
 
+TAG = re.compile(r"<[^>]+>")
+
+
 def clean(t):
     return re.sub(r"\s+", " ", (t or "").replace("&nbsp;", " ").replace("\xa0", " ")).strip()
 
@@ -264,6 +268,64 @@ FAIRS = [
      "title": "wire Russia / Metallurgy Russia 2027", "match": "wire Russia", "when": "2027-05",
      "kind": "confirmed", "city": "Moscow", "country": "RU", "step": 5000, "max_rows": 5000,
      "note": "와이어·케이블·금속 동시 개최 — 참가업체 카탈로그가 한 쪽에 전부 나온다(러시아어 음차 표기)"},
+    # ── 방산·항공 (커넥터 수요처인데 그동안 우리 자료에 아예 없던 분야)
+    {"key": "eurosatory26", "platform": "finderr",
+     "api": "https://eurosatory.finderr.cloud/api/catalog/search_exhibitors",
+     "api_key": "9532b2dbcb94ddfb48bf4f6b240b856575f6ad5a3f0a70a618608e4cbe23c15e",
+     "origin": "https://eurosatory.finderr.cloud",
+     "page": "https://eurosatory.finderr.cloud/standalone/catalog/company-list?lang=en",
+     "title": "Eurosatory 2026 (파리 방산전)", "match": "EUROSATORY", "when": "2026-06", "kind": "history",
+     "cycle": 2, "city": "Paris", "country": "FR",
+     "note": "세계 최대 지상방산전(격년, 다음 2028) — 부스·홈페이지·국가·소개 포함"},
+    {"key": "dsei25", "platform": "aspevents",
+     "page": "https://www.dsei.co.uk/visit/exhibiting-companies",
+     "title": "DSEI London 2025 (영국 방산전)", "match": "DSEI", "when": "2025-09", "kind": "history",
+     "cycle": 2, "city": "London", "country": "GB",
+     "note": "유럽 최대 종합 방산전(격년, 다음 2027) — 부스 포함"},
+    {"key": "siae25", "platform": "hubj2c",
+     "api": "https://new-liste-exposants.hubj2c.com/siae2025/main/en/getSettings",
+     "page": "https://new-liste-exposants.hubj2c.com/siae2025/main/en",
+     "title": "Paris Air Show 2025 (파리 에어쇼)", "match": "PARIS AIR SHOW", "when": "2025-06", "kind": "history",
+     "cycle": 2, "city": "Paris", "country": "FR",
+     "note": "세계 최대 항공전(격년, 다음 2027) — 커넥터 업체는 Hall 2b에 몰려 있다"},
+    {"key": "ausa26", "platform": "eshow",
+     "api": "https://meetings.ausa.org/annual/2026/exhibitor_exhibitor_list.cfm",
+     "page": "https://meetings.ausa.org/annual/2026/exhibitor_exhibitor_list.cfm",
+     "title": "AUSA Annual Meeting 2026 (미 육군협회)", "match": "AUSA", "when": "2026-10", "kind": "confirmed",
+     "cycle": 1, "city": "Washington DC", "country": "US",
+     "note": "미 육군 최대 조달 전시회 — 다가오는 회차 확정 명단(부스 포함)"},
+    {"key": "xponential26", "platform": "eshow",
+     "api": "https://xponential.org/2026/exhibitor_list.cfm",
+     "page": "https://xponential.org/2026/exhibitor_list.cfm",
+     "title": "AUVSI XPONENTIAL 2026 (무인기·자율시스템)", "match": "XPONENTIAL", "when": "2026-05",
+     "kind": "history", "cycle": 1, "city": "Houston", "country": "US",
+     "note": "무인기·드론 최대 전시회 — 소형 커넥터(I-PEX·Harwin) 접점"},
+    {"key": "farnborough26", "platform": "farnborough",
+     "page": "https://www.farnboroughairshow.com/the-show/exhibitor-listing/",
+     "title": "Farnborough Airshow 2026 (영국 에어쇼)", "match": "FARNBOROUGH", "when": "2026-07",
+     "kind": "history", "cycle": 2, "city": "Farnborough", "country": "GB",
+     "note": "격년(다음 2028) — 소개글·홈페이지 포함, 인터커넥트는 얇은 편"},
+    # ── 산업 자동화
+    {"key": "hannover26", "platform": "hmcsv",
+     "api": "https://www.hannovermesse.de/en/application/exhibitor-index/csvExport?rt=ex&sort=AZ",
+     "page": "https://www.hannovermesse.de/en/exhibitors-products/",
+     "title": "Hannover Messe 2026 (하노버 산업전)", "match": "HANNOVER MESSE", "when": "2026-04",
+     "kind": "history", "cycle": 1, "city": "Hannover", "country": "DE",
+     "note": "세계 최대 산업전 — 주최측이 CSV 내려받기를 열어 둠(회차 종료로 부스 칸은 빔)"},
+    {"key": "sps26", "platform": "mfesb",
+     "api": "https://api.messefrankfurt.com/service/esb_api/exhibitor-service/api/2.1/public/exhibitor/search",
+     "api_key": "LXnMWcYQhipLAS7rImEzmZ3CkrU033FMha9cwVSngG4vbufTsAOCQQ==", "event": "SPS",
+     "page": "https://sps.mesago.com/nuernberg/en/exhibitor-search.html",
+     "title": "SPS 2026 뉘른베르크 (산업 자동화)", "match": "SPS", "when": "2026-11", "kind": "confirmed",
+     "cycle": 1, "city": "Nuremberg", "country": "DE",
+     "note": "유럽 최대 FA 전시회 — 다가오는 회차 확정 명단(홀·부스·국가)"},
+    {"key": "autoworld26", "platform": "coexems",
+     "api": "https://site-api.ems.coex.co.kr/public/company-directories",
+     "coex_host": "www.automationworld.co.kr", "campaign": 2635,
+     "page": "https://www.automationworld.co.kr",
+     "title": "오토메이션월드 2026 (스마트공장·자동화산업전)", "match": "AUTOMATION WORLD", "when": "2026-03",
+     "kind": "history", "cycle": 1, "city": "서울 코엑스", "country": "KR",
+     "note": "국내 최대 FA 전시회 — 부스·홈페이지·품목 포함 (2027 회차는 아직 미공개)"},
     # ── 로봇·자동화 (robots.py가 모아 둔 명단을 그대로 검사 — 새로 긁지 않는다)
     {"key": "rb_irex25", "platform": "robots", "robot_key": "irex25",
      "page": "https://irex.nikkan.co.jp/exhibitor/",
@@ -655,6 +717,187 @@ def fetch_manual(f):
     return [(n, "", f.get("note", "")) for n in f["companies"]], len(f["companies"]), f["page"]
 
 
+# ================================================================ 방산·항공 (커넥터 수요처인데 그동안 빈 분야였다)
+def _json_post(url, body=b"", headers=None, timeout=180):
+    req = urllib.request.Request(url, data=body,
+                                 headers={"User-Agent": UA, "Accept": "application/json", **(headers or {})})
+    return json.loads(urllib.request.urlopen(req, timeout=timeout).read().decode("utf-8", "replace"))
+
+
+def fetch_finderr(f):
+    """Eurosatory(파리 방산전) — 카탈로그 앱이 쓰는 검색 API. 한 번에 전부 준다(페이징 없음).
+    X-API-KEY는 공개 JS 번들에 박힌 열람용 키라 주최측이 바꾸면 401이 난다 → 그때 번들에서 다시 뽑는다."""
+    d = _json_post(f["api"], b"{}", {
+        "Content-Type": "application/json", "X-API-KEY": f["api_key"],
+        "Origin": f["origin"], "Referer": f["page"]})
+    rows = []
+    for r in d.get("ListDetailsExhibitors", []):
+        name = clean(r.get("Exhi_CompanyName"))
+        if not name:
+            continue
+        booth = ", ".join(x for x in (f"{(s_.get('Hall') or '').strip()} {(s_.get('Name') or '').strip()}".strip()
+                                      for s_ in (r.get("Stands") or [])) if x)
+        extra = " ".join([clean(r.get("OneLiner")), clean(r.get("ShortPresentation")),
+                          clean(r.get("Exhi_Country_CodeISO2")), clean(r.get("Exhi_Website"))])
+        rows.append((name[:90], booth[:24], extra[:600]))
+    return rows, int(d.get("NbExhibitors") or len(rows)), f["page"]
+
+
+def fetch_hubj2c(f):
+    """파리 에어쇼(SIAE) — 출품사 목록 위젯이 쓰는 getSettings가 명단을 통째로 담아 온다."""
+    d = _json_post(f["api"], b"", {"Referer": f["page"], "X-Requested-With": "XMLHttpRequest"})
+    rows = []
+    for r in d.get("list", []):
+        name = clean(r.get("exposant"))
+        if not name:
+            continue
+        extra = " ".join([clean(r.get("TexteActivite")), clean(r.get("Texte")),
+                          clean(r.get("nomPays")), clean(r.get("SecteursActivite"))])
+        rows.append((name[:90], clean(r.get("stands"))[:24], extra[:600]))
+    return rows, len(rows), f["page"]
+
+
+def fetch_aspevents(f):
+    """DSEI(런던 방산전) — Clarion ASP.events. 목록이 서버에서 그려져 ?page=N으로 넘기면 된다."""
+    op = opener()
+    rows, page = [], 1
+    while page < 40:
+        t = get(op, f"{f['page']}?page={page}", timeout=90).decode("utf-8", "replace")
+        got = 0
+        for m in re.finditer(r'(?s)<li class="m-exhibitors-list__items__item [^"]*js-library-item"[^>]*>(.*?)</li>', t):
+            b = m.group(1)
+            nm = re.search(r'(?s)__header__title__link[^>]*>(.*?)</a>', b)
+            st = re.search(r'(?s)__meta__stand">(.*?)</div>', b)
+            name = clean(TAG.sub(" ", nm.group(1))) if nm else ""
+            if not name:
+                continue
+            got += 1
+            booth = clean(TAG.sub(" ", st.group(1))).replace("Stand:", "").strip() if st else ""
+            rows.append((name[:90], booth[:24], clean(TAG.sub(" ", b))[:600]))
+        if not got:
+            break
+        page += 1
+    return rows, len(rows), f["page"]
+
+
+def fetch_eshow(f):
+    """AUSA·XPONENTIAL(미국 방산·무인기) — eShow 표 한 장. 부스·회사명만 공개한다."""
+    t = get(opener(), f["api"], timeout=90).decode("utf-8", "replace")
+    rows = []
+    for tr in re.findall(r"(?s)<tr[^>]*>(.*?)</tr>", t):
+        if "ExhibitorPopup(" not in tr:
+            continue
+        tds = [clean(TAG.sub(" ", x)) for x in re.findall(r"(?s)<td[^>]*>(.*?)</td>", tr)]
+        a = re.search(r'(?s)<a href="javascript:void\(0\)"[^>]*>(.*?)</a>', tr)
+        name = clean(TAG.sub(" ", a.group(1))) if a else ""
+        if not name:
+            continue
+        rows.append((name[:90], (tds[0] if tds else "")[:24], (tds[2] if len(tds) > 2 else "")[:600]))
+    return rows, len(rows), f.get("page") or f["api"]
+
+
+def fetch_farnborough(f):
+    """판버러 에어쇼 — 20건씩 65쪽. 카드 안에 소개글·홈페이지까지 들어 있다."""
+    op = opener()
+    rows, seen, page = [], set(), 1
+    while page < 90:
+        u = f["page"] + (f"?page={page}" if page > 1 else "")
+        t = get(op, u, timeout=90).decode("utf-8", "replace")
+        got = 0
+        for m in re.finditer(r'(?s)<div class="modal fade exhibitor-list-modal" id="model-Exhibitor(\d+)"(.*?)'
+                             r'</div>\s*</div>\s*</div>', t):
+            eid, b = m.group(1), m.group(2)
+            if eid in seen:
+                continue
+            seen.add(eid)
+            nm = re.search(r"(?s)<h5[^>]*>(.*?)</h5>", b)
+            st = re.search(r'(?s)class="stand-number">(.*?)</span>', b)
+            de = re.search(r'(?s)<p class="card-des[^"]*">(.*?)</p>', b)
+            web = re.findall(r'<a href="([^"]+)"[^>]*title="Website"', b)
+            name = clean(TAG.sub(" ", nm.group(1))) if nm else ""
+            if not name:
+                continue
+            got += 1
+            rows.append((name[:90], (clean(TAG.sub(" ", st.group(1))) if st else "")[:24],
+                         (clean(TAG.sub(" ", de.group(1))) if de else "" + " " + (web[0] if web else ""))[:600]))
+        if not got:
+            break
+        page += 1
+    return rows, len(rows), f["page"]
+
+
+# ================================================================ 산업 자동화
+def fetch_hmcsv(f):
+    """하노버 산업전 — 출품사 색인이 CSV 내려받기를 그대로 열어 둔다(세미콜론·latin-1).
+    열: Hit type;Exhibitor;Country;Zip;City;State;CCI;Company website;Booth;Exhibitor presentation.
+    회차가 끝나면 Booth 칸은 비어서 온다."""
+    raw = get(opener(), f["api"], timeout=180).decode("latin-1", "replace")
+    lines = raw.splitlines()
+    head = None
+    rows = []
+    for ln in lines:
+        cells = ln.split(";")
+        if head is None:
+            if "Exhibitor" in cells and "Country" in cells:
+                head = {c.strip(): i for i, c in enumerate(cells)}
+            continue
+        if len(cells) < len(head):
+            continue
+        g = lambda k: clean(cells[head[k]]) if k in head and head[k] < len(cells) else ""  # noqa: E731
+        name = g("Exhibitor")
+        if not name:
+            continue
+        rows.append((name[:90], g("Booth")[:24],
+                     " ".join([g("Country"), g("City"), g("Company website")])[:600]))
+    return rows, len(rows), f["page"]
+
+
+def fetch_mfesb(f):
+    """SPS 뉘른베르크 — 메세프랑크푸르트 출품사 검색 API. **GET**이어야 하고(POST는 403),
+    findEventVariable은 대문자(SPS). apikey는 공개 번들에서 가져온 열람용 키."""
+    q = urllib.parse.urlencode({"language": "en-GB", "q": "", "orderBy": "name", "pageNumber": 1,
+                                "pageSize": 2000, "orSearchFallback": "false",
+                                "findEventVariable": f["event"]})
+    req = urllib.request.Request(f["api"] + "?" + q,
+                                 headers={"User-Agent": UA, "Accept": "application/json", "apikey": f["api_key"]})
+    d = json.loads(urllib.request.urlopen(req, timeout=180).read().decode("utf-8", "replace"))
+    res = d.get("result") or {}
+    rows = []
+    for h in res.get("hits", []):
+        e = h.get("exhibitor") or {}
+        name = clean(e.get("name"))
+        if not name:
+            continue
+        ex = e.get("exhibition") or {}
+        halls = [clean(x.get("name")) for x in (ex.get("exhibitionHall") or [])]
+        stands = [clean(x.get("name")) for x in (ex.get("stand") or [])]
+        booth = " ".join([x for x in halls + stands if x])
+        addr = (e.get("address") or {}).get("country") or {}
+        rows.append((name[:90], booth[:24],
+                     " ".join([clean(e.get("shortDescription")), clean(addr.get("label"))])[:600]))
+    return rows, int(res.get("hitsTotal") or len(rows)), f["page"]
+
+
+def fetch_coexems(f):
+    """코엑스 전시회 공통 출품사 API(오토메이션월드 등) — 어느 전시회인지는 호스트 헤더로 가른다.
+    coex-host를 안 보내면 0건이 온다. 회차는 archiveCampaignIdx로 고른다."""
+    q = urllib.parse.urlencode({"archiveCampaignIdx": f["campaign"], "page": 1, "size": 1000, "language": "ko"})
+    req = urllib.request.Request(f["api"] + "?" + q, headers={
+        "User-Agent": UA, "Accept": "application/json", "coex-host": f["coex_host"]})
+    d = json.loads(urllib.request.urlopen(req, timeout=120).read().decode("utf-8", "replace"))
+    data = d.get("data") or {}
+    rows = []
+    for r in data.get("list", []):
+        name = clean(r.get("companyNameEng")) or clean(r.get("companyName"))
+        if not name:
+            continue
+        co = r.get("company") or {}
+        rows.append((name[:90], clean(r.get("boothNumber"))[:24],
+                     " ".join([clean(r.get("keywordEng")), clean(r.get("keyword")),
+                               clean(co.get("website")), clean(co.get("country"))])[:600]))
+    return rows, int(d.get("totalRows") or data.get("totalRows") or len(rows)), f["page"]
+
+
 def fetch_robots(f):
     """robots.py가 모아 둔 로봇 전시회 출품사 명단(data/robots.json)을 그대로 읽는다.
     로봇·자동화는 커넥터 수요처인데 여기선 따로 긁지 않고 이미 받아 둔 것을 재사용한다
@@ -693,7 +936,9 @@ def fetch_taitra(f):
 
 
 FETCH = {"mys": fetch_mys, "xlsx": fetch_xlsx, "jsae": fetch_jsae, "ceatec": fetch_ceatec,
-         "robots": fetch_robots,
+         "robots": fetch_robots, "finderr": fetch_finderr, "hubj2c": fetch_hubj2c,
+         "aspevents": fetch_aspevents, "eshow": fetch_eshow, "farnborough": fetch_farnborough,
+         "hmcsv": fetch_hmcsv, "mfesb": fetch_mfesb, "coexems": fetch_coexems,
          "kes": fetch_kes, "table": fetch_table, "tems": fetch_tems, "hktdc": fetch_hktdc,
          "taitra": fetch_taitra, "manual": fetch_manual}
 
