@@ -6,5 +6,6 @@ logs/
 data/
 # 단, 링크드인 광고는 브라우저로 손수 받은 것이라 재생성이 안 된다 — 이것만 보관한다
 !data/linkedin_ads.json
+!data/official_events.json
 share/
 *.tmp

@@ -137,6 +137,19 @@ TARGET_IX = {t[0]: t for t in TARGETS}
 # 커넥터·전장·로봇·방산 업계가 실제로 나가는 곳. (표시이름, 찾기 정규식, 분야)
 # data/rivals.json · data/robots.json 에서 읽어온 이름은 아래에 자동으로 더해진다.
 FAIRS = [
+    # 이름이 더 긴 쪽을 먼저 둔다 (공식 일정은 처음 걸린 이름 하나만 쓴다)
+    ("Hannover Messe USA", r"hannover\s*messe\s*usa", "fa"),
+    # 회차·지역이 갈리는 전시회는 갈린 이름을 먼저 (출품사 명단 쪽 이름과 맞춘다)
+    ("人とくるまのテクノロジー展 YOKOHAMA",
+     r"人と(?:くるま|クルマ)のテクノロジー展.{0,14}(yokohama|横浜)|(横浜|yokohama).{0,10}人と(?:くるま|クルマ)", "auto"),
+    ("人とくるまのテクノロジー展 NAGOYA",
+     r"人と(?:くるま|クルマ)のテクノロジー展.{0,14}(nagoya|名古屋)|(名古屋|nagoya).{0,10}人と(?:くるま|クルマ)", "auto"),
+    ("SEMICON Japan", r"semicon\s*japan|セミコン\s*ジャパン", "elec"),
+    ("SEMICON Taiwan", r"semicon\s*taiwan", "elec"),
+    ("SEMICON West", r"semicon\s*west", "elec"),
+    ("SEMICON China", r"semicon\s*china", "elec"),
+    ("SEMICON Europa", r"semicon\s*europa", "elec"),
+    ("SEMICON Southeast Asia", r"semicon\s*(southeast|sea)\b", "elec"),
     # 전자·부품
     ("electronica", r"\belectronica\b(?!\s*(china|india|south))", "elec"),
     ("electronica China", r"electronica\s*china|慕尼黑上海电子展", "elec"),
@@ -149,7 +162,7 @@ FAIRS = [
     ("한국전자전 KES", r"한국전자전|\bKES\s*20\d\d", "elec"),
     ("NEPCON Japan", r"nepcon\s*japan|ネプコン\s*ジャパン", "elec"),
     ("NEPCON Asia", r"nepcon\s*(asia|china|south china)", "elec"),
-    ("JPCA Show", r"\bJPCA\s*(show|展)", "elec"),
+    ("JPCA Show", r"\bJPCA\s*(show|展)|電子機器トータルソリューション展", "elec"),
     ("IPC APEX EXPO", r"ipc\s*apex", "elec"),
     ("DesignCon", r"designcon", "elec"),
     ("electronicAsia", r"electronic\s*asia|香港電子", "elec"),
@@ -164,14 +177,14 @@ FAIRS = [
     ("InfoComm", r"infocomm", "elec"),
     ("ISE", r"integrated\s*systems\s*europe|\bISE\s*20\d\d", "elec"),
     ("MWC", r"mobile\s*world\s*congress|\bMWC\s*(바르셀로나|barcelona|20\d\d)", "elec"),
-    ("OFC", r"\bOFC\b(?=.{0,40}(optical|fiber|conference|광))|optical\s*fiber\s*communication", "elec"),
+    ("OFC", r"\bOFC\b(?=.{0,40}(optical|fiber|conference|광))|\bOFC\s*20\d\d|optical\s*fiber\s*communication", "elec"),
     ("ECOC", r"\bECOC\b|european\s*conference\s*on\s*optical", "elec"),
     ("OCP Global Summit", r"\bOCP\b.{0,20}(global\s*summit|regional\s*summit)|open\s*compute\s*(project\s*)?summit", "elec"),
     ("SC 슈퍼컴퓨팅", r"\bSC\s*2\d\b(?=.{0,30}(supercomput|HPC))|supercomputing\s*conference", "elec"),
     ("Touch Taiwan", r"touch\s*taiwan", "elec"),
     ("K-Display 한국디스플레이산업전", r"k-?display|한국디스플레이산업전", "elec"),
     # 자동차·모빌리티
-    ("人とくるまのテクノロジー展 (JSAE)", r"人とくるまのテクノロジー|automotive\s*engineering\s*exposition", "auto"),
+    ("人とくるまのテクノロジー展 (JSAE)", r"人と(?:くるま|クルマ)のテクノロジー|人テク展|automotive\s*engineering\s*exposition", "auto"),
     ("Automotive World Tokyo", r"automotive\s*world|オートモーティブ\s*ワールド", "auto"),
     ("AAPEX", r"\bAAPEX\b", "auto"),
     ("SEMA Show", r"\bSEMA\s*show\b", "auto"),
@@ -189,7 +202,7 @@ FAIRS = [
     # 산업·자동화·로봇
     ("Hannover Messe", r"hannover\s*messe|하노버\s*(산업|메세)|ハノーバーメッセ", "fa"),
     ("automatica", r"\bautomatica\b", "robot"),
-    ("Automate", r"\bautomate\s*20\d\d\b|automate\s*show", "robot"),
+    ("Automate", r"\bautomate\s*20\d\d\b|automate\s*show|automate\s*forward", "robot"),
     ("iREX 국제로봇전", r"\biREX\b|国際ロボット展", "robot"),
     ("로보월드 RobotWorld", r"로보월드|robot\s*world\s*20\d\d", "robot"),
     ("IMTS", r"\bIMTS\b", "fa"),
@@ -274,7 +287,7 @@ FAIRS = [
     ("Advanced Engineering UK", r"advanced\s*engineering\s*(uk|show)", "fa"),
     ("Southern Manufacturing", r"southern\s*manufacturing", "fa"),
     ("METALEX", r"\bmetalex\b", "fa"),
-    ("Manufacturing World Japan", r"manufacturing\s*world|ものづくりワールド", "fa"),
+    ("Manufacturing World Japan", r"manufacturing\s*world|ものづくり\s*ワールド", "fa"),
     ("MTA / ITAP 싱가포르", r"\bITAP\b|industrial\s*transformation\s*asia", "fa"),
     ("Vietnam Manufacturing Expo", r"vietnam\s*manufacturing\s*expo|\bVMEX\b|\bVIMF\b", "fa"),
     ("IMTEX / ELECRAMA 인도", r"\bIMTEX\b|\belecrama\b|automation\s*expo\s*india", "fa"),
@@ -306,6 +319,29 @@ FAIRS = [
     ("전기산업대전 / 국제전기", r"전기산업대전|국제전기전자산업전|\bSIEF\b", "enr"),
     ("스마트테크코리아", r"스마트테크\s*코리아|smart\s*tech\s*korea", "robot"),
     ("국제물류산업대전 KOREA MAT", r"국제물류산업대전|korea\s*mat\b", "robot"),
+    # ── 일본 전시회 (경쟁사 공식 일정에서 확인된 곳)
+    ("電設工業展 JECA FAIR (일본 전기설비전)", r"電設工業展|jeca\s*fair", "fa"),
+    ("鉄道技術展 (일본 철도기술전)", r"鉄道技術展|mass-?trans\s*innovation\s*japan", "rail"),
+    ("Inter BEE (일본 국제방송기기전)", r"inter\s*bee", "elec"),
+    ("関西放送機器展 (간사이 방송기기전)", r"関西放送機器展", "elec"),
+    ("スマートグリッドEXPO (일본 스마트그리드전)", r"スマートグリッド\s*expo|smart\s*grid\s*expo", "enr"),
+    ("スマートビルディングEXPO", r"スマートビルディング\s*expo|smart\s*building\s*expo", "enr"),
+    ("ウェアラブルEXPO (일본 웨어러블전)", r"ウェアラブル\s*expo|wearable\s*expo", "elec"),
+    ("IoT/M2M展 · IoT Technology", r"iot\s*/\s*m2m\s*展|\biot\s*technology\b", "elec"),
+    ("産業オープンネット展 (산업 오픈넷전)", r"産業オープンネット展", "fa"),
+    ("建設資材展", r"建設資材展", "etc"),
+    ("CeBIT", r"\bcebit\b", "elec"),
+    # ── 경쟁사 공식 일정에서 확인된 곳 (TE 등)
+    ("Power2Drive Europe", r"power2drive", "batt"),
+    ("Euronaval", r"euronaval", "def"),
+    ("Middle East Energy", r"middle\s*east\s*energy", "enr"),
+    ("Medtec (China/Japan)", r"\bmedtec\s*(china|japan)|medtecjapan", "med"),
+    ("Medical Technology Ireland", r"medical\s*technology\s*ireland", "med"),
+    ("DistribuTECH", r"distributech", "enr"),
+    ("All-Energy Australia", r"all[\s-]*energy\s*australia", "enr"),
+    ("JFlex (일본 플렉서블 전자)", r"\bjflex\b", "elec"),
+    ("MOSA Summit", r"\bMOSA\b", "def"),
+    ("AOC Symposium", r"\bAOC\b\s*(international|symposium|20\d\d)", "def"),
 ]
 
 FIELD_NAME = {"elec": "💻 전자·IT", "auto": "🚗 자동차·모빌리티", "fa": "🏭 산업·자동화",
@@ -647,6 +683,34 @@ def linkedin_ads():
     return out
 
 
+# ================================================================ 회사 공식 전시 일정 (브라우저로 받아 둔 파일)
+OFFICIAL = os.path.join(HERE, "data", "official_events.json")
+
+
+def official_events():
+    """경쟁사 홈페이지의 '전시회·이벤트' 목록. 글 하나가 곧 전시회 하나다(own=True)."""
+    try:
+        d = json.load(open(OFFICIAL, encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return []
+    return [{"title": e["t"], "desc": e.get("note", ""), "url": e.get("u") or "", "date": e.get("d") or "",
+             "site": "회사 공식 전시 일정", "kind": "official", "own": True,
+             "rival": e["rival"], "engine": "official", "q": "공식 일정"}
+            for e in d.get("events", [])]
+
+
+def own_fair_name(t):
+    """공식 일정 제목에서 전시회 이름만 남긴다 — 「第72回 電設工業展 (JECA FAIR 2024) に出展」 → 電設工業展 (JECA FAIR)"""
+    t = re.sub(r"\[[^\]]*\]|［[^］]*］", " ", t)                        # [Event] [名古屋会場]
+    t = re.sub(r"\((?:booth|stand)[^)]*\)|\([^)]*\d{4}/\d[^)]*\)|（[^）]*\d+/\d+[^）]*）", " ", t, flags=re.I)
+    t = re.sub(r"に出展.*$|出展のご案内.*$|協賛出展.*$|に出展しています.*$|オンライン会場.*$", "", t)
+    t = re.sub(r"第\s*\d+\s*回|(?<!\d)20[0-3]\d(?!\d)|\bin\s+[A-Z][\w ,.]+$|/\s*Booth.*$", " ", t)
+    t = re.sub(r"[～~]+", " ", t)
+    t = re.sub(r"\s*\((?:[^()]*)\)\s*$", "", t.strip())          # 끝의 (도시·나라) 꼬리
+    t = re.sub(r"\bbooth\b.*$", "", t, flags=re.I)
+    return re.sub(r"\s{2,}", " ", t).strip(" -–—·,|│")
+
+
 # ================================================================ 질의 만들기
 # 구글 뉴스 RSS 가 주력이다. 빙 웹검색은 회사 홈페이지·스팸만 올라와 쓰지 않는다(2026-09 확인).
 #  1) 일반형   "몰렉스" (booth OR exhibit OR …)        — 최근 기사
@@ -781,6 +845,10 @@ def collect():
     if li:
         log("링크드인 광고 %d건 (data/linkedin_ads.json)" % len(li))
         got += li
+    of = official_events()
+    if of:
+        log("회사 공식 전시 일정 %d건 (data/official_events.json)" % len(of))
+        got += of
     return got
 
 
@@ -823,16 +891,26 @@ def refine(raw):
         fairs = find_fairs(text)
         if not fairs:
             fairs = guess_fairs(text)
+        if it.get("own"):
+            # 공식 일정은 글 하나가 곧 전시회 하나 — 사전에서 여러 개가 걸려도 첫 번째만,
+            # 사전에 없으면 제목을 다듬어 그대로 전시회 이름으로 쓴다
+            y0 = int(it["date"][:4]) if (it.get("date") or "")[:4].isdigit() else 0
+            if fairs:
+                fairs = [dict(fairs[0], year=fairs[0]["year"] or y0)]
+            else:
+                fairs = [{"fair": own_fair_name(it.get("title", "")), "field": "etc", "year": y0, "src": "공식"}]
         hint = bool(SHOW_HINT.search(text))
         if not fairs and not hint and it.get("kind") != "ad":
             continue                       # 전시회 얘기가 아예 아닌 글
         url = (it.get("url") or "").split("&ved=")[0]
         d = parse_date(it.get("date") or "")
-        ukey = (key, url)
+        ukey = (key, url, it.get("title", "") if it.get("own") else "")
         if ukey in seen_url:
             continue
         seen_url[ukey] = 1
+        bm = re.search(r"booth\s*#?\s*([A-Za-z0-9][\w.\- ,]{1,30}?)(?:\)|,|$)", text, re.I)
         rows.append({
+            "booth": bm.group(1).strip() if bm else "", "own": bool(it.get("own")),
             "rival": key, "title": it.get("title", "")[:300], "desc": it.get("desc", "")[:400],
             "url": url, "date": d, "site": it.get("site", "")[:60], "kind": it.get("kind", "news"),
             "engine": it.get("engine", ""), "fairs": fairs, "hint": hint, "q": it.get("q", "")[:120],
@@ -891,6 +969,10 @@ def pair_rows(rows):
                                      "field": f["field"], "how": f.get("src", ""),
                                      "known": seen_before, "n": 0, "src": []})
             p["n"] += 1
+            if r.get("booth") and not p.get("booth"):
+                p["booth"] = r["booth"]
+            if r.get("own"):
+                p["off"] = True
             if len(p["src"]) < 6 and r["url"] not in [x["u"] for x in p["src"]]:
                 p["src"].append({"t": r["title"][:160], "u": r["url"], "d": r["date"],
                                  "s": r["site"], "k": r["kind"]})
@@ -1053,15 +1135,17 @@ def main():
         old = []
     merged, seen = [], set()
     for it in raw + old:
-        k = (it.get("rival"), (it.get("url") or "").split("&ved=")[0])
+        k = (it.get("rival"), (it.get("url") or "").split("&ved=")[0],
+             it.get("title", "") if it.get("own") else "")
         if k in seen:
             continue
         seen.add(k)
         merged.append(it)
     if OFFLINE:
-        li = linkedin_ads()
-        have = {(x.get("rival"), x.get("url")) for x in merged}
-        merged += [x for x in li if (x.get("rival"), x.get("url")) not in have]
+        li = linkedin_ads() + official_events()
+        have = {(x.get("rival"), x.get("url"), x.get("title") if x.get("own") else "") for x in merged}
+        merged += [x for x in li
+                   if (x.get("rival"), x.get("url"), x.get("title") if x.get("own") else "") not in have]
     log("원문 %d건 (이번 %d + 지난 %d)" % (len(merged), len(raw), len(old)))
     if not OFFLINE:
         json.dump(merged[:60000], open(RAW_CACHE, "w", encoding="utf-8"), ensure_ascii=False)

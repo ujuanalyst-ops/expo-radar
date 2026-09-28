@@ -26,12 +26,12 @@
   function host(u) {
     return String(u || "").replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/.*$/, "");
   }
-  var KIND = { news: "뉴스", ad: "광고", official: "회사 소식란", web: "웹", list: "출품사 명단" };
+  var KIND = { news: "뉴스", ad: "광고", official: "회사 공식", web: "웹", list: "출품사 명단" };
   // 이 줄을 무엇으로 확인했나 — 출품사 명단(확실) / 뉴스·광고 글(정황) / 둘 다
   function basisOf(p) { return p.has_list && p.has_text ? "both" : p.has_list ? "list" : "text"; }
   var BASIS = {
     both: '<span class="badge known">명단 + 글</span>',
-    list: '<span class="badge official">출품사 명단</span>',
+    list: '<span class="badge known">출품사 명단</span>',
     text: '<span class="badge fresh">글에서만 (흔적)</span>'
   };
 
@@ -76,7 +76,8 @@
       if (S.fld && p.field !== S.fld) return false;
       if (S.year && String(p.year) !== S.year) return false;
       if (S.freshOnly && p.known) return false;
-      if (S.basis && basisOf(p) !== S.basis) return false;
+      if (S.basis === "off") { if (!p.off) return false; }
+      else if (S.basis && basisOf(p) !== S.basis) return false;
       if (q && hay(p).indexOf(q) < 0) return false;
       return true;
     });
@@ -109,7 +110,8 @@
       }).join("") + "</select>" +
       (extra || "") +
       (extra ? "" : '<select id="fBasis">' + [["", "근거 전체"], ["both", "명단 + 글 둘 다"],
-        ["list", "출품사 명단으로 확인"], ["text", "글에서만 찾은 흔적"]].map(function (o) {
+        ["list", "출품사 명단으로 확인"], ["off", "회사 공식 전시 일정"],
+        ["text", "글에서만 찾은 흔적"]].map(function (o) {
           return '<option value="' + o[0] + '"' + (S.basis === o[0] ? " selected" : "") + ">" + o[1] + "</option>";
         }).join("") + "</select>") +
       '<label class="ck"><input type="checkbox" id="fFresh"' + (S.freshOnly ? " checked" : "") +
@@ -172,6 +174,7 @@
           '<td class="fr">' + esc(p.fair) +
           (p.booth ? '<small class="booth">부스 ' + esc(p.booth) + "</small>" : "") +
           '<div class="bs">' + BASIS[basisOf(p)] +
+          (p.off ? ' <span class="badge official" title="경쟁사 홈페이지의 전시회·이벤트 목록에 올라 있음">회사 공식 발표</span>' : "") +
           (p.list_kind === "visitor" ? ' <span class="badge web">참관</span>' : "") +
           (p.how === "발굴" ? ' <span class="badge dig">기사에서 캐냄</span>' : "") + "</div></td>" +
           '<td class="yr">' + (p.year || "—") + "</td>" +
@@ -316,7 +319,7 @@
       esc(rivName(p.rival)) + "</h3><p>" + esc(p.fair) + (p.year ? " " + p.year : "") +
       " · 분야 " + esc(fldName(p.field)) + " · 근거 " + p.n + "건</p></div>" +
       '<div class="dbody"><p class="note">' +
-      ({ both: "<b>출품사 명단과 뉴스·광고 글 양쪽</b>에서 확인됐습니다.",
+      ({ both: "<b>출품사 명단</b>과 <b>" + (p.off ? "회사 공식 전시 일정" : "뉴스·광고 글") + "</b> 양쪽에서 확인됐습니다.",
          list: "전시회 주최 측 <b>출품사 명단</b>으로 확인했습니다.",
          text: "출품사 명단으로는 못 잡고 <b>글에서만 확인</b>된 흔적입니다. 참가 확정이 아닐 수 있습니다."
        })[basisOf(p)] +

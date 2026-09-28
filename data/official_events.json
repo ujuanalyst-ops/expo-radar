@@ -1,0 +1,1019 @@
+{
+ "note": "경쟁사 공식 홈페이지의 '전시회·이벤트' 목록. 회사 사이트가 스크립트 접근을 403으로 막아 브라우저로 직접 받아 둔 것이다. 재생성이 안 되므로 git에 보관한다. 갱신 절차는 tools/official_events.md.",
+ "collected": "2026-09-28",
+ "sources": {
+  "hirose": [
+   "https://www.hirose.com/corporate/en/global_news/?news_cat=event",
+   "https://www.hirose.com/corporate/ja/global_news/?news_cat=event"
+  ],
+  "iriso": [
+   "https://www.irisoele.com/jp/technology/event/ (연도별 y2019~y2026)"
+  ],
+  "yazaki": [
+   "https://www.yazaki-group.com/expo/index.html",
+   "https://www.yazaki-group.com/news/"
+  ],
+  "te": [
+   "https://www.te.com/en/about-te/events.html",
+   "https://www.te.com/en/industries/industrial-machinery/industry-events.html",
+   "https://www.te.com/en/industries/medical-technologies/medical-events.html",
+   "https://www.te.com/en/industries/aerospace/adm-events.html",
+   "https://www.te.com/en/industries/energy-solutions/energy-events.html"
+  ],
+  "jae": [
+   "https://www.jae.com/topics/"
+  ]
+ },
+ "events": [
+  {
+   "rival": "hirose",
+   "d": "2027-01-06",
+   "t": "CES 2027 (Las Vegas, Jan 6-9, 2027)",
+   "u": "https://info.hirose.com/ces-2027"
+  },
+  {
+   "rival": "hirose",
+   "d": "2026-09-11",
+   "t": "産業オープンネット展 2026に出展",
+   "u": "https://sangyo-open.net/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2026-06-17",
+   "t": "人とくるまのテクノロジー展2026 NAGOYA に出展",
+   "u": "https://connectors.hirose.com/event_automotive_engineering_exposition_nagoya_2026"
+  },
+  {
+   "rival": "hirose",
+   "d": "2026-05-27",
+   "t": "JECA FAIR 2026 ～第74回電設工業展～ に出展",
+   "u": "https://connectors.hirose.com/ja/event_jeca_fair_2026"
+  },
+  {
+   "rival": "hirose",
+   "d": "2026-05-27",
+   "t": "人とくるまのテクノロジー展2026 YOKOHAMA に出展",
+   "u": "https://connectors.hirose.com/event_automotive_engineering_exposition_2026"
+  },
+  {
+   "rival": "hirose",
+   "d": "2026-01-06",
+   "t": "CES 2026",
+   "u": "https://info.hirose.com/ces-2026"
+  },
+  {
+   "rival": "hirose",
+   "d": "2025-12-17",
+   "t": "SEMICON Japan 2025 に出展",
+   "u": "https://connectors.hirose.com/event_semicon_japan_2025"
+  },
+  {
+   "rival": "hirose",
+   "d": "2025-12-03",
+   "t": "2025 国際ロボット展 に出展",
+   "u": "https://connectors.hirose.com/event_irex_2025"
+  },
+  {
+   "rival": "hirose",
+   "d": "2025-07-16",
+   "t": "人とくるまのテクノロジー展2025 Nagoya に出展",
+   "u": "https://hubs.la/Q03rnqx20"
+  },
+  {
+   "rival": "hirose",
+   "d": "2025-05-28",
+   "t": "電設工業展 2025 (JECA FAIR 2025) に出展",
+   "u": "https://connectors.hirose.com/ja/event_jeca_fair_2025"
+  },
+  {
+   "rival": "hirose",
+   "d": "2025-05-21",
+   "t": "人とくるまのテクノロジー展2025 Yokohama に出展",
+   "u": "https://hubs.la/Q03j1Z_D0"
+  },
+  {
+   "rival": "hirose",
+   "d": "2025-01-07",
+   "t": "CES 2025 / Booth #52939",
+   "u": "https://info.hirose.com/ces-2025"
+  },
+  {
+   "rival": "hirose",
+   "d": "2024-12-11",
+   "t": "SEMICON Japan 2024 に出展",
+   "u": "https://www.hirose.com/corporate/ja/global_news/jp_semicon_japan_2024/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2024-07-17",
+   "t": "[名古屋会場] 人とくるまのテクノロジー展2024 に出展",
+   "u": "https://www.hirose.com/corporate/ja/global_news/jp_jsae2024/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2024-05-29",
+   "t": "第72回 電設工業展 (JECA FAIR 2024) に出展",
+   "u": "https://www.hirose.com/corporate/ja/global_news/jp_jeca2024/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2024-05-22",
+   "t": "[横浜会場] 人とくるまのテクノロジー展2024 に出展",
+   "u": "https://www.hirose.com/corporate/ja/global_news/jp_jsae2024/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2024-01-09",
+   "t": "CES 2024",
+   "u": "https://info.hirose.com/ces"
+  },
+  {
+   "rival": "hirose",
+   "d": "2023-11-29",
+   "t": "2023国際ロボット展に出展",
+   "u": "https://www.hirose.com/corporate/ja/global_news/jp_irex2023/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2023-07-05",
+   "t": "［名古屋会場］人とくるまのテクノロジー展2023に出展",
+   "u": "https://www.hirose.com/corporate/ja/global_news/jp_jsae2023/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2023-05-24",
+   "t": "第71回 電設工業展（JECA FAIR 2023） に出展",
+   "u": "https://www.hirose.com/corporate/ja/global_news/jp_jeca2023/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2023-05-22",
+   "t": "Automate 2023",
+   "u": "https://www.hirose.com/us/event/Automate_2023.html"
+  },
+  {
+   "rival": "hirose",
+   "d": "2023-02-01",
+   "t": "DesignCon 2023",
+   "u": "https://www.hirose.com/us/event/DesignCon_2023.html"
+  },
+  {
+   "rival": "hirose",
+   "d": "2023-01-25",
+   "t": "第9回 ウェアラブルEXPO",
+   "u": "https://www.hirose.com/corporate/ja/global_news/jp_wearableexpo2023/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2023-01-05",
+   "t": "CES 2023",
+   "u": "https://www.hirose.com/us/event/CES_2023.html"
+  },
+  {
+   "rival": "hirose",
+   "d": "2022-06-29",
+   "t": "[名古屋会場] 人とくるまのテクノロジー展2022 に出展",
+   "u": "https://www.hirose.com/corporate/ja/global_news/jp_jsae2022/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2022-06-01",
+   "t": "第70回 電設工業展（JECA FAIR 2022） に出展",
+   "u": "https://www.hirose.com/corporate/ja/global_news/jp_jeca2022/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2022-05-25",
+   "t": "[横浜会場] 人とくるまのテクノロジー展2022 に出展",
+   "u": "https://www.hirose.com/corporate/ja/global_news/jp_jsae2022/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2022-03-09",
+   "t": "2022国際ロボット展 に出展",
+   "u": "https://www.hirose.com/corporate/ja/global_news/jp_irex2022/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2021-11-24",
+   "t": "鉄道技術展2021 に出展",
+   "u": "https://www.hirose.com/corporate/ja/global_news/jp_mtji2021/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2021-10-27",
+   "t": "電子機器トータルソリューション展2021 (JPCA Show) に出展",
+   "u": "https://www.jpcashow.com/show2021/index.html"
+  },
+  {
+   "rival": "hirose",
+   "d": "2021-07-01",
+   "t": "電設工業展/JECA FAIR 2021 オンライン会場に出展",
+   "u": "https://www.jecafair.jp/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2021-04-12",
+   "t": "DesignCon 2021 (Webinar)",
+   "u": "https://www.designcon.com/en/resources/webinars.html"
+  },
+  {
+   "rival": "hirose",
+   "d": "2021-03-22",
+   "t": "AUTOMATE FORWARD 2021 (A Virtual Trade Show and Conference)",
+   "u": "https://www.automateshow.com/conference/automate-forward"
+  },
+  {
+   "rival": "hirose",
+   "d": "2021-01-11",
+   "t": "CES 2021 All-Digital Experience",
+   "u": "https://www.ces.tech/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2020-10-27",
+   "t": "チップワンストップ オンライン展示会2020秋 に出展",
+   "u": "https://www.chip1stop.com/sp/event/online_expo2020_autumn_hirose"
+  },
+  {
+   "rival": "hirose",
+   "d": "2020-10-20",
+   "t": "CEATEC 2020 Online に出展",
+   "u": "https://www.ceatec.com/ja/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2020-01-07",
+   "t": "CES 2020 (booth #44349, Tech West, Sands Expo)",
+   "u": "https://www.hirose.com/product/en/pr/event/ces_2020/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2019-12-18",
+   "t": "2019国際ロボット展 出展のご案内",
+   "u": "https://www.hirose.com/product/jp/pr/event/irex2019/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2019-11-13",
+   "t": "Inter BEE 2019 出展のご案内",
+   "u": "https://www.hirose.com/product/jp/pr/event/interbee19/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2019-10-10",
+   "t": "ET & IoT Technology 2019 協賛出展のご案内",
+   "u": "https://www.hirose.com/product/jp/pr/event/et_iot2019/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2019-07-17",
+   "t": "人とくるまのテクノロジー展 2019 (名古屋) 出展のご案内",
+   "u": "https://www.hirose.com/product/jp/pr/event/jsae19/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2019-07-10",
+   "t": "関西放送機器展 2019 出展のご案内",
+   "u": "https://www.hirose.com/product/jp/pr/event/kbee19/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2019-06-05",
+   "t": "JPCA Show 2019 (国際電子回路産業展)出展のご案内",
+   "u": "https://www.hirose.com/product/jp/pr/event/jpca19/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2019-05-22",
+   "t": "人とくるまのテクノロジー展 2019 (横浜) 出展のご案内",
+   "u": "https://www.hirose.com/product/jp/pr/event/jsae19/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2019-05-22",
+   "t": "JECA FAIR 2019 ～第67回電設工業展～ 出展のご案内",
+   "u": "https://www.hirose.com/product/jp/pr/event/jeca19/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2019-04-10",
+   "t": "IoT/M2M展(春) 2019 協賛出展のご案内",
+   "u": "https://www.hirose.com/product/jp/pr/event/iot19/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2019-01-08",
+   "t": "CES 2019 (booth #44543, Sands Halls A-D)",
+   "u": "https://www.hirose.com/product/en/pr/event/ces_2019/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2018-11-14",
+   "t": "Inter BEE 2018 ～国際放送機器展～",
+   "u": "https://www.hirose.com/product/jp/pr/event/interbee18/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2018-09-26",
+   "t": "electronica India 2018 (booth #EA31, Hall 4)",
+   "u": "https://www.hirose.com/product/en/pr/event/electronica_india_2018/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2018-09-10",
+   "t": "HANNOVER MESSE USA 2018 (booth #134126, East Building)",
+   "u": "https://www.hirose.com/product/en/pr/event/hannovermesse_usa_2018/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2018-07-11",
+   "t": "人とくるまのテクノロジー展2018 名古屋",
+   "u": "https://www.hirose.com/product/jp/pr/event/jsae18/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2018-06-10",
+   "t": "IMS 2018 in Philadelphia, USA (booth #2034)",
+   "u": "https://www.hirose.com/product/en/pr/event/ims2018/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2018-06-06",
+   "t": "JPCA Show 2018 ～国際電子回路産業展～",
+   "u": "https://www.hirose.com/product/jp/pr/event/jpca18/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2018-05-23",
+   "t": "JECA FAIR 2018 ～第66回電設工業展～",
+   "u": "https://www.hirose.com/product/jp/pr/event/jeca18/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2018-05-23",
+   "t": "人とくるまのテクノロジー展2018 横浜",
+   "u": "https://www.hirose.com/product/jp/pr/event/jsae18/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2018-04-23",
+   "t": "HANNOVER MESSE 2018 (booth #Hall 11, Stand E72)",
+   "u": "https://www.hirose.com/product/en/pr/event/hannovermesse2018/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2018-03-13",
+   "t": "OFC 2018 in San Diego, USA (booth #4145)",
+   "u": "https://www.hirose.com/product/en/pr/event/ofc2018/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2018-02-28",
+   "t": "第8回 国際スマートグリッドEXPO 2018",
+   "u": "https://www.hirose.com/product/jp/pr/event/smartgride2018/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2018-01-09",
+   "t": "CES 2018 in Las Vegas, USA (booth #45340)",
+   "u": "https://www.hirose.com/product/en/pr/event/ces18/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2017-11-29",
+   "t": "2017国際ロボット展",
+   "u": "https://www.hirose.com/product/jp/pr/event/irex2017/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2017-11-15",
+   "t": "IoT Technology 2017",
+   "u": "https://www.hirose.com/product/jp/pr/event/iot_technology_2017/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2017-11-15",
+   "t": "Inter BEE 2017",
+   "u": "https://www.hirose.com/product/jp/pr/event/interbee2017/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2017-09-20",
+   "t": "第1回 スマートビルディングEXPO関西 2017",
+   "u": "http://go.hirose.co.jp/smartbuilding_kansai_2017/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2017-06-28",
+   "t": "人とくるまのテクノロジー展 2017 名古屋",
+   "u": "http://go.hirose.co.jp/aeey2017/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2017-06-07",
+   "t": "電子機器トータルソリューション展 2017 (JPCA Show)",
+   "u": "http://go.hirose.co.jp/JPCA2017/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2017-05-24",
+   "t": "人とくるまのテクノロジー展 2017 横浜",
+   "u": "http://go.hirose.co.jp/aeey2017/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2017-05-17",
+   "t": "JECA FAIR 2017",
+   "u": "http://go.hirose.co.jp/jecafair2017/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2017-03-20",
+   "t": "CeBIT 2017",
+   "u": "https://www.hirose.com/jp/additional/pressreleases/cebit2017_jp.html"
+  },
+  {
+   "rival": "hirose",
+   "d": "2017-03-14",
+   "t": "electronica China 2017",
+   "u": "https://www.hirose.com/jp/additional/pressreleases/electronica_china_2017_jp.html"
+  },
+  {
+   "rival": "hirose",
+   "d": "2017-03-01",
+   "t": "第7回 国際スマートグリッドEXPO 2017",
+   "u": "http://go.hirose.co.jp/smartgrid2017/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2017-01-05",
+   "t": "CES 2017 in Las Vegas, USA (booth #44154)",
+   "u": "http://go.hirose.co.jp/ces17/productslist/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2016-07-20",
+   "t": "第1回 建設資材展 2016",
+   "u": "http://go.hirose.co.jp/construction/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2016-06-29",
+   "t": "人とくるまのテクノロジー展2016名古屋",
+   "u": "http://go.hirose.co.jp/hitotokuruma2016/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2016-05-25",
+   "t": "人とくるまのテクノロジー展2016横浜",
+   "u": "http://go.hirose.co.jp/hitotokuruma2016/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2016-03-02",
+   "t": "第6回 国際スマートグリッドEXPO 2016",
+   "u": "https://www.hirose.com/corporate/ja/global_news/file/1736/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2016-01-06",
+   "t": "2016 International CES in Las Vegas, USA (booth #73563)",
+   "u": "http://go.hirose.co.jp/ces16"
+  },
+  {
+   "rival": "hirose",
+   "d": "2015-12-02",
+   "t": "2015国際ロボット展 出展のご案内",
+   "u": "https://www.hirose.com/corporate/ja/global_news/file/1737/"
+  },
+  {
+   "rival": "hirose",
+   "d": "2015-11-11",
+   "t": "第4回 鉄道技術展 2015",
+   "u": "https://www.hirose.com/corporate/ja/global_news/file/1738/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2026-06-17",
+   "t": "人とくるまのテクノロジー展 2026 NAGOYA に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2026/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2026-05-27",
+   "t": "人とくるまのテクノロジー展 2026 YOKOHAMA に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2026/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2026-04-08",
+   "t": "第11回 ものづくり ワールド (名古屋) に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2026/",
+   "note": "株式会社鳥羽洋行 부스 안에서 출품"
+  },
+  {
+   "rival": "iriso",
+   "d": "2026-01-21",
+   "t": "インターネプコン ジャパン (NEPCON JAPAN) 2026 に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2026/",
+   "note": "コアスタッフ 부스 안에서 출품"
+  },
+  {
+   "rival": "iriso",
+   "d": "2026-01-06",
+   "t": "CES 2026 に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2026/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2025-12-03",
+   "t": "2025 国際ロボット展（iREX2025）に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2025/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2025-10-18",
+   "t": "あきたNEXTモーターフェス2025 に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2025/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2025-09-17",
+   "t": "electronica India 2025 に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2025/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2025-07-16",
+   "t": "人とくるまのテクノロジー展 2025 NAGOYA に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2025/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2025-05-21",
+   "t": "人とくるまのテクノロジー展 2025 YOKOHAMA に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2025/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2025-01-07",
+   "t": "CES 2025 に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2025/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2024-10-05",
+   "t": "あきたNEXTモーターフェス2024 に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2024/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2024-07-17",
+   "t": "人とくるまのテクノロジー展 2024 NAGOYA に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2024/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2024-05-22",
+   "t": "人とくるまのテクノロジー展 2024 YOKOHAMA に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2024/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2024-01-24",
+   "t": "インターネプコン ジャパン (NEPCON JAPAN) 2024 に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2024/",
+   "note": "ヤマハ発動機 부스 안에서 출품"
+  },
+  {
+   "rival": "iriso",
+   "d": "2023-11-29",
+   "t": "2023国際ロボット展 に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2023/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2023-10-28",
+   "t": "あきたNEXTモーターフェス2023 に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2023/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2023-09-13",
+   "t": "electronica India 2023 に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2023/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2023-07-05",
+   "t": "人とくるまのテクノロジー展 2023 NAGOYA に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2023/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2023-05-24",
+   "t": "人とくるまのテクノロジー展 2023 YOKOHAMA に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2023/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2023-01-05",
+   "t": "CES 2023 に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2023/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2022-11-15",
+   "t": "electronica 2022 (München) に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2022/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2022-10-01",
+   "t": "CEATEC 2022 ONLINE に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2022/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2022-05-25",
+   "t": "人とくるまのテクノロジー展 2022 ONLINE に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2022/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2022-03-09",
+   "t": "2022 国際ロボット展（iREX2022）に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2022/",
+   "note": "クラボウ(倉敷紡績) 부스 안에서 출품"
+  },
+  {
+   "rival": "iriso",
+   "d": "2022-01-05",
+   "t": "CES 2022 に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2022/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2021-10-19",
+   "t": "CEATEC 2021 ONLINE に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2021/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2021-06-11",
+   "t": "マークラインズオンライン展示会2021 に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2021/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2020-10-20",
+   "t": "CEATEC 2020 ONLINE に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2020/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2019-12-18",
+   "t": "2019 国際ロボット展（iREX2019）に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2019/",
+   "note": "三菱電機 부스 안에서 출품"
+  },
+  {
+   "rival": "iriso",
+   "d": "2019-09-10",
+   "t": "The Battery Show 2019 (USA) に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2019/"
+  },
+  {
+   "rival": "iriso",
+   "d": "2019-08-21",
+   "t": "TAIROS 2019 台湾ロボット＆インテリジェンスオートメーション展 に出展",
+   "u": "https://www.irisoele.com/jp/technology/event/y2019/",
+   "note": "三菱電機 부스 안에서 출품"
+  },
+  {
+   "rival": "yazaki",
+   "d": "2026-05-27",
+   "t": "人とくるまのテクノロジー展2026 に出展",
+   "u": "https://www.yazaki-group.com/expo/index.html"
+  },
+  {
+   "rival": "yazaki",
+   "d": "2026-01-21",
+   "t": "オートモーティブワールド2026 に出展",
+   "u": "https://www.yazaki-group.com/expo/index.html"
+  },
+  {
+   "rival": "yazaki",
+   "d": "2025-05-21",
+   "t": "人とくるまのテクノロジー展2025 に出展",
+   "u": "https://www.yazaki-group.com/expo/index.html"
+  },
+  {
+   "rival": "yazaki",
+   "d": "2024-05-22",
+   "t": "人とクルマのテクノロジー展 2024 YOKOHAMA に出展",
+   "u": "https://www.yazaki-group.com/news/11104/index.html"
+  },
+  {
+   "rival": "yazaki",
+   "d": "2023-10-26",
+   "t": "JAPAN MOBILITY SHOW 2023 に出展",
+   "u": "https://www.yazaki-group.com/expo/index.html"
+  },
+  {
+   "rival": "yazaki",
+   "d": "2023-05-24",
+   "t": "人とクルマのテクノロジー展 2023 YOKOHAMA に出展",
+   "u": "https://www.yazaki-group.com/news/news133/index.html"
+  },
+  {
+   "rival": "yazaki",
+   "d": "2022-05-25",
+   "t": "人とクルマのテクノロジー展 2022 YOKOHAMA に出展",
+   "u": "https://www.yazaki-group.com/news/news131/index.html"
+  },
+  {
+   "rival": "yazaki",
+   "d": "2021-05-26",
+   "t": "人とくるまのテクノロジー展2021 ONLINE に出展",
+   "u": "https://www.yazaki-group.com/news/news130/index.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-10-12",
+   "t": "OCP Global Summit 2026 (San Jose)",
+   "u": "https://www.te.com/en/about-te/events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-10-13",
+   "t": "Energyear Italy 2026 (Milan)",
+   "u": "https://www.te.com/en/about-te/events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-11-16",
+   "t": "COMPAMED 2026 (Düsseldorf) booth 8A R17",
+   "u": "https://www.te.com/en/about-te/events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-09-01",
+   "t": "Middle East Energy 2026 (Dubai)",
+   "u": "https://www.te.com/en/industries/industrial-machinery/industry-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-09-16",
+   "t": "Electronica India 2026 (BIEC, Bengaluru)",
+   "u": "https://www.te.com/en/industries/industrial-machinery/industry-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-11-24",
+   "t": "SPS - Smart Production Solutions 2026 (Nuremberg)",
+   "u": "https://www.te.com/en/industries/industrial-machinery/industry-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-08-11",
+   "t": "Fenasucro 2026 (Sertãozinho, Brasil)",
+   "u": "https://www.te.com/en/industries/industrial-machinery/industry-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-03-10",
+   "t": "Embedded World 2026 (Nuremberg)",
+   "u": "https://www.te.com/en/industries/industrial-machinery/industry-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-06-23",
+   "t": "Power2Drive Europe 2026 (Munich)",
+   "u": "https://www.te.com/en/industries/industrial-machinery/industry-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-06-23",
+   "t": "Automate 2026 (Chicago)",
+   "u": "https://www.te.com/en/industries/industrial-machinery/industry-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2025-12-03",
+   "t": "iREX 2025 (Tokyo)",
+   "u": "https://www.te.com/en/industries/industrial-machinery/industry-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-09-01",
+   "t": "Medical Technology Ireland 2026",
+   "u": "https://www.te.com/en/industries/medical-technologies/medical-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-09-01",
+   "t": "MedTec China 2026",
+   "u": "https://www.te.com/en/industries/medical-technologies/medical-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2027-02-09",
+   "t": "MD&M West 2027 (Anaheim)",
+   "u": "https://www.te.com/en/industries/medical-technologies/medical-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-09-16",
+   "t": "ESA Industry Space Days 2026 (Netherlands)",
+   "u": "https://www.te.com/en/industries/aerospace/adm-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-09-22",
+   "t": "MOSA Industry & Government Summit 2026 (National Harbor, MD)",
+   "u": "https://www.te.com/en/industries/aerospace/adm-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-10-12",
+   "t": "AUSA Annual Meeting 2026 (Washington DC)",
+   "u": "https://www.te.com/en/industries/aerospace/adm-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-11-03",
+   "t": "Euronaval 2026 (Paris)",
+   "u": "https://www.te.com/en/industries/aerospace/adm-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-12-08",
+   "t": "AOC International Symposium 2026 (National Harbor, MD)",
+   "u": "https://www.te.com/en/industries/aerospace/adm-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-11-16",
+   "t": "RE+ 2026 (Las Vegas)",
+   "u": "https://www.te.com/en/industries/energy-solutions/energy-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-09-22",
+   "t": "WindEnergy Hamburg 2026",
+   "u": "https://www.te.com/en/industries/energy-solutions/energy-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-10-28",
+   "t": "All Energy Australia 2026 (Melbourne)",
+   "u": "https://www.te.com/en/industries/energy-solutions/energy-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2025-11-11",
+   "t": "FISE 2025 (Colombia)",
+   "u": "https://www.te.com/en/industries/energy-solutions/energy-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2025-11-26",
+   "t": "Concapan 2025 (El Salvador)",
+   "u": "https://www.te.com/en/industries/energy-solutions/energy-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-08-25",
+   "t": "Intersolar South America 2026 (Brasil)",
+   "u": "https://www.te.com/en/industries/energy-solutions/energy-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-05-04",
+   "t": "IEEE PES T&D 2026",
+   "u": "https://www.te.com/en/industries/energy-solutions/energy-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-02-02",
+   "t": "DistribuTECH 2026",
+   "u": "https://www.te.com/en/industries/energy-solutions/energy-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2025-10-15",
+   "t": "International Lineman's Rodeo 2025",
+   "u": "https://www.te.com/en/industries/energy-solutions/energy-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2025-09-08",
+   "t": "RE+ 2025",
+   "u": "https://www.te.com/en/industries/energy-solutions/energy-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-05-27",
+   "t": "JECA FAIR 2026 (電設工業展, Tokyo)",
+   "u": "https://www.te.com/en/industries/energy-solutions/energy-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2026-06-03",
+   "t": "SNEC 2026 (Shanghai)",
+   "u": "https://www.te.com/en/industries/energy-solutions/energy-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2025-05-06",
+   "t": "Elfack 2025 (Sweden)",
+   "u": "https://www.te.com/en/industries/energy-solutions/energy-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2025-03-25",
+   "t": "Eltefa 2025 (Stuttgart)",
+   "u": "https://www.te.com/en/industries/energy-solutions/energy-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2025-02-12",
+   "t": "Elektrotechnik 2025 (Dortmund)",
+   "u": "https://www.te.com/en/industries/energy-solutions/energy-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2025-11-21",
+   "t": "Powerexpo Almaty 2025 (Kazakhstan)",
+   "u": "https://www.te.com/en/industries/energy-solutions/energy-events.html"
+  },
+  {
+   "rival": "te",
+   "d": "2025-10-29",
+   "t": "All Energy Australia 2025 (Melbourne)",
+   "u": "https://www.te.com/en/industries/energy-solutions/energy-events.html"
+  },
+  {
+   "rival": "jae",
+   "d": "2019-01-16",
+   "t": "JFlex 2019 出展",
+   "u": "https://www.jae.com/topics/detail/id=1631"
+  },
+  {
+   "rival": "jae",
+   "d": "2018-12-12",
+   "t": "SEMICON Japan 2018 出展",
+   "u": "https://www.jae.com/topics/detail/id=1630"
+  },
+  {
+   "rival": "jae",
+   "d": "2018-11-13",
+   "t": "electronica 2018 出展",
+   "u": "https://www.jae.com/topics/detail/id=1627"
+  },
+  {
+   "rival": "jae",
+   "d": "2018-11-01",
+   "t": "JIMTOF 2018 第29回 日本国際工作機械見本市 出展",
+   "u": "https://www.jae.com/topics/detail/id=1625"
+  },
+  {
+   "rival": "jae",
+   "d": "2018-10-16",
+   "t": "CEATEC JAPAN 2018 出展",
+   "u": "https://www.jae.com/topics/detail/id=1623"
+  },
+  {
+   "rival": "jae",
+   "d": "2018-09-26",
+   "t": "electronica India 2018 出展",
+   "u": "https://www.jae.com/topics/detail/id=1622"
+  },
+  {
+   "rival": "jae",
+   "d": "2018-07-11",
+   "t": "人とくるまのテクノロジー展2018 名古屋 出展",
+   "u": "https://www.jae.com/topics/detail/id=1618"
+  },
+  {
+   "rival": "jae",
+   "d": "2018-05-23",
+   "t": "人とくるまのテクノロジー展2018 横浜 出展",
+   "u": "https://www.jae.com/topics/detail/id=1613"
+  },
+  {
+   "rival": "jae",
+   "d": "2018-04-23",
+   "t": "Hannover Messe 2018 出展",
+   "u": "https://www.jae.com/topics/detail/id=1609"
+  },
+  {
+   "rival": "jae",
+   "d": "2018-03-14",
+   "t": "electronica China 2018 出展",
+   "u": "https://www.jae.com/topics/detail/id=1606"
+  }
+ ]
+}
