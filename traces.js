@@ -10,7 +10,7 @@
   // 다른 화면에서 traces.html?q=InnoTrans 로 넘어오면 그 검색어로 열어 준다
   var q0 = (location.search.match(/[?&]q=([^&]*)/) || [])[1];
   q0 = q0 ? decodeURIComponent(q0.replace(/\+/g, " ")) : "";
-  var S = { tab: "pair", q: q0, riv: "", fld: "", year: "", freshOnly: false, kind: "", limit: 200 };
+  var S = { tab: "pair", q: q0, riv: "", fld: "", year: "", freshOnly: false, kind: "", basis: "", limit: 200 };
   var main = document.getElementById("main");
   var drawer = document.getElementById("drawer");
   var scrim = document.getElementById("scrim");
@@ -26,11 +26,19 @@
   function host(u) {
     return String(u || "").replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/.*$/, "");
   }
-  var KIND = { news: "뉴스", ad: "광고", official: "회사 소식란", web: "웹" };
+  var KIND = { news: "뉴스", ad: "광고", official: "회사 소식란", web: "웹", list: "출품사 명단" };
+  // 이 줄을 무엇으로 확인했나 — 출품사 명단(확실) / 뉴스·광고 글(정황) / 둘 다
+  function basisOf(p) { return p.has_list && p.has_text ? "both" : p.has_list ? "list" : "text"; }
+  var BASIS = {
+    both: '<span class="badge known">명단 + 글</span>',
+    list: '<span class="badge official">출품사 명단</span>',
+    text: '<span class="badge fresh">글에서만 (흔적)</span>'
+  };
 
   // ---------------------------------------------------------------- 헤더
   function header() {
     var fresh = D.pairs.filter(function (p) { return !p.known; }).length;
+    var both = D.pairs.filter(function (p) { return basisOf(p) === "both"; }).length;
     var fairs = {}, oldest = "9999";
     D.pairs.forEach(function (p) { fairs[p.fair] = 1; });
     D.rows.forEach(function (r) { if (r.date && r.date < oldest) oldest = r.date; });
@@ -38,20 +46,21 @@
     D.pairs.forEach(function (p) { withRiv[p.rival] = 1; });
 
     document.getElementById("subline").textContent =
-      D.generated + " 기준 · 경쟁사 " + D.rivals.length + "곳의 이름을 뉴스·보도자료·회사 소식란·링크드인 광고에서 찾아, " +
-      "그 글에 적힌 전시회를 뽑아낸 것입니다. 출품사 명단이 아니라 '흔적'이므로 참가 확정이 아닐 수 있습니다" +
+      D.generated + " 기준 · 두 가지를 한 표에 합쳤습니다 — 전시회 주최 측 '출품사 명단'으로 확인한 것(확실)과, " +
+      "뉴스·보도자료·회사 소식란·링크드인 광고에서 찾은 '흔적'(정황, 과거·명단 비공개 전시회까지)" +
       (oldest !== "9999" ? " (가장 오래된 근거 " + oldest.slice(0, 4) + "년)." : ".");
     document.getElementById("kpis").innerHTML =
-      '<div class="kpi"><b>' + num(D.pairs.length) + "</b><span>경쟁사 × 전시회 흔적</span></div>" +
-      '<div class="kpi hot"><b>' + num(fresh) + "</b><span>명단으로는 못 잡던 것</span></div>" +
+      '<div class="kpi"><b>' + num(D.pairs.length) + "</b><span>경쟁사 × 전시회</span></div>" +
+      '<div class="kpi hot"><b>' + num(fresh) + "</b><span>글에서만 찾은 것</span></div>" +
+      '<div class="kpi"><b>' + num(both) + "</b><span>명단·글 둘 다</span></div>" +
       '<div class="kpi"><b>' + num(Object.keys(fairs).length) + "</b><span>전시회</span></div>" +
-      '<div class="kpi"><b>' + num(D.rows.length) + "</b><span>근거 글</span></div>" +
-      '<div class="kpi"><b>' + num(Object.keys(withRiv).length) + "</b><span>흔적이 잡힌 경쟁사</span></div>";
+      '<div class="kpi"><b>' + num(Object.keys(withRiv).length) + "</b><span>경쟁사</span></div>";
   }
 
   // ---------------------------------------------------------------- 찾기
   function hay(p) {
-    var t = p.fair + " " + rivName(p.rival) + " " + fldName(p.field) + " " + (p.year || "");
+    var t = p.fair + " " + rivName(p.rival) + " " + fldName(p.field) + " " + (p.year || "") + " " +
+      (p.booth || "") + " " + (p.city || "");
     (p.src || []).forEach(function (s) { t += " " + s.t + " " + s.s; });
     return t.toLowerCase();
   }
@@ -67,6 +76,7 @@
       if (S.fld && p.field !== S.fld) return false;
       if (S.year && String(p.year) !== S.year) return false;
       if (S.freshOnly && p.known) return false;
+      if (S.basis && basisOf(p) !== S.basis) return false;
       if (q && hay(p).indexOf(q) < 0) return false;
       return true;
     });
@@ -98,6 +108,10 @@
         return '<option value="' + y + '"' + (S.year === y ? " selected" : "") + ">" + y + "년</option>";
       }).join("") + "</select>" +
       (extra || "") +
+      (extra ? "" : '<select id="fBasis">' + [["", "근거 전체"], ["both", "명단 + 글 둘 다"],
+        ["list", "출품사 명단으로 확인"], ["text", "글에서만 찾은 흔적"]].map(function (o) {
+          return '<option value="' + o[0] + '"' + (S.basis === o[0] ? " selected" : "") + ">" + o[1] + "</option>";
+        }).join("") + "</select>") +
       '<label class="ck"><input type="checkbox" id="fFresh"' + (S.freshOnly ? " checked" : "") +
       "> 출품사 명단으로는 못 잡던 것만</label>" +
       '<span class="cnt" id="cnt"></span></div>';
@@ -118,7 +132,9 @@
 
   function wire() {
     var r = document.getElementById("fRiv"), y = document.getElementById("fYear"),
-      f = document.getElementById("fFresh"), k = document.getElementById("fKind");
+      f = document.getElementById("fFresh"), k = document.getElementById("fKind"),
+      bs = document.getElementById("fBasis");
+    if (bs) bs.onchange = function () { S.basis = bs.value; S.limit = 200; render(); };
     if (r) r.onchange = function () { S.riv = r.value; S.limit = 200; render(); };
     if (y) y.onchange = function () { S.year = y.value; S.limit = 200; render(); };
     if (f) f.onchange = function () { S.freshOnly = f.checked; S.limit = 200; render(); };
@@ -146,17 +162,18 @@
     var shown = list.slice(0, S.limit);
     main.innerHTML = toolbar() + fieldChips(list) +
       '<div class="card tblwrap"><table class="ttbl"><thead><tr>' +
-      "<th>경쟁사</th><th>전시회</th><th>연도</th><th>분야</th><th>근거</th><th>글</th>" +
+      "<th>경쟁사</th><th>전시회 · 부스</th><th>연도</th><th>분야</th><th>근거</th><th>건수</th>" +
       "</tr></thead><tbody>" +
       shown.map(function (p, i) {
         var idx = D.pairs.indexOf(p);
         return '<tr class="pr" data-pair="' + idx + '">' +
           '<td class="riv">' + esc(rivName(p.rival)) +
           "<small>" + esc((RIV[p.rival] || {}).country || "") + "</small></td>" +
-          '<td class="fr">' + esc(p.fair) + " " +
-          (p.known ? '<span class="badge known">명단 확인됨</span>'
-                   : '<span class="badge fresh">흔적만</span>') +
-          (p.how === "발굴" ? ' <span class="badge dig">기사에서 캐냄</span>' : "") + "</td>" +
+          '<td class="fr">' + esc(p.fair) +
+          (p.booth ? '<small class="booth">부스 ' + esc(p.booth) + "</small>" : "") +
+          '<div class="bs">' + BASIS[basisOf(p)] +
+          (p.list_kind === "visitor" ? ' <span class="badge web">참관</span>' : "") +
+          (p.how === "발굴" ? ' <span class="badge dig">기사에서 캐냄</span>' : "") + "</div></td>" +
           '<td class="yr">' + (p.year || "—") + "</td>" +
           "<td>" + esc(fldName(p.field)) + "</td>" +
           '<td class="ev">' + esc((p.src[0] || {}).t || "") + srcHtml(p.src) + "</td>" +
@@ -289,16 +306,27 @@
     var p = D.pairs[+idx];
     if (!p) return;
     var rows = D.rows.filter(function (r) {
-      return r.rival === p.rival && (r.fairs || []).some(function (f) { return f.fair === p.fair; });
+      // 같은 해 글만 — DesignCon 2027 줄에 2026년 기사가 섞이지 않게
+      return r.rival === p.rival && (r.fairs || []).some(function (f) {
+        var y = f.year || +(r.date || "").slice(0, 4) || 0;
+        return f.fair === p.fair && (!p.year || !y || y === p.year);
+      });
     });
     drawer.innerHTML = '<div class="dhead"><button class="dclose" id="dwX">✕</button><h3>' +
       esc(rivName(p.rival)) + "</h3><p>" + esc(p.fair) + (p.year ? " " + p.year : "") +
       " · 분야 " + esc(fldName(p.field)) + " · 근거 " + p.n + "건</p></div>" +
       '<div class="dbody"><p class="note">' +
-      (p.known
-        ? "이 전시회는 <b>출품사 명단으로도 확인</b>된 곳입니다(경쟁사 레이더에 이미 있음)."
-        : "출품사 명단으로는 못 잡고 <b>글에서만 확인</b>된 흔적입니다. 참가 확정이 아닐 수 있습니다.") +
+      ({ both: "<b>출품사 명단과 뉴스·광고 글 양쪽</b>에서 확인됐습니다.",
+         list: "전시회 주최 측 <b>출품사 명단</b>으로 확인했습니다.",
+         text: "출품사 명단으로는 못 잡고 <b>글에서만 확인</b>된 흔적입니다. 참가 확정이 아닐 수 있습니다."
+       })[basisOf(p)] +
       "</p>" +
+      (p.src || []).filter(function (x) { return x.k === "list"; }).map(function (x) {
+        return '<div class="rawrow" style="padding-left:0;padding-right:0"><div class="body">' +
+          '<a class="tt" href="' + esc(x.u) + '" target="_blank" rel="noopener">' + esc(x.t) + "</a>" +
+          '<div class="sub"><span class="badge official">출품사 명단</span> ' + esc(x.d || "") +
+          " · 주최 측 공개 명단에서 이름을 확인</div></div></div>";
+      }).join("") +
       rows.map(function (r) {
         return '<div class="rawrow" style="padding-left:0;padding-right:0">' +
           '<div class="body"><a class="tt" href="' + esc(r.url) + '" target="_blank" rel="noopener">' +
@@ -327,6 +355,11 @@
       "<b>이미 끝나 명단이 내려간 과거 회차</b>는 그 방식으로는 영원히 안 잡힙니다.</li>" +
       "<li>이 화면은 반대편에서 팝니다 — 경쟁사 이름이 박힌 <b>뉴스·보도자료·회사 소식란·링크드인 광고</b>를 " +
       "모아, 그 글에 적힌 전시회 이름을 뽑아냅니다. 그래서 <b>과거 흔적</b>과 <b>명단 비공개 전시회</b>가 여기서 잡힙니다.</li>" +
+      "<li><b>🏁 경쟁사 → 전시회</b> 표에는 두 가지를 <b>합쳐</b> 보여줍니다 — 경쟁사 레이더가 출품사 명단으로 확인한 기록 " +
+      "(<span class=\"badge official\">출품사 명단</span>, 부스 번호 포함)과 이 화면이 글에서 찾은 흔적 " +
+      "(<span class=\"badge fresh\">글에서만</span>). 양쪽에서 다 나온 것은 <span class=\"badge known\">명단 + 글</span>입니다. " +
+      "같은 경쟁사·같은 해에 이름이 같으면 한 줄로 합치되, <i>electronica</i>와 <i>electronica India</i>처럼 " +
+      "지역이 붙은 다른 전시회는 합치지 않습니다.</li>" +
       "</ul><h3>어디서 모았나</h3><table><tr><th>출처</th><th>건수</th><th>설명</th></tr>" +
       "<tr><td>뉴스</td><td>" + num(byKind.news || 0) + "</td><td>구글 뉴스 RSS(영·일·한·중·독) + 빙 뉴스. " +
       "<code>after:2010-01-01</code> 같은 기간 질의로 옛 기사까지 꺼냅니다. 경쟁사마다 일반형·기간형·" +

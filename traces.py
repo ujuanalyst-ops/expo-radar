@@ -844,6 +844,27 @@ def _norm(t):
     return re.sub(r"[^0-9a-z가-힣ぁ-んァ-ヶ一-龯]+", "", (t or "").lower())
 
 
+# "electronica"와 "electronica India"는 다른 전시회다. 이름이 겹쳐도 남는 부분이 지역·회차 구분어면
+# 같은 전시회로 보지 않는다.
+QUALIFIER = re.compile(r"india|china|asia|south|north|east|west|japan|korea|europe|america|usa|"
+                       r"shanghai|shenzhen|beijing|tokyo|osaka|nagoya|yokohama|taiwan|vietnam|thailand|"
+                       r"russia|mexico|brazil|turkey|middle|africa|arabia|dubai|singapore|indonesia|"
+                       r"인도|중국|아시아|상하이|선전|베이징|일본|대만|베트남|태국|동남아|북미|유럽|"
+                       r"southeast|germany|italia|italy|france|uk|poland|hungary|sea|global|regional")
+
+
+def same_fair(a, b):
+    """정규화한 두 전시회 이름이 같은 전시회를 가리키는가."""
+    if not a or not b:
+        return False
+    if a == b:
+        return True
+    short, long_ = (a, b) if len(a) <= len(b) else (b, a)
+    if len(short) < 3 or short not in long_:
+        return False
+    return not QUALIFIER.search(long_.replace(short, "", 1))
+
+
 def known_pairs():
     """rivals.py 가 이미 출품사 명단으로 확인해 둔 (경쟁사, 전시회) 짝."""
     out = set()
@@ -865,7 +886,7 @@ def pair_rows(rows):
             y = f["year"] or (int(r["date"][:4]) if r["date"][:4].isdigit() else 0)
             k = (r["rival"], f["fair"], y)
             nf = _norm(f["fair"])
-            seen_before = any(kr == r["rival"] and kf and (kf in nf or nf in kf) for kr, kf in known)
+            seen_before = any(kr == r["rival"] and same_fair(kf, nf) for kr, kf in known)
             p = pairs.setdefault(k, {"rival": r["rival"], "fair": f["fair"], "year": y,
                                      "field": f["field"], "how": f.get("src", ""),
                                      "known": seen_before, "n": 0, "src": []})
@@ -882,7 +903,7 @@ def pair_rows(rows):
         host = None
         for q in merged.get(g, []):
             nq = _norm(q["fair"])
-            if len(nf) >= 4 and len(nq) >= 4 and (nf in nq or nq in nf):
+            if len(nf) >= 4 and len(nq) >= 4 and same_fair(nf, nq):
                 host = q
                 break
         if host:
@@ -896,6 +917,75 @@ def pair_rows(rows):
     out = [p for g in merged.values() for p in g]
     out.sort(key=lambda p: (-p["year"], -p["n"], p["rival"]))
     return out
+
+
+LIST_KIND = {"confirmed": "다가오는 회차 명단", "history": "직전 회차 명단", "past": "지난 회차 명단",
+             "visitor": "참관(방문) 확인"}
+
+
+def merge_list(pairs):
+    """경쟁사 레이더(rivals.py)가 **출품사 명단**으로 확인한 기록을 흔적 표에 합친다.
+
+    흔적(뉴스·광고)과 명단은 서로 모자란 곳을 메운다 — 명단은 확실하지만 공개된 전시회만,
+    흔적은 과거·비공개 전시회까지 닿지만 정황일 뿐이다. 한 표에서 둘 다 보이게 하고,
+    각 줄에 무엇으로 확인했는지(명단/글/둘 다)를 남긴다.
+    같은 경쟁사·같은 해에 이름이 겹치면(DesignCon ↔ DesignCon 2027) 한 줄로 합친다.
+    """
+    try:
+        riv = json.load(open(os.path.join(HERE, "data", "rivals.json"), encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return pairs, []
+    for p in pairs:
+        p["has_text"] = True
+        p["has_list"] = False
+        p.setdefault("booth", "")
+    index = {}
+    for p in pairs:
+        index.setdefault((p["rival"], p["year"]), []).append(p)
+
+    added = 0
+    for r in riv.get("records", []):
+        when = r.get("when") or ""
+        year = int(when[:4]) if when[:4].isdigit() else 0
+        match = r.get("match") or ""
+        title = re.sub(r"\s*(?<!\d)20[0-3]\d(?!\d)\s*", " ", r.get("fair") or match).strip()
+        title = re.sub(r"\s{2,}", " ", title)
+        fk = r.get("field") or "etc"
+        src = {"t": "%s · %s%s" % (r.get("fair") or title, LIST_KIND.get(r.get("kind"), "출품사 명단"),
+                                   (" · 부스 " + str(r["booth"])) if r.get("booth") else ""),
+               "u": r.get("url") or "", "d": when, "s": "출품사 명단", "k": "list"}
+        nm, nt = _norm(match), _norm(title)
+        host = None
+        for p in index.get((r.get("rival"), year), []):
+            nf = _norm(p["fair"])
+            if any(same_fair(x, nf) for x in (nm, nt) if x):
+                host = p
+                break
+        if host:
+            host["has_list"] = True
+            host["known"] = True
+            if r.get("booth") and not host.get("booth"):
+                host["booth"] = str(r["booth"])
+            if src["u"] not in [x["u"] for x in host["src"]]:
+                host["src"].insert(0, src)
+            host["n"] += 1
+            continue
+        p = {"rival": r.get("rival"), "fair": title, "year": year,
+             "field": FIELD_ALIAS.get(fk, fk), "how": "명단", "known": True,
+             "has_list": True, "has_text": False, "booth": str(r.get("booth") or ""),
+             "list_kind": r.get("kind") or "", "city": r.get("city") or "",
+             "country": r.get("country") or "", "n": 1, "src": [src]}
+        pairs.append(p)
+        index.setdefault((p["rival"], year), []).append(p)
+        added += 1
+    pairs.sort(key=lambda p: (-p["year"], -(p["has_list"] and p["has_text"]), -p["n"], p["rival"]))
+    # 흔적 대상(TARGETS)에 없는 경쟁사도 명단에는 나온다 — 이름표를 같이 넘긴다
+    extra = [{"key": x["key"], "name": x["name"], "country": x.get("country", ""), "alias": [],
+              "list_only": True}
+             for x in riv.get("rivals", []) if x.get("key") not in TARGET_IX]
+    log("출품사 명단 기록 %d건을 합침 (새 줄 %d · 흔적과 겹침 %d)"
+        % (len(riv.get("records", [])), added, len(riv.get("records", [])) - added))
+    return pairs, extra
 
 
 # ---------------------------------------------------------------- 한국어 번역
@@ -981,6 +1071,7 @@ def main():
     translate(rows)
     pairs = pair_rows(rows)
     log("경쟁사 × 전시회 흔적 %d건" % len(pairs))
+    pairs, extra_rivals = merge_list(pairs)
 
     by_r = {}
     for p in pairs:
@@ -991,7 +1082,8 @@ def main():
 
     data = {
         "generated": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "rivals": [{"key": k, "name": n, "country": c, "alias": a} for k, n, c, a, s in TARGETS],
+        "rivals": [{"key": k, "name": n, "country": c, "alias": a} for k, n, c, a, s in TARGETS]
+        + extra_rivals,
         "fields": [{"key": k, "name": v} for k, v in FIELD_NAME.items()],
         "pairs": pairs,
         "rows": sorted(rows, key=lambda r: (r["date"] or "0000"), reverse=True),

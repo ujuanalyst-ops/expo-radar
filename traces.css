@@ -83,3 +83,6 @@
   .rawrow{flex-wrap:wrap}
   .rawrow .when,.rawrow .who{width:auto;flex:0 0 auto}
 }
+.ttbl .fr small.booth{display:block;color:var(--muted);font-weight:600;font-size:11px;margin-top:2px}
+.ttbl .fr .bs{margin-top:4px;display:flex;gap:4px;flex-wrap:wrap}
+.ttbl td:nth-child(4){white-space:nowrap}
