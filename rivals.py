@@ -29,6 +29,7 @@ import os
 import re
 import ssl
 import sys
+import threading
 import time
 import urllib.request
 import zipfile
@@ -62,6 +63,7 @@ RIVALS = [
     ("iriso", "IRISO 이리소", "JP", "차량용 플로팅 커넥터", r"\biriso\b|イリソ", "direct"),
     ("rosenberger", "Rosenberger", "DE", "RF·고주파 커넥터", r"rosenberger", "direct"),
     ("harwin", "Harwin", "GB", "고신뢰 소형 커넥터", r"\bharwin\b", "direct"),
+    ("ipex", "I-PEX 다이이치정공", "JP", "초소형 기판·FPC 커넥터", r"\bi-?pex\b|第一精工|dai-?ichi seiko", "direct"),
     # ── 내가 추가한 직접 경쟁사 (같은 제품군·같은 전시회에서 마주치는 곳)
     ("samtec", "Samtec", "US", "고속 전송 커넥터", r"\bsamtec\b", "direct"),
     ("harting", "HARTING", "DE", "산업용 커넥터", r"\bharting\b", "direct"),
@@ -132,6 +134,34 @@ RIVAL_META = {k: {"key": k, "name": n, "country": c, "note": note, "tier": tier,
 NOISE = re.compile(r"university|institute|associat|magazine|media|publish|consult(ing)?\b", re.I)
 
 
+ROWS_CACHE = os.path.join(HERE, "data", "fair_rows_cache.json")
+_CACHE_LOCK = threading.Lock()
+
+
+def cache_rows(key, rows=None, label=""):
+    """전시회별 '마지막으로 성공한 명단'을 보관한다.
+    주최측 사이트가 하루 막히면(403·타임아웃) 그날 수집이 0건이 되는데,
+    그대로 두면 공개 화면에서 그 전시회 출품사가 통째로 사라진다. 그래서
+    성공하면 저장하고, 실패하거나 평소의 절반도 안 되면 지난 명단으로 되돌린다."""
+    try:
+        db = json.load(open(ROWS_CACHE, encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        db = {}
+    if rows is None:                      # 읽기
+        return db.get(key)
+    with _CACHE_LOCK:                     # 전시회를 동시에 받으므로 쓰기는 한 번에 하나씩
+        try:
+            db = json.load(open(ROWS_CACHE, encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            db = {}
+        db[key] = {"when": datetime.now().strftime("%Y-%m-%d %H:%M"), "n": len(rows), "rows": rows}
+        tmp = f"{ROWS_CACHE}.{os.getpid()}.tmp"
+        os.makedirs(os.path.dirname(ROWS_CACHE), exist_ok=True)
+        json.dump(db, open(tmp, "w", encoding="utf-8"), ensure_ascii=False)
+        os.replace(tmp, ROWS_CACHE)
+    return None
+
+
 def match_rivals(name):
     if not name or NOISE.search(name):
         return []
@@ -188,9 +218,11 @@ FAIRS = [
     {"key": "designcon26", "platform": "mys", "host": "dcon26.mapyourshow.com",
      "title": "DesignCon 2026", "match": "DesignCon", "when": "2026-01", "kind": "past", "cycle": 1,
      "city": "Santa Clara", "country": "US", "note": "지난 회차(2026-01) 출품 이력"},
-    {"key": "automate26", "platform": "mys", "host": "automate26.mapyourshow.com",
-     "title": "Automate 2026", "match": "Automate", "when": "2026-06", "kind": "past", "cycle": 1,
-     "city": "Detroit", "country": "US", "note": "지난 회차(2026-06) 출품 이력"},
+    {"key": "automate26", "platform": "robots", "robot_key": "automate26",
+     "page": "https://automate26.mapyourshow.com/8_0/explore/exhibitor-gallery.cfm",
+     "title": "Automate 2026", "match": "Automate", "when": "2026-06", "kind": "history", "cycle": 1,
+     "city": "Detroit", "country": "US",
+     "note": "지난 회차 — 주최측 사이트가 닫혀(403) 이전에 받아 둔 명단을 쓴다"},
     {"key": "mdmwest26", "platform": "mys", "host": "mdmwest26.mapyourshow.com",
      "title": "MD&M West 2026", "match": "MD&M West", "when": "2026-02", "kind": "past", "cycle": 1,
      "city": "Anaheim", "country": "US", "note": "지난 회차(2026-02) 출품 이력"},
@@ -232,6 +264,112 @@ FAIRS = [
      "title": "wire Russia / Metallurgy Russia 2027", "match": "wire Russia", "when": "2027-05",
      "kind": "confirmed", "city": "Moscow", "country": "RU", "step": 5000, "max_rows": 5000,
      "note": "와이어·케이블·금속 동시 개최 — 참가업체 카탈로그가 한 쪽에 전부 나온다(러시아어 음차 표기)"},
+    # ── 로봇·자동화 (robots.py가 모아 둔 명단을 그대로 검사 — 새로 긁지 않는다)
+    {"key": "rb_irex25", "platform": "robots", "robot_key": "irex25",
+     "page": "https://irex.nikkan.co.jp/exhibitor/",
+     "title": "iREX 2025 国際ロボット展", "match": "국제로봇전", "when": "2025-12",
+     "kind": "history", "cycle": 2, "city": "Tokyo", "country": "JP",
+     "note": "로봇 전시회 — 세계 최대 로봇 전문 전시회 (격년, 다음 2027-11). 소개글·전시 분야 태그 포함"},
+    {"key": "rb_automatica25", "platform": "robots", "robot_key": "automatica25",
+     "page": "https://exhibitors.automatica-munich.com/en/exhibitors-details/exhibitors-brands",
+     "title": "automatica 2025", "match": "AUTOMATICA", "when": "2025-06",
+     "kind": "history", "cycle": 2, "city": "Munich", "country": "DE",
+     "note": "로봇 전시회 — 유럽 최대 로봇·자동화 (격년, 다음 2027-06). 홈페이지·제품군·회사소개(독일어 多"},
+    {"key": "rb_promat27", "platform": "robots", "robot_key": "promat27",
+     "page": "https://pm2027.mapyourshow.com/8_0/explore/exhibitor-gallery.cfm",
+     "title": "ProMat 2027", "match": "ProMat", "when": "2027-03",
+     "kind": "confirmed", "cycle": 2, "city": "Chicago", "country": "US",
+     "note": "로봇 전시회 — 북미 최대 물류 자동화 — 로봇·AMR·피킹 관련 업체만 추림"},
+    {"key": "rb_promat25", "platform": "robots", "robot_key": "promat25",
+     "page": "https://pm2025.mapyourshow.com/8_0/explore/exhibitor-gallery.cfm",
+     "title": "ProMat 2025", "match": "ProMat", "when": "2025-03",
+     "kind": "history", "cycle": 2, "city": "Chicago", "country": "US",
+     "note": "로봇 전시회 — 직전 회차 — 로봇 관련 업체만 추림"},
+    {"key": "rb_robotworld26", "platform": "robots", "robot_key": "robotworld26",
+     "page": "https://www.robotworld.or.kr/visitors/list_of_exhibitors.php",
+     "title": "로보월드 2026", "match": "로보월드", "when": "2026-11",
+     "kind": "confirmed", "cycle": 1, "city": "고양(킨텍스)", "country": "KR",
+     "note": "로봇 전시회 — 국내 최대 로봇 전문전 — 부스·전시분야·홈페이지·회사소개 포함"},
+    {"key": "rb_nextai26", "platform": "robots", "robot_key": "nextai26",
+     "page": "https://nextaikorea.com/visitors/companies",
+     "title": "THE NEXT AI 피지컬AI·스마트팩토리산업전 2026", "match": "THE NEXT AI", "when": "2026-10",
+     "kind": "confirmed", "cycle": 1, "city": "창원", "country": "KR",
+     "note": "로봇 전시회 — 신설 전시회 — 소개·출품내역·홈페이지 포함, 부스 미공개"},
+    {"key": "rb_robottech26", "platform": "robots", "robot_key": "robottech26",
+     "page": "https://smarttechkorea.com/exhibitor-directory",
+     "title": "Robot Tech Show 2026 (스마트테크코리아)", "match": "ROBOT TECH SHOW", "when": "2026-06",
+     "kind": "history", "cycle": 1, "city": "서울(코엑스)", "country": "KR",
+     "note": "로봇 전시회 — 직전 회차 — 회사명·부스만 (다음 2027-06)"},
+    {"key": "rb_robex25", "platform": "robots", "robot_key": "robex25",
+     "page": "https://fixkorea.or.kr/participation/bis_info_list.asp?site=robex&yy=2025&lang=kor",
+     "title": "ROBEX 대구국제로봇산업전 2025", "match": "ROBEX", "when": "2025-10",
+     "kind": "history", "cycle": 1, "city": "대구(엑스코)", "country": "KR",
+     "note": "로봇 전시회 — 직전 회차 — FIX 디렉토리 등록 업체만(실제 출품사의 일부), 전시품목·홈페이지 포함"},
+    {"key": "rb_wrc26", "platform": "robots", "robot_key": "wrc26",
+     "page": "https://www.worldrobotconference.com/expo/",
+     "title": "WRC 세계로봇대회 2026 (베이징)", "match": "베이징 로봇", "when": "2026-08",
+     "kind": "history", "cycle": 1, "city": "Beijing", "country": "CN",
+     "note": "로봇 전시회 — 직전 회차 — 관별 명단·부스·회사소개(중국어) 포함 (다음 2027-08)"},
+    {"key": "rb_fairplus26", "platform": "robots", "robot_key": "fairplus26",
+     "page": "https://fairplus.cn/exhibitor-list/",
+     "title": "FAIR plus 선전 로봇산업체인전 2026", "match": "선전 로봇", "when": "2026-04",
+     "kind": "history", "cycle": 1, "city": "Shenzhen", "country": "CN",
+     "note": "로봇 전시회 — 직전 회차 — 회사소개(중국어) 포함, 부스 미공개 (다음 2027-04)"},
+    {"key": "rb_hrte26", "platform": "robots", "robot_key": "hrte26",
+     "page": "https://www.arte.net.cn/about_36/",
+     "title": "HRTE 항저우 휴머노이드로봇기술전 2026", "match": "휴머노이드로봇", "when": "2026-05",
+     "kind": "history", "cycle": 1, "city": "Hangzhou", "country": "CN",
+     "note": "로봇 전시회 — 직전 회차 — 회사명(중·영)·부스만 (다음 2027-05)"},
+    {"key": "rb_vimf_bn26", "platform": "robots", "robot_key": "vimf_bn26",
+     "page": "https://vimf.vn/danh-sach-don-vi-tham-gia/",
+     "title": "RAV Robotic & Automation Vietnam 2026 (VIMF 박닌)", "match": "RAV", "when": "2026-11",
+     "kind": "confirmed", "cycle": 1, "city": "Bac Ninh", "country": "VN",
+     "note": "로봇 전시회 — VIMF 산업전과 통합 명단 — 로봇·자동화 관련 업체만 추림, 소개·제품 포함"},
+    {"key": "rb_roboticssummit23", "platform": "robots", "robot_key": "roboticssummit23",
+     "page": "https://www.roboticssummit.com/exhibit-floor/",
+     "title": "Robotics Summit & Expo 2023 (보스턴)", "match": "ROBOTICS SUMMIT", "when": "2023-05",
+     "kind": "history", "cycle": 1, "city": "Boston", "country": "US",
+     "note": "로봇 전시회 — 2027 회차 명단이 아직 안 열려 지난 회차(ExpoFP 배치도)로 대체 — 홈페이지·국"},
+    {"key": "rb_robobusiness23", "platform": "robots", "robot_key": "robobusiness23",
+     "page": "https://www.robobusiness.com/exhibit-floor/",
+     "title": "RoboBusiness 2023 (산타클라라)", "match": "ROBOBUSINESS", "when": "2023-10",
+     "kind": "history", "cycle": 1, "city": "Santa Clara", "country": "US",
+     "note": "로봇 전시회 — 2026 회차 배치도 미공개 — 지난 회차 명단(회사명·부스)"},
+    {"key": "rb_r4m24", "platform": "robots", "robot_key": "r4m24",
+     "page": "https://robot4manufacturing.com/en/exhibitors",
+     "title": "ROBOT4MANUFACTURING 2024 (라로슈쉬르용)", "match": "ROBOT4MANUFACTURING", "when": "2024-11",
+     "kind": "history", "cycle": 1, "city": "La Roche-sur-Yon", "country": "FR",
+     "note": "로봇 전시회 — 2026 명단 미발표 — 주최측이 올린 2024 회차 PDF 명단에서 추출(국가·홈페이지·"},
+    {"key": "rb_tairos26", "platform": "robots", "robot_key": "tairos26",
+     "page": "https://tairos.chanchao.com.tw/VisitorExhibitor",
+     "title": "TAIROS 2026 (타이베이) — 일부", "match": "TAIROS", "when": "2026-08",
+     "kind": "history", "cycle": 1, "city": "Taipei", "country": "TW",
+     "note": "로봇 전시회 — 주최측 사이트가 Cloudflare 봇 차단 — 인터넷 아카이브에 남은 목록 1쪽(전체 8"},
+    {"key": "rb_robotics_si27", "platform": "robots", "robot_key": "robotics_si27",
+     "page": "https://icm.si/events/mte-slovenia-exhibitors/",
+     "title": "Robotics Slovenia 2027 (IFAM·INTRONIKA·ROBOTICS·MTE)", "match": "ROBOTICS SLOVENIA", "when": "2027-01",
+     "kind": "confirmed", "cycle": 1, "city": "Ljubljana", "country": "SI",
+     "note": "로봇 전시회 — 자동화·전자·로봇 합동전 — 홈페이지·제품군·국가 포함"},
+    {"key": "rb_robotics_rs26", "platform": "robots", "robot_key": "robotics_rs26",
+     "page": "https://icm.si/events/robotics-serbia-novi-sad/",
+     "title": "Robotics Serbia 2026 (IFAM·INTRONIKA·ROBOTICS·MTE)", "match": "ROBOTICS SERBIA", "when": "2026-10",
+     "kind": "confirmed", "cycle": 1, "city": "Novi Sad", "country": "RS",
+     "note": "로봇 전시회 — 자동화·전자·로봇 합동전 — 홈페이지·제품군·국가 포함"},
+    {"key": "rb_roboticswarsaw26", "platform": "robots", "robot_key": "roboticswarsaw26",
+     "page": "https://roboticswarsaw.com/katalog-wystawcow-2026/",
+     "title": "ROBOTICS Warsaw 2026", "match": "ROBOTICS Warsaw", "when": "2026-02",
+     "kind": "history", "cycle": 1, "city": "Warsaw(Nadarzyn)", "country": "PL",
+     "note": "로봇 전시회 — 직전 회차 — 회사명·부스만 (다음 2027-02)"},
+    {"key": "rb_warsawautomatica26", "platform": "robots", "robot_key": "warsawautomatica26",
+     "page": "https://automaticaexpo.com/katalog-wystawcow-2026/",
+     "title": "Warsaw Industry Automatica 2026", "match": "WARSAW INDUSTRY AUTOMATICA", "when": "2026-05",
+     "kind": "history", "cycle": 1, "city": "Warsaw(Nadarzyn)", "country": "PL",
+     "note": "로봇 전시회 — 직전 회차 — 회사명·부스만 (다음 2027-05)"},
+    {"key": "rb_stom_robotics26", "platform": "robots", "robot_key": "stom_robotics26",
+     "page": "https://www.targikielce.pl/en/industrial-spring-2026/list-of-exhibitors?aliases=714",
+     "title": "STOM-ROBOTICS 2026 (Kielce Industrial Spring)", "match": "STOM-ROBOTICS", "when": "2026-03",
+     "kind": "history", "cycle": 1, "city": "Kielce", "country": "PL",
+     "note": "로봇 전시회 — 직전 회차 — 회사명·국가·부스 (다음 2027-04)"},
     # ── 커넥터 전용 전시회 중 출품사 명단을 웹에 안 여는 곳 — 주최측이 글로 밝힌 기업만
     {"key": "ich_dg27", "platform": "manual",
      "page": "https://www.ich-expo.com/dongguan/?about_15/",
@@ -517,6 +655,27 @@ def fetch_manual(f):
     return [(n, "", f.get("note", "")) for n in f["companies"]], len(f["companies"]), f["page"]
 
 
+def fetch_robots(f):
+    """robots.py가 모아 둔 로봇 전시회 출품사 명단(data/robots.json)을 그대로 읽는다.
+    로봇·자동화는 커넥터 수요처인데 여기선 따로 긁지 않고 이미 받아 둔 것을 재사용한다
+    (run_daily.sh에서 robots.py를 먼저 돌린다)."""
+    path = os.path.join(HERE, "data", "robots.json")
+    d = json.load(open(path, encoding="utf-8"))
+    key = f["robot_key"]
+    rows = []
+    for c in d.get("companies", []):
+        ent = [x for x in c.get("f", []) if x.get("k") == key]
+        if not ent:
+            continue
+        extra = " ".join([c.get("what", ""), " ".join(c.get("tags", [])), c.get("desc", "")])[:600]
+        for nm in [c.get("n", ""), c.get("ja", "")]:
+            if nm:
+                rows.append((nm, ent[0].get("b", ""), extra))
+                break
+    src = next((x.get("url", "") for x in d.get("fairs", []) if x.get("key") == key), f.get("page", ""))
+    return rows, len(rows), src or f.get("page", "")
+
+
 def fetch_taitra(f):
     """대만무역센터(TAITRA) 전시회 — 전시회 홈페이지 명단은 검색 버튼을 눌러야 나오지만,
     **부스 배치도가 쓰는 정적 JSON**에 전체 출품사가 그대로 있다.
@@ -534,6 +693,7 @@ def fetch_taitra(f):
 
 
 FETCH = {"mys": fetch_mys, "xlsx": fetch_xlsx, "jsae": fetch_jsae, "ceatec": fetch_ceatec,
+         "robots": fetch_robots,
          "kes": fetch_kes, "table": fetch_table, "tems": fetch_tems, "hktdc": fetch_hktdc,
          "taitra": fetch_taitra, "manual": fetch_manual}
 
@@ -572,11 +732,21 @@ def conn_score(name, extra):
 # ================================================================ 실행
 def one(f):
     t0 = time.time()
+    err, stale = None, ""
     try:
         rows, total, src = FETCH[f["platform"]](f)
     except Exception as e:  # noqa: BLE001 - 한 전시회가 막혀도 나머지는 살린다
+        rows, total, src, err = [], 0, f.get("page") or f.get("url", ""), f"{type(e).__name__}: {e}"
+    cached = cache_rows(f["key"])
+    if cached and len(rows) < max(1, cached["n"] * 0.5):
+        rows = [tuple(r) for r in cached["rows"]]
+        total = max(total, cached["n"])
+        stale = f"지난 수집분({cached['when']}) 사용 — 이번엔 " + (err or f"{len(rows)}건만 응답")
+    elif rows:
+        cache_rows(f["key"], [list(r) for r in rows])
+    if not rows:
         return f, [], [], {"key": f["key"], "title": f["title"], "platform": f["platform"],
-                           "exhibitors": 0, "rivals": 0, "error": f"{type(e).__name__}: {e}",
+                           "exhibitors": 0, "rivals": 0, "error": err,
                            "sec": round(time.time() - t0, 1), "when": f["when"], "kind": f["kind"],
                            "city": f["city"], "country": f["country"], "match": f["match"],
                            "url": f.get("page") or f.get("url", ""), "note": f.get("note", "")}
@@ -605,7 +775,7 @@ def one(f):
         "exhibitors": total, "listed": len(ex_rows), "rivals": len({r["rival"] for r in recs}),
         "conn": nconn, "kind": f["kind"], "when": f["when"], "cycle": f.get("cycle", 1),
         "city": f["city"],
-        "country": f["country"], "error": None, "sec": round(time.time() - t0, 1),
+        "country": f["country"], "error": err, "stale": stale, "sec": round(time.time() - t0, 1),
         "url": src, "note": f.get("note", "")}
 
 

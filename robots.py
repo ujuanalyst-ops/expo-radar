@@ -37,7 +37,7 @@ from datetime import datetime
 from multiprocessing.dummy import Pool as ThreadPool
 
 import countries
-from rivals import UA, clean, get, norm_co, opener
+from rivals import UA, cache_rows, clean, get, norm_co, opener
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "data", "robots.json")
@@ -54,7 +54,7 @@ FAIRS = [
      "city": "Chicago", "country": "US", "note": "북미 최대 로봇·자동화 (A3 주최). 소개글은 회차 임박 시 채워진다"},
     {"key": "automate26", "platform": "mys", "host": "automate26.mapyourshow.com",
      "title": "Automate 2026", "when": "2026-06", "kind": "history", "scope": "robot",
-     "city": "Detroit", "country": "US", "note": "직전 회차 — 출품사 소개글 포함"},
+     "city": "Detroit", "country": "US", "note": "지난 회차 — 주최측 사이트가 닫혀 이전에 받아 둔 명단을 쓴다(소개글 포함)"},
     {"key": "irex25", "platform": "irex", "url": "https://irex.nikkan.co.jp/exhibitor/",
      "title": "iREX 2025 国際ロボット展", "when": "2025-12", "kind": "history", "scope": "robot",
      "city": "Tokyo", "country": "JP", "note": "세계 최대 로봇 전문 전시회 (격년, 다음 2027-11). 소개글·전시 분야 태그 포함"},
@@ -448,6 +448,15 @@ def fetch_aut(f):
         cache = json.load(open(AUT_CACHE, encoding="utf-8"))
     except Exception:  # noqa: BLE001
         cache = {}
+    # 목록 페이지의 더보기(lazy-load)가 막히면 20건만 잡힌다 → 지난번에 읽어 둔 상세 캐시를 쓴다
+    if len(ids) < len(cache) * 0.5:
+        rows = [dict(v) for v in cache.values()]
+        for r in rows:
+            x = extra.get(norm_co(r.get("name", "")), {})
+            r["booth"] = r.get("booth") or x.get("booth", "")
+            r["city"] = r.get("city") or x.get("city", "")
+            r["country"] = r.get("country") or x.get("country", "")
+        return rows, len(rows), f["url"]
 
     def detail(item):
         i, ch = item
@@ -978,19 +987,30 @@ def one(f):
     t0 = time.time()
     rep = {k: f.get(k, "") for k in ("key", "title", "platform", "when", "kind", "scope", "city", "country", "note")}
     rep["url"] = f.get("url") or f"https://{f.get('host', '')}/8_0/explore/exhibitor-gallery.cfm"
+    err, stale = None, ""
     try:
         rows, total, src = FETCH[f["platform"]](f)
     except Exception as e:  # noqa: BLE001 - 한 전시회가 막혀도 나머지는 살린다
-        rep.update({"exhibitors": 0, "listed": 0, "kept": 0, "error": f"{type(e).__name__}: {e}",
+        rows, total, src, err = [], 0, rep["url"], f"{type(e).__name__}: {e}"
+    rows = [r for r in rows if r.get("name")]
+    # 주최측이 하루 막히면(403·타임아웃) 그 전시회 명단이 통째로 사라진다 → 지난 명단으로 되돌린다
+    cached = cache_rows("robots:" + f["key"])
+    if cached and len(rows) < max(1, cached["n"] * 0.5):
+        rows = cached["rows"]
+        total = max(total, cached["n"])
+        stale = f"지난 수집분({cached['when']}) 사용 — 이번엔 " + (err or f"{len(rows)}건만 응답")
+    elif rows:
+        cache_rows("robots:" + f["key"], rows)
+    if not rows:
+        rep.update({"exhibitors": 0, "listed": 0, "kept": 0, "error": err, "stale": stale,
                     "sec": round(time.time() - t0, 1)})
         return f, [], rep
-    rows = [r for r in rows if r.get("name")]
     if f["scope"] == "filter":
         kept = [r for r in rows if ROBOT_RE.search(" ".join([r["name"], r.get("desc", ""), " ".join(r.get("tags", []))]))]
     else:
         kept = rows
     rep.update({"url": src, "exhibitors": total, "listed": len(rows), "kept": len(kept),
-                "with_desc": sum(1 for r in kept if r.get("desc")), "error": None,
+                "with_desc": sum(1 for r in kept if r.get("desc")), "error": err, "stale": stale,
                 "sec": round(time.time() - t0, 1)})
     return f, kept, rep
 
@@ -1250,7 +1270,7 @@ def main():
           f"업체 {len(data['companies'])}개 · app-robots.js {len(js) // 1024}KB")
     for r in data["fairs"]:
         print(f"  {r['key']:14} {r['kind']:9} {r.get('kept', 0):5}/{r.get('listed', 0):<5} "
-              f"소개글 {r.get('with_desc', 0):4}  {r['sec']:5}s  {r.get('error') or ''}")
+              f"소개글 {r.get('with_desc', 0):4}  {r['sec']:5}s  {r.get('stale') or r.get('error') or ''}")
     if "--dump" in sys.argv:
         for c in data["companies"][:40]:
             print(f"- {c['n']} [{c['c']}] {','.join(c['cat'])} | {c['what'][:80]}")

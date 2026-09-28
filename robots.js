@@ -346,7 +346,7 @@
           (f.scope === "filter" ? "<div><b>" + num(f.listed) + "</b><span>전체 출품사</span></div>" : "") +
           "<div><b>" + num(f.with_desc) + "</b><span>소개글 있음</span></div></div>" +
           '<p class="note" style="margin:0 0 8px">' + esc(f.note || "") + "</p>" +
-          (f.error ? '<p class="err">' + esc(f.error) + "</p>" : "") +
+          (f.stale ? '<p class="err">⚠ ' + esc(f.stale) + "</p>" : f.error ? '<p class="err">' + esc(f.error) + "</p>" : "") +
           '<a class="flink" href="' + esc(f.url) + '" target="_blank" rel="noopener">출품사 명단 원문 ↗</a> ' +
           '<button class="rbtn" data-goto="' + esc(f.key) + '">이 전시회 업체 보기</button>' +
           "</div>";
