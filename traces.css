@@ -86,3 +86,19 @@
 .ttbl .fr small.booth{display:block;color:var(--muted);font-weight:600;font-size:11px;margin-top:2px}
 .ttbl .fr .bs{margin-top:4px;display:flex;gap:4px;flex-wrap:wrap}
 .ttbl td:nth-child(4){white-space:nowrap}
+
+/* 경쟁사 → 전시회 탭 위 요약 */
+.tsum{padding:14px 16px;margin-bottom:12px}
+.tsum .lead{margin:0 0 8px;font-size:14px;color:var(--ink)}
+.tsum .lead b{color:var(--brand)}
+.tsum .mix{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tsum .scols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.tsum h4{margin:0 0 6px;font-size:11.5px;color:var(--dim);font-weight:800}
+.sbar{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 30px;gap:8px;align-items:center;font-size:12px;padding:2px 0}
+.sbar[data-goriv],.sbar[data-gofair]{cursor:pointer;border-radius:5px}
+.sbar[data-goriv]:hover .sl,.sbar[data-gofair]:hover .sl{color:var(--brand);text-decoration:underline}
+.sbar .sl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#3b4656}
+.sbar .st{height:7px;background:#eef2f7;border-radius:4px;overflow:hidden}
+.sbar .st i{display:block;height:100%;background:var(--brand);border-radius:4px}
+.sbar b{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+@media (max-width:900px){.tsum .scols{grid-template-columns:1fr}}

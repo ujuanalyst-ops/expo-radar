@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- 다운로드·데스크톱에 파일이 생기면 한글 파일명을 NFC로 고친다 (tools/nfc_names.py) -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.uju.nfc-names</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <string>/Users/sam/code/expo-radar/tools/nfc_names.py</string>
+    <string>/Users/sam/Downloads</string>
+    <string>/Users/sam/Desktop</string>
+    <string>--apply</string>
+  </array>
+  <key>WatchPaths</key>
+  <array>
+    <string>/Users/sam/Downloads</string>
+    <string>/Users/sam/Desktop</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+  <key>StandardErrorPath</key>
+  <string>/tmp/nfc-names.err</string>
+</dict>
+</plist>

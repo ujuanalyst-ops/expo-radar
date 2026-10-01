@@ -153,16 +153,83 @@
     Array.prototype.forEach.call(main.querySelectorAll("[data-more]"), function (b) {
       b.onclick = function () { S.limit += 200; render(); };
     });
+    Array.prototype.forEach.call(main.querySelectorAll("[data-gofair]"), function (b) {
+      b.onclick = function () {
+        S.q = b.getAttribute("data-gofair"); S.limit = 200;
+        tq.value = S.q; document.getElementById("tclear").hidden = false;
+        render(); window.scrollTo(0, 0);
+      };
+    });
     Array.prototype.forEach.call(main.querySelectorAll("[data-goriv]"), function (b) {
       b.onclick = function () { S.riv = b.getAttribute("data-goriv"); S.tab = "pair"; setTab(); render(); window.scrollTo(0, 0); };
     });
+  }
+
+  // ---------------------------------------------------------------- 요약 (경쟁사 → 전시회 탭 위)
+  // 지금 걸린 필터·검색 결과를 한눈에 — 근거 구성, 경쟁사별·전시회별 상위, 연도 분포
+  function bars(rows, attr) {
+    var max = Math.max.apply(null, rows.map(function (r) { return r.v; }).concat(1));
+    return rows.map(function (r) {
+      return '<div class="sbar"' + (attr ? " " + attr + '="' + esc(r.k) + '"' : "") + ' title="' + esc(r.tip || "") + '">' +
+        '<span class="sl">' + esc(r.label) + "</span>" +
+        '<span class="st"><i style="width:' + Math.max(4, Math.round(r.v / max * 100)) + '%"></i></span>' +
+        '<b>' + r.v + "</b></div>";
+    }).join("");
+  }
+  function summary(list) {
+    if (!list.length) return "";
+    var basis = { both: 0, list: 0, text: 0 }, off = 0, rivF = {}, fairR = {}, yrs = {}, fld = {};
+    var thisYear = +D.generated.slice(0, 4) || new Date().getFullYear(), upcoming = 0;
+    list.forEach(function (p) {
+      basis[basisOf(p)]++;
+      if (p.off) off++;
+      (rivF[p.rival] = rivF[p.rival] || {})[p.fair] = 1;
+      (fairR[p.fair] = fairR[p.fair] || {})[p.rival] = 1;
+      if (p.year) yrs[p.year] = (yrs[p.year] || 0) + 1;
+      fld[p.field] = (fld[p.field] || 0) + 1;
+      if (p.year && p.year >= thisYear) upcoming++;
+    });
+    function top(o, n, label, tip) {
+      return Object.keys(o).map(function (k) {
+        var v = typeof o[k] === "number" ? o[k] : Object.keys(o[k]).length;
+        return { k: k, v: v, label: label(k), tip: tip ? tip(k) : "" };
+      }).sort(function (a, b) { return b.v - a.v || a.label.localeCompare(b.label); }).slice(0, n);
+    }
+    var nRiv = Object.keys(rivF).length, nFair = Object.keys(fairR).length;
+    var yKeys = Object.keys(yrs).sort();
+    var span = yKeys.length ? (yKeys[0] === yKeys[yKeys.length - 1] ? yKeys[0] + "년" : yKeys[0] + "–" + yKeys[yKeys.length - 1] + "년") : "";
+    var recent = Object.keys(yrs).sort().reverse().slice(0, 6).map(function (y) {
+      return { k: y, v: yrs[y], label: y + "년" + (+y >= thisYear ? " ▸" : "") };
+    }).sort(function (a, b) { return b.k - a.k; });
+    // 경쟁사 하나만 골랐으면 '경쟁사별' 대신 그 경쟁사의 분야 분포를 보여 준다
+    var col1 = S.riv
+      ? "<h4>분야별</h4>" + bars(top(fld, 6, fldName))
+      : "<h4>경쟁사별 전시회 수</h4>" + bars(top(rivF, 8, rivName, function (k) {
+          return rivName(k) + " — 눌러서 이 경쟁사만 보기";
+        }), "data-goriv");
+    return '<div class="card tsum">' +
+      '<p class="lead">' + (S.riv ? "<b>" + esc(rivName(S.riv)) + "</b>은(는) " : "경쟁사 <b>" + nRiv + "곳</b>이 ") +
+      "전시회 <b>" + num(nFair) + "곳</b>에 나간 기록 <b>" + num(list.length) + "건</b>" +
+      (span ? " (" + span + ")" : "") + " — 그중 올해 이후 회차 <b>" + num(upcoming) + "건</b>.</p>" +
+      '<div class="mix">' +
+      '<span class="badge known">명단 + 글 ' + num(basis.both) + "</span>" +
+      '<span class="badge known">출품사 명단만 ' + num(basis.list) + "</span>" +
+      '<span class="badge fresh">글에서만 ' + num(basis.text) + "</span>" +
+      '<span class="badge official">회사 공식 발표 ' + num(off) + "</span></div>" +
+      '<div class="scols">' +
+      '<div class="scol">' + col1 + "</div>" +
+      '<div class="scol"><h4>경쟁사가 많이 모인 전시회</h4>' + bars(top(fairR, 8, function (k) { return k; }, function (k) {
+        return Object.keys(fairR[k]).map(rivName).join(", ") + " — 눌러서 이 전시회로 찾기";
+      }), "data-gofair") + "</div>" +
+      '<div class="scol"><h4>연도별 (최근 6개 해)</h4>' + bars(recent) + "</div>" +
+      "</div></div>";
   }
 
   // ---------------------------------------------------------------- 탭: 경쟁사 → 전시회
   function tabPair() {
     var list = pairs();
     var shown = list.slice(0, S.limit);
-    main.innerHTML = toolbar() + fieldChips(list) +
+    main.innerHTML = toolbar() + summary(list) + fieldChips(list) +
       '<div class="card tblwrap"><table class="ttbl"><thead><tr>' +
       "<th>경쟁사</th><th>전시회 · 부스</th><th>연도</th><th>분야</th><th>근거</th><th>건수</th>" +
       "</tr></thead><tbody>" +
