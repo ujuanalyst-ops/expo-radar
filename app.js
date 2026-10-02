@@ -597,18 +597,28 @@
       return fairHay[f.key];
     }
 
-    var counts = {};                       // 경쟁사 → 이름이 나온 전시회 목록
-    Object.keys(REXH).forEach(function (fk) {
-      if (S.rivFld && fldOfKey[fk] !== S.rivFld) return;
-      REXH[fk].forEach(function (r) {
-        if (r[2]) (counts[r[2]] = counts[r[2]] || {})[fk] = 1;
-      });
-    });
-    var nFair = function (k) { return Object.keys(counts[k] || {}).length; };
-
     var ranked = RFAIRS.filter(function (f) { return !f.error && inFld(f) && hit(fairText(f)); })
       .sort(function (a, b) { return (b.rivals || 0) - (a.rivals || 0); });
     var okFairs = ranked.filter(function (f) { return f.exhibitors; });
+    var rankedKey = {};
+    ranked.forEach(function (f) { rankedKey[f.key] = 1; });
+
+    var counts = {}, allCounts = {};       // 경쟁사 → 이름이 나온 전시회 목록 (검색으로 추린 것 / 전체)
+    Object.keys(REXH).forEach(function (fk) {
+      if (S.rivFld && fldOfKey[fk] !== S.rivFld) return;
+      REXH[fk].forEach(function (r) {
+        if (!r[2]) return;
+        (allCounts[r[2]] = allCounts[r[2]] || {})[fk] = 1;
+        if (rankedKey[fk]) (counts[r[2]] = counts[r[2]] || {})[fk] = 1;
+      });
+    });
+    var nFair = function (k) { return Object.keys(counts[k] || {}).length; };
+    // 검색어가 경쟁사 이름이면 그 회사 칩만 남긴다. 안 그러면 그 회사가 나온 전시회의 다른 경쟁사가
+    // 전부 따라 나와 칩이 그대로라 "검색이 안 먹는다"처럼 보인다.
+    var named = rq ? RIVDATA.list.filter(function (r) { return hit(r.name); }) : [];
+    var inChips = function (r) {
+      return nFair(r.key) && (!named.length || named.indexOf(r) >= 0);
+    };
 
     var fldCount = {};
     (RIVDATA.fairs || []).forEach(function (f) {
@@ -621,13 +631,14 @@
           esc(x[1]) + " <b>" + num(fldCount[x[0]]) + "</b></button>";
       }).join("");
 
-    var chips = RIVDATA.list.filter(function (r) { return nFair(r.key); })
+    var chips = RIVDATA.list.filter(inChips)
       .sort(function (a, b) { return nFair(b.key) - nFair(a.key); })
       .map(function (r) {
         return '<button class="chip' + (S.riv === r.key ? " on" : "") + (r.user ? " core" : "") +
           '" data-riv="' + r.key + '">' + esc(r.name) + " <b>" + nFair(r.key) + "</b></button>";
       }).join("");
-    var none = RIVDATA.list.filter(function (r) { return !nFair(r.key); })
+    var nChips = RIVDATA.list.filter(inChips).length;
+    var none = RIVDATA.list.filter(function (r) { return !allCounts[r.key]; })
       .map(function (r) { return esc(r.name); }).join(", ");
 
     var confirmed = EV.filter(function (e) { return e.riv && e.riv.length; })
@@ -657,18 +668,19 @@
       "우리 경쟁사 " + num(Object.keys(counts).length) + "곳을 찾았습니다" +
       (S.rivFld ? " (" + esc(fldName[S.rivFld] || "") + "만 보는 중)" : "") + " · " +
       esc(RIVDATA.generated || "") + "</small></div>" +
-      '<div class="frow"><span class="flabel">분야</span>' + fldChips + "</div>" +
-      '<div class="frow"><span class="flabel">경쟁사</span>' + chips +
-      (S.riv ? ' <button class="chip on" data-riv="">전체 ✕</button>' : "") + "</div>" +
-      (rq ? '<div class="note" style="margin-top:8px">🔍 <b>' + esc(rq) + '</b> 로 추린 결과 — ' +
+      (rq ? '<div class="note" style="margin:8px 0">🔍 <b>' + esc(rq) + '</b> 로 추린 결과 — ' +
         "전시회 " + num(ranked.length) + "개 · 일정 " + num(confirmed.length) + "건 · 새로 찾은 업체 " +
-        num(disc.length) + "곳" +
+        num(disc.length) + "곳 · 경쟁사 " + num(nChips) + "곳" +
         (ranked.length + confirmed.length + connFairs.length + disc.length === 0
           ? " · <b>이 탭에는 맞는 것이 없습니다.</b> 여기는 <b>출품사 명단을 받은 전시회</b>만 봅니다" +
             ' — <button class="rivsearch" data-gotab="soon">전체 전시회에서 찾기 →</button>' +
             ' <a class="rivsearch" href="traces.html?q=' + encodeURIComponent(rq) +
             '">뉴스·광고 흔적에서 찾기 →</a>' : "") +
         "</div>" : "") +
+      '<div class="frow"><span class="flabel">분야</span>' + fldChips + "</div>" +
+      '<div class="frow"><span class="flabel">경쟁사</span>' + chips +
+      (chips ? "" : '<span class="note">맞는 경쟁사가 없습니다</span>') +
+      (S.riv ? ' <button class="chip on" data-riv="">전체 ✕</button>' : "") + "</div>" +
       (none ? '<div class="note" style="margin-top:8px">아직 명단에서 못 본 곳: ' + none + "</div>" : "") +
       "</div>" +
 
