@@ -216,8 +216,11 @@ def build_events(store, details, applies):
         items.append(e)
 
     # 한국관·개별참가 모집공고를 전시회에 붙일 색인
+    # 신청이 이미 마감된 공고는 붙이지 않는다 — 지원 목록에는 지금 신청할 수 있는 것만 남긴다
     apply_idx = {}
     for a in applies:
+        if (a.get("apply_end") or "9999") < TODAY.isoformat():
+            continue
         n = taxonomy.norm_title(a.get("exhibition") or a.get("notice"))
         if len(n) >= 4:
             apply_idx.setdefault(n, a)
@@ -498,7 +501,8 @@ def main():
             save(os.path.join(DATA, "report.json"), report)
             try:
                 applies = collect.collect_gep_apply()
-                save(APPLY, applies)
+                if applies:                 # 접속 실패로 0건이면 어제 것을 지우지 않는다(지원 표시가 통째로 사라짐)
+                    save(APPLY, applies)
                 print(f"  {'gep_apply':10s} {len(applies):6d}건 (한국관·개별참가 모집공고)")
             except Exception as e:  # noqa: BLE001
                 print("  gep_apply 실패:", e)

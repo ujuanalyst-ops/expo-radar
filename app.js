@@ -283,8 +283,13 @@
   // ---------------------------------------------------------------- 탭: 우리 관련·지원
   function viewPick() {
     var pool = filtered({ ignoreSpan: true }).filter(function (e) { return e.s >= TODAY; });
+    // 지금 신청받는 한국관 모집을 맨 위로(마감 빠른 순), 그 아래에 국고지원 전시회를 개최일 순으로
     var apply = pool.filter(function (e) { return e.ap || e.sup; })
-      .sort(function (a, b) { return a.s < b.s ? -1 : a.s > b.s ? 1 : 0; });
+      .sort(function (a, b) {
+        if (!a.ap !== !b.ap) return a.ap ? -1 : 1;
+        if (a.ap && a.ap.end !== b.ap.end) return (a.ap.end || "9999") < (b.ap.end || "9999") ? -1 : 1;
+        return a.s < b.s ? -1 : a.s > b.s ? 1 : 0;
+      });
     var top = pool.filter(function (e) { return (e.rel || 0) >= 4; })
       .sort(function (a, b) { return (b.rel - a.rel) || (a.s < b.s ? -1 : 1); });
     var big = pool.filter(function (e) { return (e.ex || 0) >= 300 || (e.ar || 0) >= 30000; })
@@ -1066,4 +1071,34 @@
 
   header();
   render();
+
+  // ---------------------------------------------------------------- 새 수집본 자동 반영
+  // 탭을 며칠씩 열어 두거나 브라우저가 탭을 복원하면 예전 수집본이 그대로 보인다(날짜가 멈춘 것처럼 보임).
+  // index.html에 찍힌 `?v=수집시각`을 캐시 없이 다시 읽어, 지금 화면보다 새것이면 한 번 새로 연다.
+  // 공유용 단일 HTML(file://)은 스크립트 주소가 없어 건너뛴다.
+  var MYVER = (function () {
+    var s = document.querySelector('script[src*="app.js?v="]');
+    var m = s && /[?&]v=(\d+)/.exec(s.getAttribute("src"));
+    return m ? m[1] : "";
+  })();
+  function checkFresh() {
+    if (!MYVER || !/^https?:$/.test(location.protocol) || document.hidden) return;
+    fetch(location.pathname + "?t=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.text() : ""; })
+      .then(function (html) {
+        var m = /app\.js\?v=(\d+)/.exec(html);
+        if (!m || m[1] <= MYVER) return;
+        try {
+          if (sessionStorage.getItem("radar-reloaded") === m[1]) return;   // 같은 버전으로 두 번 돌지 않게
+          sessionStorage.setItem("radar-reloaded", m[1]);
+        } catch (e) { /* 저장소가 막혀 있으면 주소의 r= 로만 구분한다 */ }
+        if (location.search.indexOf("r=" + m[1]) >= 0) return;
+        location.replace(location.pathname + "?r=" + m[1] + location.hash);  // 주소가 달라 캐시를 안 탄다
+      })
+      .catch(function () { /* 오프라인이면 다음 기회에 */ });
+  }
+  checkFresh();
+  document.addEventListener("visibilitychange", checkFresh);
+  window.addEventListener("pageshow", function (e) { if (e.persisted) checkFresh(); });
+  setInterval(checkFresh, 30 * 60 * 1000);
 })();

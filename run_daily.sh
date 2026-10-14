@@ -27,6 +27,7 @@ mkdir -p logs
   /usr/bin/python3 -u build.py        # -u: 진행 상황이 로그에 바로바로 찍히게
   /usr/bin/python3 build_share.py     # 공유용 단일 HTML(share/)도 매일 갱신
   /usr/bin/python3 matrix.py          # 경쟁사 매트릭스 엑셀(share/)도 매일 갱신
+  /usr/bin/python3 support.py         # 새 해외 전시회 지원공고(우리 관련)를 메일로 알림
   publish_github                      # 새 app-data.js를 GitHub(공개 페이지)에 올린다
   echo "──────── $(date '+%F %T') 완료"
 } >> "$LOG" 2>&1

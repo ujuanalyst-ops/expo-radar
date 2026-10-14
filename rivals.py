@@ -817,9 +817,9 @@ def fetch_kes(f):
     SYSTEM_IDX 는 회차마다 바뀐다(2026 = 232)."""
     op = opener()
     base = "https://www.kes.org/fairOnline.do"
-
     def page(n):
-        body = json.dumps({"page": n, "SYSTEM_IDX": f["system_idx"],
+        # `page`는 서버가 무시한다(몇 쪽을 달라고 해도 1쪽) → `numOfRows`로 한 번에 받는다
+        body = json.dumps({"page": n, "numOfRows": 1000, "SYSTEM_IDX": f["system_idx"],
                            "searchFullTextIndex": "N", "selOrder": "cfair_nm_special_first"}).encode()
         req = urllib.request.Request(base, data=body, headers={
             "User-Agent": UA, "Content-Type": "application/json", "Accept": "application/json",
@@ -828,7 +828,7 @@ def fetch_kes(f):
 
     first = page(1)
     total = int((first.get("pagesJson") or {}).get("totalRows") or 0)
-    per = int((first.get("pagesJson") or {}).get("numOfRows") or 12) or 12
+    per = len(first.get("prodList") or []) or 12
     pages = (total + per - 1) // per
     chunks = [first]
     if pages > 1:
